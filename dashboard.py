@@ -48,6 +48,7 @@ def init_session_state() -> None:
         "selected_fault":     "NORMAL",
         "applied_fault":      "NORMAL",
         "last_generated_ts":  0.0,
+        "page":               "dashboard",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -197,7 +198,7 @@ def render_top_controls() -> None:
         f"</div>"
     )
 
-    c_on, c_off, c_mode, c_clear = st.columns([1, 1, 2, 1])
+    c_on, c_off, c_mode, c_clear, c_tech, c_guide = st.columns([1, 1, 2, 1, 1, 1])
 
     with c_on:
         if st.button("⏻  開機", use_container_width=True, type="primary", key="btn_on"):
@@ -234,6 +235,16 @@ def render_top_controls() -> None:
             if os.path.exists(db_path):
                 os.remove(db_path)
             init_db(db_path)
+            st.rerun()
+
+    with c_tech:
+        if st.button("📄 技術報告", use_container_width=True, key="btn_tech"):
+            st.session_state.page = "tech"
+            st.rerun()
+
+    with c_guide:
+        if st.button("📖 使用說明", use_container_width=True, key="btn_guide"):
+            st.session_state.page = "guide"
             st.rerun()
 
     with c_mode:
@@ -340,8 +351,6 @@ def build_dashboard_html(
     startup_elapsed: float,
     is_running: bool,
     stats: dict,
-    tech_report_html: str = "",
-    user_guide_html: str = "",
 ) -> str:
 
     # ── KPI ──
@@ -600,11 +609,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     </div>
   </div>
   <div class="header-right">
-    <div class="header-doc-links">
-      <button class="doc-btn doc-btn-cyan" onclick="showPage('dashboard')">⬅ 監控面板</button>
-      <button class="doc-btn doc-btn-cyan" onclick="showPage('tech')">📄 技術報告</button>
-      <button class="doc-btn doc-btn-green" onclick="showPage('guide')">📖 使用說明</button>
-    </div>
+
     <div class="header-badge-group">
       <div class="hbadge-label">設備階段</div>
       <div class="hbadge" style="background:{ms_bg};border-color:{ms_bd};color:{ms_color};">{machine_state}</div>
@@ -801,34 +806,6 @@ mkLine('c2',[{{l:'A',d:C,c:'#fbbf24'}}]);
 mkLine('c3',[{{l:'N·m',d:T,c:'#cbd5e1'}}]);
 mkLine('c4',[{{l:'Rule Score',d:RS,c:'#f87171'}},{{l:'ML Conf%',d:ML,c:'#a78bfa',dash:[4,2]}}]);
 </script>
-<div id="page-tech" style="display:none;">
-  {tech_report_html}
-</div>
-<div id="page-guide" style="display:none;">
-  {user_guide_html}
-</div>
-<div id="page-dashboard-overlay" style="display:none;"></div>
-
-<script>
-function showPage(page) {{
-  var dash = document.querySelector('.dash');
-  var tech = document.getElementById('page-tech');
-  var guide = document.getElementById('page-guide');
-  if (page === 'tech') {{
-    dash.style.display = 'none';
-    tech.style.display = 'block';
-    guide.style.display = 'none';
-  }} else if (page === 'guide') {{
-    dash.style.display = 'none';
-    tech.style.display = 'none';
-    guide.style.display = 'block';
-  }} else {{
-    dash.style.display = 'block';
-    tech.style.display = 'none';
-    guide.style.display = 'none';
-  }}
-}}
-</script>
 </body>
 </html>"""
 
@@ -853,6 +830,26 @@ def main() -> None:
     maybe_generate_data()
     render_top_controls()
 
+    # ── 頁面切換 ──
+    page = st.session_state.get("page", "dashboard")
+
+    if page == "tech":
+        if st.button("⬅ 返回監控面板", key="back_from_tech"):
+            st.session_state.page = "dashboard"
+            st.rerun()
+        with open("static/technical_report.html", "r", encoding="utf-8") as f:
+            components.html(f.read(), height=5000, scrolling=True)
+        return
+
+    if page == "guide":
+        if st.button("⬅ 返回監控面板", key="back_from_guide"):
+            st.session_state.page = "dashboard"
+            st.rerun()
+        with open("static/user_guide.html", "r", encoding="utf-8") as f:
+            components.html(f.read(), height=4000, scrolling=True)
+        return
+
+
     df            = load_data()
     machine_state = ctrl.machine_state
     startup_elapsed = ctrl.startup_elapsed_sec
@@ -867,23 +864,6 @@ def main() -> None:
         )
         return
 
-    # 讀取技術報告和使用說明
-    import os
-    def _read_html(path):
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                # 只取 <body> 內容，去掉 <!DOCTYPE> 和 <head>
-                raw = f.read()
-                start = raw.find("<body>")
-                end   = raw.find("</body>")
-                if start != -1 and end != -1:
-                    return raw[start+6:end]
-                return raw
-        return "<p style='color:#4b6174;font-family:monospace;padding:40px;'>找不到檔案</p>"
-
-    tech_html  = _read_html("static/technical_report.html")
-    guide_html = _read_html("static/user_guide.html")
-
     html = build_dashboard_html(
         df=df,
         machine_state=machine_state,
@@ -891,8 +871,6 @@ def main() -> None:
         startup_elapsed=startup_elapsed,
         is_running=st.session_state.is_running,
         stats=stats,
-        tech_report_html=tech_html,
-        user_guide_html=guide_html,
     )
 
     components.html(html, height=1950, scrolling=False)
