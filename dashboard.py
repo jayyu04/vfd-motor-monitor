@@ -134,6 +134,7 @@ def render_top_controls() -> None:
         font-size: 12px !important;
         letter-spacing: 0.06em;
         box-shadow: 0 0 8px rgba(34,211,165,0.2), inset 0 0 8px rgba(34,211,165,0.05) !important;
+        text-shadow: 0 0 6px rgba(34,211,165,0.6) !important;
         transition: all 0.2s ease !important;
     }
     button[data-testid="baseButton-primary"]:hover {
@@ -141,7 +142,7 @@ def render_top_controls() -> None:
         border-color: rgba(34,211,165,0.8) !important;
         color: #ffffff !important;
         box-shadow: 0 0 18px rgba(34,211,165,0.5), inset 0 0 12px rgba(34,211,165,0.1) !important;
-        text-shadow: 0 0 8px rgba(34,211,165,0.9) !important;
+        text-shadow: 0 0 10px rgba(34,211,165,1.0) !important;
     }
     button[data-testid="baseButton-secondary"] {
         background: rgba(248,113,113,0.08) !important;
@@ -151,6 +152,7 @@ def render_top_controls() -> None:
         font-size: 12px !important;
         letter-spacing: 0.06em;
         box-shadow: 0 0 8px rgba(248,113,113,0.15), inset 0 0 8px rgba(248,113,113,0.05) !important;
+        text-shadow: 0 0 6px rgba(248,113,113,0.6) !important;
         transition: all 0.2s ease !important;
     }
     button[data-testid="baseButton-secondary"]:hover {
@@ -158,7 +160,7 @@ def render_top_controls() -> None:
         border-color: rgba(248,113,113,0.8) !important;
         color: #ffffff !important;
         box-shadow: 0 0 18px rgba(248,113,113,0.5), inset 0 0 12px rgba(248,113,113,0.1) !important;
-        text-shadow: 0 0 8px rgba(248,113,113,0.9) !important;
+        text-shadow: 0 0 10px rgba(248,113,113,1.0) !important;
     }
     div[data-testid="stSelectbox"] > div > div {
         background: #111827 !important;
