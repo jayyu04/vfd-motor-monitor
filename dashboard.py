@@ -155,6 +155,18 @@ def render_top_controls() -> None:
         letter-spacing: 0.08em;
     }
     iframe { border: none !important; }
+    button[data-testid="baseButton-tertiary"] {
+        background: rgba(56,189,248,0.08) !important;
+        border: 1px solid rgba(56,189,248,0.25) !important;
+        color: #38bdf8 !important;
+        font-family: 'IBM Plex Mono', monospace !important;
+        font-size: 11px !important;
+        letter-spacing: 0.04em;
+    }
+    button[data-testid="baseButton-tertiary"]:hover {
+        background: rgba(56,189,248,0.16) !important;
+        border-color: rgba(56,189,248,0.45) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -238,12 +250,12 @@ def render_top_controls() -> None:
             st.rerun()
 
     with c_tech:
-        if st.button("📄 技術報告", use_container_width=True, key="btn_tech"):
+        if st.button("📄 技術報告", use_container_width=True, key="btn_tech", type="tertiary"):
             st.session_state.page = "tech"
             st.rerun()
 
     with c_guide:
-        if st.button("📖 使用說明", use_container_width=True, key="btn_guide"):
+        if st.button("📖 使用說明", use_container_width=True, key="btn_guide", type="tertiary"):
             st.session_state.page = "guide"
             st.rerun()
 
@@ -834,7 +846,7 @@ def main() -> None:
     page = st.session_state.get("page", "dashboard")
 
     if page == "tech":
-        if st.button("⬅ 返回監控面板", key="back_from_tech"):
+        if st.button("⬅ 返回監控面板", key="back_from_tech", type="tertiary"):
             st.session_state.page = "dashboard"
             st.rerun()
         with open("static/technical_report.html", "r", encoding="utf-8") as f:
@@ -842,7 +854,7 @@ def main() -> None:
         return
 
     if page == "guide":
-        if st.button("⬅ 返回監控面板", key="back_from_guide"):
+        if st.button("⬅ 返回監控面板", key="back_from_guide", type="tertiary"):
             st.session_state.page = "dashboard"
             st.rerun()
         with open("static/user_guide.html", "r", encoding="utf-8") as f:
