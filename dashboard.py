@@ -249,6 +249,13 @@ def render_top_controls() -> None:
             st.rerun()
 
 
+    # 技術報告 / 使用說明
+    col_l, col_r = st.columns([1, 1])
+    with col_l:
+        st.page_link("pages/technical_report.py", label="📄 技術報告", use_container_width=True)
+    with col_r:
+        st.page_link("pages/user_guide.py", label="📖 使用說明", use_container_width=True)
+
     st.markdown(
         '<hr style="border:none;border-top:1px solid rgba(56,189,248,0.12);margin:8px 0 0 0;"/>',
         unsafe_allow_html=True,
@@ -598,10 +605,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     </div>
   </div>
   <div class="header-right">
-    <div class="header-doc-links">
-      <a href="/technical_report" target="_blank" class="doc-btn doc-btn-cyan">📄 技術報告</a>
-      <a href="/user_guide" target="_blank" class="doc-btn doc-btn-green">📖 使用說明</a>
-    </div>
+
     <div class="header-badge-group">
       <div class="hbadge-label">設備階段</div>
       <div class="hbadge" style="background:{ms_bg};border-color:{ms_bd};color:{ms_color};">{machine_state}</div>
