@@ -846,9 +846,9 @@ def main() -> None:
     )
 
     init_session_state()
-    ctrl = get_ctrl()
 
-    if st.session_state.is_running and ctrl.power_state == "ON":
+    # autorefresh 要在最前面，確保持續觸發
+    if st.session_state.is_running:
         st_autorefresh(interval=DASHBOARD_REFRESH_INTERVAL_MS, key="motor_refresh")
 
     maybe_generate_data()
