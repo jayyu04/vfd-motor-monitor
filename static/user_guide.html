@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>使用說明 — VFD Motor Monitoring System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0e14; --bg2:#0f1520; --bg3:#151d2e; --panel:#111827;
+  --border:rgba(56,189,248,0.12); --border2:rgba(56,189,248,0.22);
+  --cyan:#38bdf8; --cyan2:#0ea5e9; --green:#22d3a5; --amber:#fbbf24;
+  --red:#f87171; --purple:#a78bfa; --orange:#fb923c;
+  --text:#e2e8f0; --text2:#94a3b8; --text3:#4b6174;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans Condensed',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
+.page{max-width:960px;margin:0 auto;padding:40px 32px 80px;}
+
+/* Header */
+.header{display:flex;align-items:center;gap:16px;padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid var(--border);}
+.logo-box{width:48px;height:48px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan2),#0369a1);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.header-title{font-size:20px;font-weight:600;letter-spacing:.02em;}
+.header-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:4px;letter-spacing:.05em;}
+.header-tag{margin-left:auto;font-size:10px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.25);color:var(--green);}
+
+/* TOC */
+.toc{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:32px;}
+.toc-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.toc-list{display:flex;flex-direction:column;gap:6px;}
+.toc-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);text-decoration:none;transition:color .15s;}
+.toc-item:hover{color:var(--cyan);}
+.toc-num{font-family:var(--mono);font-size:10px;color:var(--text3);width:20px;}
+
+/* Section */
+.section{margin-bottom:48px;}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Card */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--cyan));opacity:.7;}
+.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.card p{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7;}
+.card p:last-child{margin-bottom:0;}
+
+/* Steps */
+.step-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.step-item{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--border);}
+.step-item:last-child{border-bottom:none;}
+.step-left{padding:16px 18px;background:var(--bg2);border-right:1px solid var(--border);min-width:56px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.step-num{width:28px;height:28px;border-radius:50%;background:rgba(34,211,165,.15);border:1px solid rgba(34,211,165,.3);color:var(--green);font-size:12px;font-family:var(--mono);font-weight:500;display:flex;align-items:center;justify-content:center;}
+.step-right{padding:16px 20px;flex:1;}
+.step-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.7;}
+.step-note{display:inline-block;margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);padding:4px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);}
+
+/* State badges */
+.state-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.state-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px;border-top:3px solid var(--accent);}
+.state-badge{display:inline-block;font-size:11px;font-family:var(--mono);font-weight:500;padding:4px 12px;border-radius:4px;margin-bottom:10px;}
+.state-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* Mode grid */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.mode-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px;border-left:3px solid var(--accent,var(--cyan));}
+.mode-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:6px;}
+.mode-desc{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6;}
+.mode-expect{font-size:11px;font-family:var(--mono);color:var(--text3);}
+
+/* Dashboard map */
+.dash-map{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.dash-zone{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--border);}
+.dash-zone:last-child{border-bottom:none;}
+.zone-left{padding:14px 16px;background:var(--bg2);border-right:1px solid var(--border);min-width:110px;}
+.zone-label{font-size:10px;font-family:var(--mono);color:var(--cyan);text-transform:uppercase;letter-spacing:.07em;line-height:1.5;}
+.zone-right{padding:14px 18px;flex:1;}
+.zone-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* Score reading */
+.score-explain{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.score-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+.score-title{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:8px;}
+.score-num-big{font-size:36px;font-family:var(--mono);font-weight:500;line-height:1;margin-bottom:6px;}
+.score-unit{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.score-desc{font-size:12px;color:var(--text2);margin-top:10px;line-height:1.6;}
+.score-example{font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:8px;padding:6px 10px;background:var(--bg3);border-radius:4px;line-height:1.8;}
+
+/* Level grid */
+.level-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.level-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;border-top:3px solid var(--accent);}
+.level-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);margin:0 auto 10px;box-shadow:0 0 8px var(--accent);}
+.level-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
+.level-score{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:8px;}
+.level-action{font-size:11px;color:var(--text2);line-height:1.5;}
+
+/* Alert guide */
+.alert-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.alert-item{display:flex;align-items:flex-start;gap:14px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+.alert-badge{font-size:10px;font-family:var(--mono);padding:4px 10px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:13px;font-weight:600;margin-bottom:5px;}
+.alert-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+.alert-action{margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text3);padding:6px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);display:block;line-height:1.8;}
+
+/* Back */
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-family:var(--mono);color:var(--text3);text-decoration:none;padding:6px 14px;border-radius:4px;border:1px solid var(--border);margin-bottom:28px;transition:color .2s,border-color .2s;}
+.back-btn:hover{color:var(--cyan);border-color:rgba(56,189,248,.3);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-btn" href="javascript:history.back()">← 返回監控面板</a>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-box">
+      <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="white" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <circle cx="11" cy="11" r="3" fill="white" opacity=".9"/>
+        <line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="11" y1="17" x2="11" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="11" x2="5" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">使用說明</div>
+      <div class="header-sub">VFD Motor Monitoring System · v2.0</div>
+    </div>
+    <div class="header-tag">USER GUIDE</div>
+  </div>
+
+  <!-- 目錄 -->
+  <div class="toc">
+    <div class="toc-title">目錄</div>
+    <div class="toc-list">
+      <a class="toc-item" href="#steps"><span class="toc-num">01</span>操作流程</a>
+      <a class="toc-item" href="#states"><span class="toc-num">02</span>VFD Header 狀態說明</a>
+      <a class="toc-item" href="#modes"><span class="toc-num">03</span>五種模擬模式說明</a>
+      <a class="toc-item" href="#dashboard"><span class="toc-num">04</span>儀表板各區塊說明</a>
+      <a class="toc-item" href="#scores"><span class="toc-num">05</span>雙層判斷怎麼讀</a>
+      <a class="toc-item" href="#levels"><span class="toc-num">06</span>四個風險等級</a>
+      <a class="toc-item" href="#alerts"><span class="toc-num">07</span>告警處理建議</a>
+    </div>
+  </div>
+
+  <!-- 01 操作流程 -->
+  <div class="section" id="steps">
+    <div class="sec-title">01 操作流程</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">1</div></div>
+        <div class="step-right">
+          <div class="step-title">選擇模擬模式</div>
+          <div class="step-desc">在頂部控制列的下拉選單選擇要模擬的異常類型。開機前或開機後都可以切換，系統在進入 RUNNING 狀態後才會套用所選模式。</div>
+          <span class="step-note">可選：NORMAL / OVERLOAD / STALL / LOAD_LOSS / BEARING_WEAR</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">2</div></div>
+        <div class="step-right">
+          <div class="step-title">按下「開機」</div>
+          <div class="step-desc">系統進入 STARTUP 啟動過渡期，持續約 3 秒。此期間電流較高為正常現象，Rules 和 ML 判斷自動暫停，不發出任何告警。VFD Header 顯示黃色「STARTUP」。</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">3</div></div>
+        <div class="step-right">
+          <div class="step-title">進入 RUNNING 狀態</div>
+          <div class="step-desc">啟動完成後進入穩態運轉，VFD Header 切換為綠色「RUNNING」。系統每 300ms 產生一筆資料，每 500ms 刷新畫面，異常判斷開始運作。</div>
+          <span class="step-note">此時切換模擬模式可即時觀察告警變化</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">4</div></div>
+        <div class="step-right">
+          <div class="step-title">觀察即時數值與告警</div>
+          <div class="step-desc">監控頻率、電流、轉速、轉矩四個感測器數值，以及右側診斷面板的 Rule Score（0~100）和 ML 信心分數（%）。出現告警時查看最下方的告警記錄了解觸發原因。</div>
+          <span class="step-note">Rule Score 越高代表異常越嚴重，ML 信心越高代表模型越確定</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">5</div></div>
+        <div class="step-right">
+          <div class="step-title">切換不同模式觀察差異</div>
+          <div class="step-desc">在 RUNNING 狀態下切換不同的模擬模式，可以觀察各種異常情境下感測器數值的變化，以及 Rules 和 ML 兩層判斷的結果差異。</div>
+          <span class="step-note">BEARING_WEAR 需累積 5 筆資料後 Rules 才會觸發，ML 可更早識別</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-left"><div class="step-num">6</div></div>
+        <div class="step-right">
+          <div class="step-title">按下「關機」</div>
+          <div class="step-desc">系統停止產生資料，所有即時數值歸零，設備階段切換回 OFF。已記錄的歷史資料和告警紀錄保留在資料庫中，重新開機後仍可查看。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 VFD Header 狀態 -->
+  <div class="section" id="states">
+    <div class="sec-title">02 VFD Header 狀態說明</div>
+    <div class="card" style="--accent:var(--cyan)">
+      <div class="card-title">設備階段顏色代表什麼</div>
+      <p>VFD Header 右側的「設備階段」方框顏色會隨系統狀態即時變化，讓操作員一眼就能掌握目前的運轉狀況。</p>
+    </div>
+    <div class="state-grid">
+      <div class="state-card" style="--accent:var(--text3)">
+        <span class="state-badge" style="background:rgba(75,97,116,.2);border:1px solid rgba(75,97,116,.4);color:#4b6174;">OFF</span>
+        <div class="state-desc">系統關機，馬達未運轉。所有感測器數值為零，Rules 和 ML 不判斷。</div>
+      </div>
+      <div class="state-card" style="--accent:var(--amber)">
+        <span class="state-badge" style="background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--amber);">STARTUP</span>
+        <div class="state-desc">啟動過渡期（約 3 秒）。電流較高為正常現象，異常判斷自動暫停，不發出告警。</div>
+      </div>
+      <div class="state-card" style="--accent:var(--green)">
+        <span class="state-badge" style="background:rgba(34,211,165,.12);border:1px solid rgba(34,211,165,.35);color:var(--green);">RUNNING</span>
+        <div class="state-desc">穩態運轉中。Rules 和 ML 雙層判斷運作，即時偵測異常，告警系統啟動。</div>
+      </div>
+    </div>
+    <div class="card" style="--accent:var(--cyan)">
+      <div class="card-title">模擬模式顏色</div>
+      <p>「模擬模式」方框的顏色反映目前選擇的異常類型，方便快速辨識當前模擬情境：</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+        <span style="font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(34,211,165,.12);border:1px solid rgba(34,211,165,.35);color:var(--green);">NORMAL 綠色</span>
+        <span style="font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--amber);">OVERLOAD 黃色</span>
+        <span style="font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(248,113,113,.18);border:1px solid rgba(248,113,113,.5);color:var(--red);">STALL 紅色</span>
+        <span style="font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);">LOAD_LOSS 紅色</span>
+        <span style="font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--amber);">BEARING_WEAR 黃色</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 模擬模式 -->
+  <div class="section" id="modes">
+    <div class="sec-title">03 五種模擬模式說明</div>
+    <div class="mode-grid">
+      <div class="mode-card" style="--accent:var(--green)">
+        <div class="mode-name" style="color:var(--green)">NORMAL　正常運轉</div>
+        <div class="mode-desc">馬達在正常負載下穩定運轉，頻率和電流在正常範圍內小幅浮動。所有數值平穩，沒有異常跡象。</div>
+        <div class="mode-expect">預期：Rule 0分 ／ ML NORMAL ／ 綜合 正常</div>
+      </div>
+      <div class="mode-card" style="--accent:var(--amber)">
+        <div class="mode-name" style="color:var(--amber)">OVERLOAD　過電流</div>
+        <div class="mode-desc">機械負載過重，電流超過額定值（110% FLA 以上），頻率維持正常。電流數值偏高，進度條超過正常範圍。</div>
+        <div class="mode-expect">預期：Rule WARNING ／ ML OVERLOAD ／ 綜合 警告</div>
+      </div>
+      <div class="mode-card" style="--accent:var(--red)">
+        <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
+        <div class="mode-desc">機械端堵轉，電流飆升，轉速被嚴重拖慢。電流極高、轉速明顯低於正常值，為最嚴重的異常。</div>
+        <div class="mode-expect">預期：Rule CRITICAL ／ ML STALL ／ 綜合 緊急</div>
+      </div>
+      <div class="mode-card" style="--accent:var(--red)">
+        <div class="mode-name" style="color:var(--red)">LOAD_LOSS　負載流失</div>
+        <div class="mode-desc">負載端斷裂（皮帶斷裂或幫浦空轉），馬達空載，電流降到極低值。頻率正常但電流接近零。</div>
+        <div class="mode-expect">預期：Rule DANGER ／ ML LOAD_LOSS ／ 綜合 危險</div>
+      </div>
+      <div class="mode-card" style="--accent:var(--amber); grid-column:1/-1;">
+        <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
+        <div class="mode-desc">軸承早期磨損的預警模擬。頻率保持穩定，電流平均值正常，但電流出現規律性波動（漣波現象）。Rules 需累積 5 筆資料後才觸發，ML 可更早識別。趨勢圖上電流線會比 NORMAL 明顯更不穩定。</div>
+        <div class="mode-expect">預期：Rule WARNING（累積後）／ ML BEARING_WEAR ／ 綜合 警告</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 儀表板 -->
+  <div class="section" id="dashboard">
+    <div class="sec-title">04 儀表板各區塊說明</div>
+    <div class="dash-map">
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">控制列</div></div>
+        <div class="zone-right"><div class="zone-desc">頁面最頂部。左側為開機／關機按鈕與模擬模式下拉選單。右側的「技術報告」和「使用說明」連結開啟對應文件（在新分頁中開啟）。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">VFD Header</div></div>
+        <div class="zone-right"><div class="zone-desc">系統標題列。右側依序顯示：文件連結、設備階段（顏色方框）、當前模擬模式（顏色方框）、已運行秒數、ON/OFF 狀態指示燈。顏色跟隨狀態即時變化。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">系統總覽</div></div>
+        <div class="zone-right"><div class="zone-desc">五個 KPI 卡片顯示累計統計：總資料筆數、警告筆數、危險筆數、緊急筆數、累計告警總數。數值隨每筆新資料持續更新。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">感測器</div></div>
+        <div class="zone-right"><div class="zone-desc">左側四個卡片即時顯示最新一筆的頻率（Hz）、電流（A）、轉速（RPM）、轉矩（N·m）。每個卡片下方有進度條，視覺化數值大小。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">診斷面板</div></div>
+        <div class="zone-right"><div class="zone-desc">右側面板顯示雙層判斷結果：設備階段、Rules 判斷類型與等級、ML 判斷類型與等級、Rule Score（0~100）、ML 信心分數（%）、綜合風險等級。綜合等級取 Rules 和 ML 兩者中較嚴重的結果。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">趨勢圖</div></div>
+        <div class="zone-right"><div class="zone-desc">四個即時折線圖：① 頻率 Hz ＋ 轉速 RPM（虛線）、② 電流 A、③ 轉矩 N·m、④ Rule 分數 ＋ ML 信心（%）。最多顯示最近 200 筆資料，可觀察數值變化趨勢。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">告警記錄</div></div>
+        <div class="zone-right"><div class="zone-desc">顯示最近 10 筆風險等級為警告以上的事件，包含時間、設備階段、模擬模式、頻率、電流、Rules 判斷、ML 判斷、信心分數、綜合等級。</div></div>
+      </div>
+      <div class="dash-zone">
+        <div class="zone-left"><div class="zone-label">完整資料表</div></div>
+        <div class="zone-right"><div class="zone-desc">最近 100 筆的完整資料，包含所有感測值與判斷結果。異常等級的列會有背景顏色標示（紅色為緊急，黃色為警告以上）。可橫向捲動查看所有欄位。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 雙層判斷 -->
+  <div class="section" id="scores">
+    <div class="sec-title">05 雙層判斷怎麼讀</div>
+    <div class="card" style="--accent:var(--cyan)">
+      <div class="card-title">Rules 和 ML 是兩件獨立的事</div>
+      <p>診斷面板同時顯示兩層判斷結果，它們是獨立運作的，各有不同的意義，不能混為一談。</p>
+    </div>
+    <div class="score-explain">
+      <div class="score-card" style="border-top:2px solid var(--amber);">
+        <div class="score-title" style="color:var(--amber);">Rule Score</div>
+        <div class="score-num-big" style="color:var(--amber);">0~100</div>
+        <div class="score-unit">分數 · 越高越嚴重</div>
+        <div class="score-desc">基於物理條件計算的異常嚴重程度。分數反映「現在這筆資料有多異常」，可以看到數值在慢慢爬升或下降。</div>
+        <div class="score-example">
+          0~14 → 正常<br/>
+          15~39 → 警告<br/>
+          40~64 → 危險<br/>
+          65~100 → 緊急
+        </div>
+      </div>
+      <div class="score-card" style="border-top:2px solid var(--purple);">
+        <div class="score-title" style="color:var(--purple);">ML 信心分數</div>
+        <div class="score-num-big" style="color:var(--purple);">0~100%</div>
+        <div class="score-unit">百分比 · 越高越確定</div>
+        <div class="score-desc">隨機森林模型對這個判斷有多確定。87% 代表 100 棵決策樹中有 87 棵投票給這個類別。</div>
+        <div class="score-example">
+          100% → 完全確定<br/>
+          70~99% → 高度確定<br/>
+          50~69% → 有些把握<br/>
+          &lt;50% → 落在模糊邊界
+        </div>
+      </div>
+    </div>
+    <div class="card" style="--accent:var(--green)">
+      <div class="card-title">兩層結果如何合併</div>
+      <p>綜合風險等級取 Rules 等級和 ML 等級中<strong style="color:var(--text);">較嚴重的那個</strong>。這樣設計的目的是讓兩層互補：</p>
+      <p>Rules 能快速抓到物理條件明確的異常，ML 能抓到規則式看不到的模糊邊界。只要其中一層發現異常，綜合等級就會反映出來。</p>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--text2);line-height:2;">
+        範例一：Rule = NORMAL（0分）／ ML = WARNING（BEARING_WEAR 60%）<br/>
+        <span style="color:var(--green);">→ 綜合等級 = WARNING（ML 補位發現軸承磨損）</span><br/><br/>
+        範例二：Rule = CRITICAL（78分）／ ML = CRITICAL（STALL 87%）<br/>
+        <span style="color:var(--red);">→ 綜合等級 = CRITICAL（兩層都確認緊急）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 風險等級 -->
+  <div class="section" id="levels">
+    <div class="sec-title">06 四個風險等級</div>
+    <div class="level-grid">
+      <div class="level-card" style="--accent:var(--green)">
+        <div class="level-dot"></div>
+        <div class="level-name" style="color:var(--green);">正常</div>
+        <div class="level-score">Rule Score 0 ~ 14</div>
+        <div class="level-action">設備運作正常，持續監控，無需採取行動</div>
+      </div>
+      <div class="level-card" style="--accent:var(--amber)">
+        <div class="level-dot"></div>
+        <div class="level-name" style="color:var(--amber);">警告</div>
+        <div class="level-score">Rule Score 15 ~ 39</div>
+        <div class="level-action">出現異常趨勢，安排檢查與維護，持續觀察變化</div>
+      </div>
+      <div class="level-card" style="--accent:var(--orange)">
+        <div class="level-dot" style="background:var(--orange);box-shadow:0 0 8px var(--orange);"></div>
+        <div class="level-name" style="color:var(--orange);">危險</div>
+        <div class="level-score">Rule Score 40 ~ 64</div>
+        <div class="level-action">立即檢查設備，考慮降載或計劃停機檢修</div>
+      </div>
+      <div class="level-card" style="--accent:var(--red)">
+        <div class="level-dot"></div>
+        <div class="level-name" style="color:var(--red);">緊急</div>
+        <div class="level-score">Rule Score 65 ~ 100</div>
+        <div class="level-action">立即停機，避免設備損壞或發生人員安全事故</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 告警處理 -->
+  <div class="section" id="alerts">
+    <div class="sec-title">07 告警處理建議</div>
+    <div class="alert-list">
+      <div class="alert-item">
+        <span class="alert-badge" style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);">緊急 STALL</span>
+        <div>
+          <div class="alert-title" style="color:var(--red);">機械卡死</div>
+          <div class="alert-desc">馬達電流飆升且轉速被拖慢，機械端發生堵轉。繼續運轉會導致馬達線圈在短時間內過熱燒毀，是最危險的異常狀態。</div>
+          <span class="alert-action">處置：立即按下關機 → 檢查機械端是否有異物卡住、軸承損壞或傳動機構故障 → 排除原因後再重新啟動</span>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-badge" style="background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);color:var(--orange);">危險 LOAD_LOSS</span>
+        <div>
+          <div class="alert-title" style="color:var(--orange);">負載流失</div>
+          <div class="alert-desc">馬達在高頻率下電流極低，負載端已斷裂或脫離。馬達空載長期高速運轉可能造成過速損壞，且設備無法正常運作。</div>
+          <span class="alert-action">處置：降速或停機 → 檢查皮帶是否斷裂、聯軸器是否脫落、幫浦是否空轉 → 確認負載端正常後再運轉</span>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-badge" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);">警告 OVERLOAD</span>
+        <div>
+          <div class="alert-title" style="color:var(--amber);">過電流</div>
+          <div class="alert-desc">電流持續超過額定值，機械負載過重。短時間內不會立即損壞，但長期過電流會導致馬達過熱，大幅縮短使用壽命。</div>
+          <span class="alert-action">處置：檢查負載是否過重 → 考慮降低負載或調整運轉頻率 → 觀察電流是否回到正常範圍 → 安排設備檢查</span>
+        </div>
+      </div>
+      <div class="alert-item">
+        <span class="alert-badge" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);">警告 BEARING_WEAR</span>
+        <div>
+          <div class="alert-title" style="color:var(--amber);">軸承磨損預警</div>
+          <div class="alert-desc">在固定頻率下電流出現異常波動，為軸承早期磨損的特徵。目前不需要立即停機，是預防性維護的提醒。若不處理，磨損持續惡化最終可能導致軸承卡死（STALL）。</div>
+          <span class="alert-action">處置：安排補充或更換軸承潤滑油 → 評估是否需要更換軸承 → 記錄發生時間追蹤惡化趨勢</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
