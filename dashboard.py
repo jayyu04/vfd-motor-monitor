@@ -175,34 +175,8 @@ def render_top_controls() -> None:
         letter-spacing: 0.08em;
     }
     iframe { border: none !important; }
-    /* 清除資料按鈕 金色 */
-    button[data-testid="baseButton-secondary"][kind="secondary"]:has(+ *) {
-        all: unset;
-    }
-    div[data-testid="stButton"]:has(button[key="btn_clear"]) button,
-    button[aria-label="🗑  清除資料"] {
-        background: rgba(251,191,36,0.08) !important;
-        border: 1px solid rgba(251,191,36,0.4) !important;
-        color: #fbbf24 !important;
-        box-shadow: 0 0 8px rgba(251,191,36,0.15) !important;
-    }
-    button[data-testid="baseButton-tertiary"] {
-        background: rgba(56,189,248,0.06) !important;
-        border: 1px solid rgba(56,189,248,0.35) !important;
-        color: #38bdf8 !important;
-        font-family: 'IBM Plex Mono', monospace !important;
-        font-size: 11px !important;
-        letter-spacing: 0.06em;
-        box-shadow: 0 0 8px rgba(56,189,248,0.15), inset 0 0 8px rgba(56,189,248,0.05) !important;
-        transition: all 0.2s ease !important;
-    }
-    button[data-testid="baseButton-tertiary"]:hover {
-        background: rgba(56,189,248,0.14) !important;
-        border-color: rgba(56,189,248,0.7) !important;
-        color: #ffffff !important;
-        box-shadow: 0 0 16px rgba(56,189,248,0.4), inset 0 0 12px rgba(56,189,248,0.1) !important;
-        text-shadow: 0 0 8px rgba(56,189,248,0.8) !important;
-    }
+
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -268,28 +242,12 @@ def render_top_controls() -> None:
             st.rerun()
 
     with c_clear:
-        st.markdown(
-            '<style>'
-            'div[data-testid="column"]:nth-of-type(4) button{'
-            'background:rgba(251,191,36,0.08)!important;'
-            'border:1px solid rgba(251,191,36,0.4)!important;'
-            'color:#fbbf24!important;'
-            'box-shadow:0 0 8px rgba(251,191,36,0.2),inset 0 0 8px rgba(251,191,36,0.05)!important;}'
-            'div[data-testid="column"]:nth-of-type(4) button:hover{'
-            'background:rgba(251,191,36,0.18)!important;'
-            'border-color:rgba(251,191,36,0.8)!important;'
-            'color:#ffffff!important;'
-            'box-shadow:0 0 18px rgba(251,191,36,0.5)!important;'
-            'text-shadow:0 0 8px rgba(251,191,36,0.9)!important;}'
-            '</style>',
-            unsafe_allow_html=True,
-        )
         ctrl = get_controller()
         is_off = ctrl.power_state == "OFF"
         if st.button(
             "🗑  清除資料",
             use_container_width=True,
-            type="tertiary",
+            type="secondary",
             key="btn_clear",
             disabled=not is_off,
             help="請先關機再清除資料" if not is_off else "清除所有歷史資料並重建資料庫",
@@ -302,12 +260,12 @@ def render_top_controls() -> None:
             st.rerun()
 
     with c_tech:
-        if st.button("📄 技術報告", use_container_width=True, key="btn_tech", type="tertiary"):
+        if st.button("📄 技術報告", use_container_width=True, key="btn_tech", type="secondary"):
             st.session_state.page = "tech"
             st.rerun()
 
     with c_guide:
-        if st.button("📖 使用說明", use_container_width=True, key="btn_guide", type="tertiary"):
+        if st.button("📖 使用說明", use_container_width=True, key="btn_guide", type="secondary"):
             st.session_state.page = "guide"
             st.rerun()
 
@@ -898,7 +856,7 @@ def main() -> None:
     page = st.session_state.get("page", "dashboard")
 
     if page == "tech":
-        if st.button("⬅ 返回監控面板", key="back_from_tech", type="tertiary"):
+        if st.button("⬅ 返回監控面板", key="back_from_tech", type="secondary"):
             st.session_state.page = "dashboard"
             st.rerun()
         with open("static/technical_report.html", "r", encoding="utf-8") as f:
@@ -906,7 +864,7 @@ def main() -> None:
         return
 
     if page == "guide":
-        if st.button("⬅ 返回監控面板", key="back_from_guide", type="tertiary"):
+        if st.button("⬅ 返回監控面板", key="back_from_guide", type="secondary"):
             st.session_state.page = "dashboard"
             st.rerun()
         with open("static/user_guide.html", "r", encoding="utf-8") as f:
