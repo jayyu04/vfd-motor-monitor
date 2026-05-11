@@ -21,25 +21,25 @@ from config import (
 # ---------------------------------------------------------------------------
 # 控制參數
 # ---------------------------------------------------------------------------
-DATA_GENERATE_INTERVAL_MS = 300
+DATA_GENERATE_INTERVAL_MS    = 300
 DASHBOARD_REFRESH_INTERVAL_MS = 500
-MAX_CHART_POINTS = 200
+MAX_CHART_POINTS             = 200
 
 FAULT_TYPES = ["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR", "AUTO"]
 
 FAULT_LABEL_MAP = {
-    "NORMAL": "正常",
-    "OVERLOAD": "過電流",
-    "STALL": "機械卡死",
-    "LOAD_LOSS": "負載斷裂",
+    "NORMAL":       "正常",
+    "OVERLOAD":     "過電流",
+    "STALL":        "機械卡死",
+    "LOAD_LOSS":    "負載斷裂",
     "BEARING_WEAR": "軸承磨損",
-    "STARTUP": "啟動中",
+    "STARTUP":      "啟動中",
 }
 
 LEVEL_LABEL_MAP = {
-    "NORMAL": "正常",
-    "WARNING": "警告",
-    "DANGER": "危險",
+    "NORMAL":   "正常",
+    "WARNING":  "警告",
+    "DANGER":   "危險",
     "CRITICAL": "緊急",
 }
 
@@ -49,11 +49,12 @@ LEVEL_LABEL_MAP = {
 # ---------------------------------------------------------------------------
 def init_session_state() -> None:
     defaults = {
-        "is_running": False,
-        "selected_fault": "NORMAL",
-        "applied_fault": "NORMAL",
-        "last_generated_ts": 0.0,
-        "page": "dashboard",
+        "is_running":         False,
+        "selected_fault":     "NORMAL",
+        "applied_fault":      "NORMAL",
+        "last_generated_ts":  0.0,
+        "page":               "dashboard",
+        "startup_begin":      None,   # 開機時間，存在 session_state 避免 rerun 消失
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -86,6 +87,11 @@ def maybe_generate_data() -> None:
     if now - st.session_state.last_generated_ts < DATA_GENERATE_INTERVAL_MS / 1000.0:
         return
 
+    # 同步 startup_begin 到 control.py（Streamlit rerun 後單例可能重置）
+    _sb = st.session_state.get("startup_begin", None)
+    if _sb is not None:
+        ctrl._startup_begin = _sb
+
     # 設定工況並產生資料
     ctrl.set_fault_type(st.session_state.selected_fault)
     ctrl.tick()
@@ -114,8 +120,7 @@ def fmt_level(v: str) -> str:
 # Top control bar
 # ---------------------------------------------------------------------------
 def render_top_controls() -> None:
-    st.markdown(
-        """
+    st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
     [data-testid="stAppViewContainer"] { background: #0a0e14; }
@@ -183,47 +188,45 @@ def render_top_controls() -> None:
 
 
     </style>
-    """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
-    ms = get_current_machine_state()
+    ms      = get_current_machine_state()
     elapsed = get_startup_elapsed_sec()
     applied = st.session_state.applied_fault
 
     def badge(label, value, bg, bd, tc):
         return (
             f"<div style=\"font-size:9px;color:#4b6174;font-family:'IBM Plex Mono',monospace;"
-            f'text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">{label}</div>'
-            f'<span style="display:inline-block;padding:5px 14px;border-radius:4px;'
+            f"text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;\">{label}</div>"
+            f"<span style=\"display:inline-block;padding:5px 14px;border-radius:4px;"
             f"font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;"
-            f'letter-spacing:.05em;background:{bg};border:1px solid {bd};color:{tc};">{value}</span>'
+            f"letter-spacing:.05em;background:{bg};border:1px solid {bd};color:{tc};\">{value}</span>"
         )
 
     ms_cfg = {
-        "OFF": ("rgba(75,97,116,.2)", "rgba(75,97,116,.4)", "#4b6174"),
-        "STARTUP": ("rgba(251,191,36,.15)", "rgba(251,191,36,.4)", "#fbbf24"),
-        "RUNNING": ("rgba(34,211,165,.12)", "rgba(34,211,165,.35)", "#22d3a5"),
+        "OFF":     ("rgba(75,97,116,.2)",    "rgba(75,97,116,.4)",    "#4b6174"),
+        "STARTUP": ("rgba(251,191,36,.15)",  "rgba(251,191,36,.4)",   "#fbbf24"),
+        "RUNNING": ("rgba(34,211,165,.12)",  "rgba(34,211,165,.35)",  "#22d3a5"),
     }
     mbg, mbd, mtc = ms_cfg.get(ms, ms_cfg["OFF"])
 
     fault_cfg = {
-        "NORMAL": ("#22d3a5", "rgba(34,211,165,.12)", "rgba(34,211,165,.35)"),
-        "OVERLOAD": ("#fbbf24", "rgba(251,191,36,.15)", "rgba(251,191,36,.4)"),
-        "STALL": ("#f87171", "rgba(248,113,113,.18)", "rgba(248,113,113,.5)"),
-        "LOAD_LOSS": ("#f87171", "rgba(248,113,113,.12)", "rgba(248,113,113,.3)"),
-        "BEARING_WEAR": ("#fbbf24", "rgba(251,191,36,.15)", "rgba(251,191,36,.4)"),
+        "NORMAL":       ("#22d3a5", "rgba(34,211,165,.12)",  "rgba(34,211,165,.35)"),
+        "OVERLOAD":     ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
+        "STALL":        ("#f87171", "rgba(248,113,113,.18)", "rgba(248,113,113,.5)"),
+        "LOAD_LOSS":    ("#f87171", "rgba(248,113,113,.12)", "rgba(248,113,113,.3)"),
+        "BEARING_WEAR": ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
     }
     amc, ambg, ambd = fault_cfg.get(applied, fault_cfg["NORMAL"])
 
-    dot_color = "#22d3a5" if st.session_state.is_running else "#4b6174"
+    dot_color  = "#22d3a5" if st.session_state.is_running else "#4b6174"
     live_label = "LIVE" if st.session_state.is_running else "IDLE"
     live_html = (
         f"<div style='display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:2px;'>"
         f"<div style='width:9px;height:9px;border-radius:50%;background:{dot_color};"
         f"box-shadow:0 0 7px {dot_color};'></div>"
         f"<span style=\"font-family:'IBM Plex Mono',monospace;font-size:9px;color:#4b6174;"
-        f'text-transform:uppercase;letter-spacing:.08em;">{live_label}</span>'
+        f"text-transform:uppercase;letter-spacing:.08em;\">{live_label}</span>"
         f"</div>"
     )
 
@@ -233,21 +236,21 @@ def render_top_controls() -> None:
         if st.button("⏻  開機", use_container_width=True, type="primary", key="btn_on"):
             ctrl = get_controller()
             ctrl.power_on(note="Dashboard 開機")
-            st.session_state.is_running = True
+            st.session_state.is_running        = True
+            st.session_state.startup_begin     = time.time()
             st.session_state.last_generated_ts = 0.0
-            st.session_state.selected_fault = "NORMAL"
-            st.session_state.applied_fault = "NORMAL"
+            st.session_state.selected_fault    = "NORMAL"
+            st.session_state.applied_fault     = "NORMAL"
             st.rerun()
 
     with c_off:
-        if st.button(
-            "⏼  關機", use_container_width=True, type="secondary", key="btn_off"
-        ):
+        if st.button("⏼  關機", use_container_width=True, type="secondary", key="btn_off"):
             ctrl = get_controller()
             ctrl.power_off(note="Dashboard 關機")
-            st.session_state.is_running = False
+            st.session_state.is_running        = False
+            st.session_state.startup_begin     = None
             st.session_state.last_generated_ts = 0.0
-            st.session_state.applied_fault = "NORMAL"
+            st.session_state.applied_fault     = "NORMAL"
             st.rerun()
 
     with c_clear:
@@ -262,7 +265,6 @@ def render_top_controls() -> None:
             help="請先關機再清除資料" if not is_off else "清除所有歷史資料並重建資料庫",
         ):
             from database import init_db
-
             db_path = "motor_monitor.db"
             if os.path.exists(db_path):
                 os.remove(db_path)
@@ -270,16 +272,12 @@ def render_top_controls() -> None:
             st.rerun()
 
     with c_tech:
-        if st.button(
-            "📄 技術報告", use_container_width=True, key="btn_tech", type="secondary"
-        ):
+        if st.button("📄 技術報告", use_container_width=True, key="btn_tech", type="secondary"):
             st.session_state.page = "tech"
             st.rerun()
 
     with c_guide:
-        if st.button(
-            "📖 使用說明", use_container_width=True, key="btn_guide", type="secondary"
-        ):
+        if st.button("📖 使用說明", use_container_width=True, key="btn_guide", type="secondary"):
             st.session_state.page = "guide"
             st.rerun()
 
@@ -295,6 +293,7 @@ def render_top_controls() -> None:
             st.session_state.selected_fault = new_fault
             st.rerun()
 
+
     st.markdown(
         '<hr style="border:none;border-top:1px solid rgba(56,189,248,0.12);margin:8px 0 0 0;"/>',
         unsafe_allow_html=True,
@@ -308,30 +307,28 @@ def build_full_table_html(df: pd.DataFrame) -> str:
     display = df.sort_values("timestamp", ascending=False).head(100).copy()
 
     cols = [
-        ("timestamp", "時間"),
-        ("machine_state", "設備階段"),
-        ("frequency_hz", "頻率 Hz"),
-        ("current_a", "電流 A"),
-        ("sync_rpm", "轉速 RPM"),
-        ("slip_ratio", "轉差率"),
-        ("torque_nm", "轉矩 N·m"),
+        ("timestamp",       "時間"),
+        ("machine_state",   "設備階段"),
+        ("frequency_hz",    "頻率 Hz"),
+        ("current_a",       "電流 A"),
+        ("sync_rpm",        "轉速 RPM"),
+        ("slip_ratio",      "轉差率"),
+        ("torque_nm",       "轉矩 N·m"),
         ("rule_fault_type", "Rule 判斷"),
-        ("rule_level", "Rule 等級"),
-        ("rule_score", "Rule 分數"),
-        ("ml_fault_type", "ML 判斷"),
-        ("ml_level", "ML 等級"),
-        ("ml_confidence", "ML 信心"),
-        ("final_level", "綜合等級"),
+        ("rule_level",      "Rule 等級"),
+        ("rule_score",      "Rule 分數"),
+        ("ml_fault_type",   "ML 判斷"),
+        ("ml_level",        "ML 等級"),
+        ("ml_confidence",   "ML 信心"),
+        ("final_level",     "綜合等級"),
     ]
     existing = [(c, l) for c, l in cols if c in display.columns]
 
     th = "".join(f"<th>{l}</th>" for _, l in existing)
 
     level_cls = {
-        "NORMAL": "val-normal",
-        "WARNING": "val-warn",
-        "DANGER": "val-danger",
-        "CRITICAL": "val-danger",
+        "NORMAL": "val-normal", "WARNING": "val-warn",
+        "DANGER": "val-danger", "CRITICAL": "val-danger",
     }
 
     tbody = ""
@@ -397,88 +394,82 @@ def build_dashboard_html(
     # ── 工況流程 ──
     flow_items = flow_items or []
     level_color = {
-        "NORMAL": "var(--green)",
-        "WARNING": "var(--amber)",
-        "DANGER": "#fb923c",
+        "NORMAL":   "var(--green)",
+        "WARNING":  "var(--amber)",
+        "DANGER":   "#fb923c",
         "CRITICAL": "var(--red)",
-        "啟動中": "var(--text3)",
+        "啟動中":    "var(--text3)",
     }
     level_accent = {
-        "NORMAL": "var(--green)",
-        "WARNING": "var(--amber)",
-        "DANGER": "#fb923c",
+        "NORMAL":   "var(--green)",
+        "WARNING":  "var(--amber)",
+        "DANGER":   "#fb923c",
         "CRITICAL": "var(--red)",
-        "啟動中": "var(--text3)",
+        "啟動中":    "var(--text3)",
     }
 
     if flow_items:
         boxes = []
         for i, (fault, level) in enumerate(flow_items):
-            color = level_color.get(level, "var(--text3)")
+            color  = level_color.get(level, "var(--text3)")
             accent = level_accent.get(level, "var(--cyan)")
-            label = fmt_level(level)
-            value = fmt_fault(fault)
-            is_latest = i == len(flow_items) - 1
+            label  = fmt_level(level)
+            value  = fmt_fault(fault)
+            is_latest = (i == len(flow_items) - 1)
             border = f"border:1px solid {accent};opacity:{1.0 if is_latest else 0.6};"
             boxes.append(
                 f'<div class="flow-box" style="--accent:{accent};{border}">'
                 f'<div class="flow-box-label">{label}</div>'
                 f'<div class="flow-box-value" style="color:{color}">{value}</div>'
-                f"</div>"
+                f'</div>'
             )
         flow_html = '<div class="flow-track">'
         for i, box in enumerate(boxes):
             flow_html += box
             if i < len(boxes) - 1:
                 flow_html += '<div class="flow-arrow">→</div>'
-        flow_html += "</div>"
+        flow_html += '</div>'
     else:
         flow_html = ""
 
     # ── KPI ──
-    total = stats.get("total", 0)
-    level_dist = stats.get("level_dist", {})
-    fault_dist = stats.get("fault_dist", {})
-    warn_count = level_dist.get("WARNING", 0)
+    total       = stats.get("total", 0)
+    level_dist  = stats.get("level_dist", {})
+    fault_dist  = stats.get("fault_dist", {})
+    warn_count  = level_dist.get("WARNING", 0)
     danger_count = level_dist.get("DANGER", 0)
     critical_count = level_dist.get("CRITICAL", 0)
     alert_total = warn_count + danger_count + critical_count
 
     # ── Latest ──
     if not df.empty:
-        latest = df.iloc[-1]
-        l_freq = round(float(latest["frequency_hz"]), 1)
-        l_curr = round(float(latest["current_a"]), 1)
-        l_rpm = int(float(latest["sync_rpm"]))
-        l_torq = round(float(latest["torque_nm"]), 1)
-        l_mstate = str(latest["machine_state"])
-        l_rfault = fmt_fault(str(latest["rule_fault_type"]))
-        l_rlevel = fmt_level(str(latest["rule_level"]))
-        l_rscore = int(latest["rule_score"])
-        l_mlfault = fmt_fault(str(latest["ml_fault_type"]))
-        l_mllevel = fmt_level(str(latest["ml_level"]))
-        l_mlconf = round(float(latest["ml_confidence"]) * 100, 1)
-        l_final = fmt_level(str(latest["final_level"]))
+        latest     = df.iloc[-1]
+        l_freq     = round(float(latest["frequency_hz"]), 1)
+        l_curr     = round(float(latest["current_a"]), 1)
+        l_rpm      = int(float(latest["sync_rpm"]))
+        l_torq     = round(float(latest["torque_nm"]), 1)
+        l_mstate   = str(latest["machine_state"])
+        l_rfault   = fmt_fault(str(latest["rule_fault_type"]))
+        l_rlevel   = fmt_level(str(latest["rule_level"]))
+        l_rscore   = int(latest["rule_score"])
+        l_mlfault  = fmt_fault(str(latest["ml_fault_type"]))
+        l_mllevel  = fmt_level(str(latest["ml_level"]))
+        l_mlconf   = round(float(latest["ml_confidence"]) * 100, 1)
+        l_final    = fmt_level(str(latest["final_level"]))
         l_final_raw = str(latest["final_level"])
 
         freq_pct = min(100, l_freq / 60 * 100)
         curr_pct = min(100, l_curr / 30 * 100)
-        rpm_pct = min(100, l_rpm / 1800 * 100)
+        rpm_pct  = min(100, l_rpm / 1800 * 100)
         torq_pct = min(100, l_torq / 120 * 100)
 
         final_cls = {
-            "NORMAL": "val-normal",
-            "WARNING": "val-warn",
-            "DANGER": "val-danger",
-            "CRITICAL": "val-danger",
+            "NORMAL": "val-normal", "WARNING": "val-warn",
+            "DANGER": "val-danger", "CRITICAL": "val-danger",
         }.get(l_final_raw, "val-muted")
 
         rule_cls = "val-warn" if l_rscore > 30 else "val-normal"
-        ml_cls = (
-            "val-danger"
-            if l_final_raw in ("DANGER", "CRITICAL")
-            else "val-warn" if l_final_raw == "WARNING" else "val-normal"
-        )
+        ml_cls   = "val-danger" if l_final_raw in ("DANGER", "CRITICAL") else "val-warn" if l_final_raw == "WARNING" else "val-normal"
     else:
         l_freq = l_curr = l_rpm = l_torq = 0
         l_mstate = l_rfault = l_rlevel = l_mlfault = l_mllevel = l_final = "—"
@@ -490,39 +481,26 @@ def build_dashboard_html(
 
     # ── Chart series ──
     if not df.empty:
-        cdf = df.tail(MAX_CHART_POINTS)
-        ts_labels = [t.strftime("%H:%M:%S") for t in cdf["timestamp"]]
-        freq_ser = [round(float(v), 2) for v in cdf["frequency_hz"]]
-        curr_ser = [round(float(v), 2) for v in cdf["current_a"]]
-        rpm_ser = [int(float(v)) for v in cdf["sync_rpm"]]
-        torq_ser = [round(float(v), 2) for v in cdf["torque_nm"]]
+        cdf        = df.tail(MAX_CHART_POINTS)
+        ts_labels  = [t.strftime("%H:%M:%S") for t in cdf["timestamp"]]
+        freq_ser   = [round(float(v), 2) for v in cdf["frequency_hz"]]
+        curr_ser   = [round(float(v), 2) for v in cdf["current_a"]]
+        rpm_ser    = [int(float(v)) for v in cdf["sync_rpm"]]
+        torq_ser   = [round(float(v), 2) for v in cdf["torque_nm"]]
         rscore_ser = [int(v) for v in cdf["rule_score"]]
         mlconf_ser = [round(float(v) * 100, 1) for v in cdf["ml_confidence"]]
     else:
-        ts_labels = freq_ser = curr_ser = rpm_ser = torq_ser = rscore_ser = (
-            mlconf_ser
-        ) = []
+        ts_labels = freq_ser = curr_ser = rpm_ser = torq_ser = rscore_ser = mlconf_ser = []
 
     # ── Alert rows ──
     if not df.empty:
-        adf = (
-            df[df["final_level"].isin(["WARNING", "DANGER", "CRITICAL"])]
-            .sort_values("timestamp", ascending=False)
-            .head(10)
-        )
+        adf = df[df["final_level"].isin(["WARNING", "DANGER", "CRITICAL"])] \
+                .sort_values("timestamp", ascending=False).head(10)
         alert_rows = ""
         for _, r in adf.iterrows():
-            fl = str(r["final_level"])
-            sev_cls = {
-                "WARNING": "sev-warn",
-                "DANGER": "sev-warn",
-                "CRITICAL": "sev-crit",
-            }.get(fl, "sev-info")
-            pill_cls = {
-                "WARNING": "pill-warn",
-                "DANGER": "pill-warn",
-                "CRITICAL": "pill-crit",
-            }.get(fl, "pill-ok")
+            fl  = str(r["final_level"])
+            sev_cls = {"WARNING": "sev-warn", "DANGER": "sev-warn", "CRITICAL": "sev-crit"}.get(fl, "sev-info")
+            pill_cls = {"WARNING": "pill-warn", "DANGER": "pill-warn", "CRITICAL": "pill-crit"}.get(fl, "pill-ok")
             alert_rows += (
                 f"<tr>"
                 f"<td>{r['timestamp'].strftime('%H:%M:%S')}</td>"
@@ -552,16 +530,12 @@ def build_dashboard_html(
             total_count = 0
             for _, r in adf.iterrows():
                 # 實際工況：從 rule_fault_type 讀（VFD_simulator 決定的）
-                actual = str(r.get("rule_fault_type", "NORMAL"))
-                ml_judge = str(r.get("ml_fault_type", "NORMAL"))
-                ml_conf = round(float(r.get("ml_confidence", 0)) * 100, 0)
+                actual   = str(r.get("rule_fault_type", "NORMAL"))
+                ml_judge = str(r.get("ml_fault_type",   "NORMAL"))
+                ml_conf  = round(float(r.get("ml_confidence", 0)) * 100, 0)
 
-                is_correct = actual == ml_judge
-                mark = (
-                    "<span class='correct'>✅</span>"
-                    if is_correct
-                    else "<span class='wrong'>❌</span>"
-                )
+                is_correct = (actual == ml_judge)
+                mark = "<span class='correct'>✅</span>" if is_correct else "<span class='wrong'>❌</span>"
                 if is_correct:
                     correct_count += 1
                 total_count += 1
@@ -576,9 +550,7 @@ def build_dashboard_html(
                     f"</tr>"
                 )
 
-            accuracy = (
-                round(correct_count / total_count * 100) if total_count > 0 else 0
-            )
+            accuracy = round(correct_count / total_count * 100) if total_count > 0 else 0
             auto_section = f"""
 <div class="sec-div">AUTO 模式即時驗證（最近 10 筆）</div>
 <div class="auto-panel">
@@ -602,53 +574,34 @@ def build_dashboard_html(
 """
 
     # ── Header colors ──
-    live_dot = "#22d3a5" if is_running else "#4b6174"
-    live_lbl = "ON" if is_running else "OFF"
-    ms_color = {"關機": "#4b6174", "啟動中": "#fbbf24", "運轉中": "#22d3a5"}.get(
-        machine_state, "#4b6174"
-    )
-    ms_bg = {
-        "關機": "rgba(75,97,116,.15)",
-        "啟動中": "rgba(251,191,36,.15)",
-        "運轉中": "rgba(34,211,165,.12)",
-    }.get(machine_state, "rgba(75,97,116,.15)")
-    ms_bd = {
-        "關機": "rgba(75,97,116,.35)",
-        "啟動中": "rgba(251,191,36,.4)",
-        "運轉中": "rgba(34,211,165,.35)",
-    }.get(machine_state, "rgba(75,97,116,.35)")
+    live_dot  = "#22d3a5" if is_running else "#4b6174"
+    live_lbl  = "ON" if is_running else "OFF"
+    ms_color  = {"關機": "#4b6174", "啟動中": "#fbbf24", "運轉中": "#22d3a5"}.get(machine_state, "#4b6174")
+    ms_bg     = {"關機": "rgba(75,97,116,.15)", "啟動中": "rgba(251,191,36,.15)", "運轉中": "rgba(34,211,165,.12)"}.get(machine_state, "rgba(75,97,116,.15)")
+    ms_bd     = {"關機": "rgba(75,97,116,.35)", "啟動中": "rgba(251,191,36,.4)",  "運轉中": "rgba(34,211,165,.35)"}.get(machine_state, "rgba(75,97,116,.35)")
     fault_color = {
-        "NORMAL": "#22d3a5",
-        "OVERLOAD": "#fbbf24",
-        "STALL": "#f87171",
-        "LOAD_LOSS": "#f87171",
-        "BEARING_WEAR": "#fbbf24",
+        "NORMAL": "#22d3a5", "OVERLOAD": "#fbbf24",
+        "STALL": "#f87171", "LOAD_LOSS": "#f87171", "BEARING_WEAR": "#fbbf24",
         "AUTO": "#a78bfa",
     }.get(applied_fault, "#22d3a5")
-    fault_bg = {
-        "NORMAL": "rgba(34,211,165,.12)",
-        "OVERLOAD": "rgba(251,191,36,.15)",
-        "STALL": "rgba(248,113,113,.18)",
-        "LOAD_LOSS": "rgba(248,113,113,.12)",
-        "BEARING_WEAR": "rgba(251,191,36,.15)",
-        "AUTO": "rgba(167,139,250,.12)",
+    fault_bg  = {
+        "NORMAL": "rgba(34,211,165,.12)", "OVERLOAD": "rgba(251,191,36,.15)",
+        "STALL": "rgba(248,113,113,.18)", "LOAD_LOSS": "rgba(248,113,113,.12)",
+        "BEARING_WEAR": "rgba(251,191,36,.15)", "AUTO": "rgba(167,139,250,.12)",
     }.get(applied_fault, "rgba(34,211,165,.12)")
-    fault_bd = {
-        "NORMAL": "rgba(34,211,165,.35)",
-        "OVERLOAD": "rgba(251,191,36,.4)",
-        "STALL": "rgba(248,113,113,.5)",
-        "LOAD_LOSS": "rgba(248,113,113,.3)",
-        "BEARING_WEAR": "rgba(251,191,36,.4)",
-        "AUTO": "rgba(167,139,250,.35)",
+    fault_bd  = {
+        "NORMAL": "rgba(34,211,165,.35)", "OVERLOAD": "rgba(251,191,36,.4)",
+        "STALL": "rgba(248,113,113,.5)",  "LOAD_LOSS": "rgba(248,113,113,.3)",
+        "BEARING_WEAR": "rgba(251,191,36,.4)", "AUTO": "rgba(167,139,250,.35)",
     }.get(applied_fault, "rgba(34,211,165,.35)")
 
-    ts_j = json.dumps(ts_labels)
+    ts_j   = json.dumps(ts_labels)
     freq_j = json.dumps(freq_ser)
     curr_j = json.dumps(curr_ser)
-    rpm_j = json.dumps(rpm_ser)
+    rpm_j  = json.dumps(rpm_ser)
     torq_j = json.dumps(torq_ser)
-    rs_j = json.dumps(rscore_ser)
-    ml_j = json.dumps(mlconf_ser)
+    rs_j   = json.dumps(rscore_ser)
+    ml_j   = json.dumps(mlconf_ser)
 
     return f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -1051,10 +1004,16 @@ def main() -> None:
             components.html(f.read(), height=4000, scrolling=True)
         return
 
-    ctrl = get_controller()
-    df = load_data()
+
+    ctrl          = get_controller()
+    df            = load_data()
     machine_state = ctrl.machine_state
-    startup_elapsed = ctrl.elapsed_sec
+    # 從 session_state 計算 elapsed_sec，避免 Streamlit rerun 時單例消失
+    _sb = st.session_state.get("startup_begin", None)
+    startup_elapsed = max(0.0, time.time() - _sb) if (_sb is not None and st.session_state.is_running) else 0.0
+    # 同步回 control.py（讓 main.tick 拿到正確的 elapsed_sec）
+    if st.session_state.is_running and _sb is not None:
+        ctrl._startup_begin = _sb
     flow_items = []
     if not df.empty:
         run_df = df[df["machine_state"] == "運轉中"].copy()
@@ -1071,7 +1030,6 @@ def main() -> None:
 
     # 從 VFD_simulator 直接讀取目前實際工況（AUTO 模式會回傳實際切換到的工況）
     from VFD_simulator import get_current_fault
-
     applied_fault = get_current_fault(st.session_state.applied_fault)
 
     stats = fetch_stats()
