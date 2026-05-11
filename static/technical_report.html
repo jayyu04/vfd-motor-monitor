@@ -26,8 +26,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 .toc{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:32px;}
 .toc-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
 .toc-list{display:flex;flex-direction:column;gap:6px;}
-.toc-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);text-decoration:none;transition:color .15s;}
-.toc-item:hover{color:var(--cyan);}
+.toc-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);}
 .toc-num{font-family:var(--mono);font-size:10px;color:var(--text3);width:20px;}
 .section{margin-bottom:48px;}
 .sec-title{display:flex;align-items:center;gap:10px;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
@@ -43,7 +42,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 .spec-table tr:last-child td{border-bottom:none;}
 .spec-table td:first-child{color:var(--text3);width:35%;}
 .spec-table td:last-child{color:var(--cyan);font-weight:500;}
-.diagram-wrap{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin-bottom:12px;}
 .flow-steps{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
 .flow-step{display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);}
 .flow-step:last-child{border-bottom:none;}
@@ -53,530 +51,758 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 .flow-right{padding:14px 18px;}
 .flow-data{font-size:11px;font-family:var(--mono);color:var(--cyan);margin-bottom:6px;line-height:1.8;}
 .flow-note{font-size:12px;color:var(--text2);}
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.mode-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 18px;border-left:3px solid var(--accent,var(--cyan));}
-.mode-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:6px;}
-.mode-range{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:6px;line-height:1.8;}
-.mode-logic{font-size:12px;color:var(--text2);}
 .formula-block{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin:10px 0;font-family:var(--mono);font-size:12px;color:var(--cyan);line-height:2;}
 .formula-comment{color:var(--text3);}
-.score-bar{margin:16px 0;}
-.score-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:6px;}
-.score-label{font-size:10px;font-family:var(--mono);text-align:center;padding:4px;border-radius:4px;}
-.score-track{height:12px;border-radius:6px;overflow:hidden;display:grid;grid-template-columns:15fr 25fr 25fr 35fr;gap:2px;}
-.score-seg{height:100%;border-radius:3px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .feature-item{display:flex;align-items:flex-start;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 14px;}
 .feature-rank{font-size:10px;font-family:var(--mono);color:var(--text3);width:20px;flex-shrink:0;padding-top:1px;}
 .feature-name{font-size:12px;font-family:var(--mono);font-weight:500;color:var(--cyan);margin-bottom:3px;}
 .feature-desc{font-size:11px;color:var(--text2);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:3px;margin-left:6px;vertical-align:middle;}
-.tag-amber{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);}
-.tag-red{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);}
-.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-family:var(--mono);color:var(--text3);text-decoration:none;padding:6px 14px;border-radius:4px;border:1px solid var(--border);margin-bottom:28px;transition:color .2s,border-color .2s;}
-.back-btn:hover{color:var(--cyan);border-color:rgba(56,189,248,.3);}
+.score-bar{margin:16px 0;}
+.score-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:6px;}
+.score-label{font-size:10px;font-family:var(--mono);text-align:center;padding:4px;border-radius:4px;}
+.score-track{height:12px;border-radius:6px;overflow:hidden;display:grid;grid-template-columns:15fr 25fr 25fr 35fr;gap:2px;}
+.score-seg{height:100%;border-radius:3px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.mode-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 18px;border-left:3px solid var(--accent,var(--cyan));}
+.mode-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:6px;}
+.mode-range{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:6px;line-height:1.8;}
+.mode-logic{font-size:12px;color:var(--text2);}
+.analogy-box{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:6px;padding:14px 18px;margin:10px 0;}
+.analogy-title{font-size:11px;font-family:var(--mono);color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+.analogy-text{font-size:12px;color:var(--text2);line-height:1.7;}
+.limit-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;}
+.limit-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.limit-text{font-size:12px;color:var(--text2);line-height:1.6;}
+.limit-title{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;}
+.level-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.level-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;border-top:3px solid var(--accent);}
+.level-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);margin:0 auto 10px;box-shadow:0 0 8px var(--accent);}
+.level-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
+.level-score{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:8px;}
+.level-action{font-size:11px;color:var(--text2);line-height:1.5;}
+.arch-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.arch-item{display:flex;align-items:flex-start;gap:16px;padding:12px 18px;border-bottom:1px solid var(--border);}
+.arch-item:last-child{border-bottom:none;}
+.arch-name{font-size:12px;font-family:var(--mono);font-weight:500;min-width:160px;flex-shrink:0;}
+.arch-desc{font-size:12px;color:var(--text2);}
+.highlight{color:var(--text);font-weight:600;}
 </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="header">
-    <div class="logo-box">
-      <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
-        <circle cx="11" cy="11" r="7" stroke="white" stroke-width="1.5" stroke-dasharray="3 2"/>
-        <circle cx="11" cy="11" r="3" fill="white" opacity=".9"/>
-        <line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="11" y1="17" x2="11" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="1" y1="11" x2="5" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="17" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div>
-      <div class="header-title">技術報告</div>
-      <div class="header-sub">VFD Motor Monitoring System · v2.0 · Rule-based Anomaly Score + Random Forest</div>
-    </div>
-    <div class="header-tag">TECHNICAL REPORT</div>
+<!-- Header -->
+<div class="header">
+  <div class="logo-box">
+    <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="7" stroke="white" stroke-width="1.5" stroke-dasharray="3 2"/>
+      <circle cx="11" cy="11" r="3" fill="white" opacity=".9"/>
+      <line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="11" y1="17" x2="11" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="1" y1="11" x2="5" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="17" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-title">技術報告</div>
+    <div class="header-sub">VFD Motor Monitoring System · v3.0 · Rule-based Anomaly Score + Random Forest</div>
+  </div>
+  <div class="header-tag">TECHNICAL REPORT</div>
+</div>
+
+<!-- 目錄 -->
+<div class="toc">
+  <div class="toc-title">目錄</div>
+  <div class="toc-list">
+    <div class="toc-item"><span class="toc-num">01</span>馬達基本規格</div>
+    <div class="toc-item"><span class="toc-num">02</span>系統架構</div>
+    <div class="toc-item"><span class="toc-num">03</span>資料流</div>
+    <div class="toc-item"><span class="toc-num">04</span>VFD_simulator — 模擬資料產生</div>
+    <div class="toc-item"><span class="toc-num">05</span>物理計算層 — 三個原始值推算物理量</div>
+    <div class="toc-item"><span class="toc-num">06</span>Rules 判斷 — 規則式異常評分</div>
+    <div class="toc-item"><span class="toc-num">07</span>ML 判斷 — 隨機森林機器學習</div>
+    <div class="toc-item"><span class="toc-num">08</span>雙層互補的價值</div>
+    <div class="toc-item"><span class="toc-num">09</span>風險等級</div>
+    <div class="toc-item"><span class="toc-num">10</span>系統誠實限制與未來展望</div>
+  </div>
+</div>
+
+<!-- 01 規格 -->
+<div class="section" id="spec">
+  <div class="sec-title">01 馬達基本規格</div>
+  <div class="card" style="--accent:var(--cyan)">
+    <table class="spec-table">
+      <thead><tr><th>參數</th><th>數值</th></tr></thead>
+      <tbody>
+        <tr><td>額定功率</td><td>10 HP（7.46 kW）</td></tr>
+        <tr><td>電源電壓</td><td>380V 三相交流</td></tr>
+        <tr><td>極數</td><td>4 極</td></tr>
+        <tr><td>額定頻率</td><td>50 Hz</td></tr>
+        <tr><td>同步轉速</td><td>1500 RPM（= 120 × 50 / 4）</td></tr>
+        <tr><td>額定轉速</td><td>1450 RPM（轉差率約 3.3%）</td></tr>
+        <tr><td>額定電流（FLA）</td><td>15 A</td></tr>
+        <tr><td>額定功率因數</td><td>0.85</td></tr>
+        <tr><td>效率 η</td><td>0.88</td></tr>
+        <tr><td>額定轉矩</td><td>≈ 49 N·m</td></tr>
+        <tr><td>控制方式</td><td>變頻器（VFD）V/f 控制</td></tr>
+        <tr><td>正常操作頻率範圍</td><td>30 ~ 60 Hz（從業人員確認）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 02 架構 -->
+<div class="section" id="arch">
+  <div class="sec-title">02 系統架構</div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">十二個模組，每個只做一件事</div>
+    <p>系統採用嚴格分層設計，每個模組職責單一，不依賴其他模組的內部狀態。<span class="highlight">未來換真實硬體只需修改 comms.py 一個模組</span>，換不同規格的馬達只需修改 config.py，其他模組完全不動。</p>
   </div>
 
-  <!-- 目錄 -->
-  <div class="toc">
-    <div class="toc-title">目錄</div>
-    <div class="toc-list">
-      <div class="toc-item"><span class="toc-num">01</span>馬達基本規格</div>
-      <div class="toc-item"><span class="toc-num">02</span>系統架構</div>
-      <div class="toc-item"><span class="toc-num">03</span>資料流</div>
-      <div class="toc-item"><span class="toc-num">04</span>simulator.py — 模擬資料產生</div>
-      <div class="toc-item"><span class="toc-num">05</span>device_adapter.py — 物理量推算</div>
-      <div class="toc-item"><span class="toc-num">06</span>rules.py — 規則式異常評分</div>
-      <div class="toc-item"><span class="toc-num">07</span>ml_model.py — 隨機森林機器學習</div>
-    </div>
+  <!-- 架構圖 -->
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:12px;overflow-x:auto;">
+    <svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="rgba(56,189,248,0.6)"/>
+        </marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="rgba(34,211,165,0.6)"/>
+        </marker>
+        <marker id="arr-d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="rgba(56,189,248,0.3)"/>
+        </marker>
+      </defs>
+
+      <!-- config.py 橫跨頂部 -->
+      <rect x="180" y="10" width="540" height="36" rx="6" fill="#111827" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="450" y="25" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">config.py</text>
+      <text x="450" y="39" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">馬達規格 / 系統參數 / Rules 閾值（所有模組共用）</text>
+
+      <!-- dashboard -->
+      <rect x="330" y="65" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.4)" stroke-width="1.5"/>
+      <text x="450" y="81" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">dashboard.py</text>
+      <text x="450" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">展示層 / 使用者介面</text>
+
+      <!-- control -->
+      <rect x="330" y="130" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.4)" stroke-width="1.5"/>
+      <text x="450" y="146" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">control.py</text>
+      <text x="450" y="160" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">控制層 / 狀態管理</text>
+
+      <!-- VFD_simulator -->
+      <rect x="60" y="210" width="190" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+      <text x="155" y="226" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#38bdf8" font-weight="500">VFD_simulator.py</text>
+      <text x="155" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">模擬 Hz / A / V</text>
+
+      <!-- comms -->
+      <rect x="330" y="210" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+      <text x="450" y="226" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">comms.py</text>
+      <text x="450" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">通訊層 / 換硬體只改這裡</text>
+
+      <!-- data_collector -->
+      <rect x="330" y="278" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+      <text x="450" y="294" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">data_collector.py</text>
+      <text x="450" y="308" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">加 timestamp / motor_id</text>
+
+      <!-- physics -->
+      <rect x="330" y="346" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+      <text x="450" y="362" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">physics.py</text>
+      <text x="450" y="376" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">推算 RPM / 轉差 / 轉矩</text>
+
+      <!-- main -->
+      <rect x="330" y="414" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.3)" stroke-width="1.5"/>
+      <text x="450" y="430" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">main.py</text>
+      <text x="450" y="444" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">串接 / 啟動遮蔽 / 合併結果</text>
+
+      <!-- rules -->
+      <rect x="100" y="494" width="170" height="38" rx="6" fill="#111827" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
+      <text x="185" y="510" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#fbbf24" font-weight="500">rules.py</text>
+      <text x="185" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Anomaly Score 0~100</text>
+
+      <!-- ml_model -->
+      <rect x="630" y="494" width="170" height="38" rx="6" fill="#111827" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
+      <text x="715" y="510" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#a78bfa" font-weight="500">ml_model.py</text>
+      <text x="715" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">隨機森林 100棵樹</text>
+
+      <!-- database -->
+      <rect x="330" y="556" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
+      <text x="450" y="572" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">database.py</text>
+      <text x="450" y="586" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">SQLite 儲存</text>
+
+      <!-- ── 控制流（綠色虛線）── -->
+      <!-- dashboard → control -->
+      <line x1="450" y1="103" x2="450" y2="128" stroke="rgba(34,211,165,0.6)" stroke-width="1.5" marker-end="url(#arr-g)"/>
+      <!-- control → VFD_simulator -->
+      <path d="M330,149 L155,149 L155,208" stroke="rgba(34,211,165,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
+      <!-- control → main（通知開始/停止）-->
+      <path d="M570,149 L820,149 L820,433 L572,433" stroke="rgba(34,211,165,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
+
+      <!-- ── 資料流（青藍色實線）── -->
+      <!-- VFD_simulator → comms -->
+      <line x1="250" y1="229" x2="328" y2="229" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- comms → data_collector -->
+      <line x1="450" y1="248" x2="450" y2="276" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- data_collector → physics -->
+      <line x1="450" y1="316" x2="450" y2="344" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- physics → main -->
+      <line x1="450" y1="384" x2="450" y2="412" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- main → rules -->
+      <path d="M380,452 L185,452 L185,492" stroke="rgba(251,191,36,0.5)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- rules → main（回傳結果） -->
+      <path d="M185,532 L185,546 L310,546 L310,433 L328,433" stroke="rgba(251,191,36,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+      <!-- main → ml_model -->
+      <path d="M520,452 L715,452 L715,492" stroke="rgba(167,139,250,0.5)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- ml_model → main（回傳結果） -->
+      <path d="M715,532 L715,546 L590,546 L590,433 L572,433" stroke="rgba(167,139,250,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+      <!-- main → database -->
+      <line x1="450" y1="452" x2="450" y2="554" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- database → dashboard（讀取，虛線） -->
+      <path d="M330,575 L60,575 L60,84 L328,84" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
+      <!-- VFD_simulator → dashboard（目前工況顯示，橙色虛線） -->
+      <path d="M155,210 L155,84 L328,84" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="162" y="148" font-family="IBM Plex Mono" font-size="8" fill="#fb923c">get_current_fault()</text>
+
+      <!-- config 虛線連到各模組 -->
+      <line x1="310" y1="28" x2="250" y2="28" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="250" y1="28" x2="250" y2="210" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- 資料標籤 -->
+      <text x="276" y="222" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Hz/A/V</text>
+      <text x="456" y="265" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">RawSignal</text>
+      <text x="456" y="333" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">CollectedRecord</text>
+      <text x="456" y="401" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">PhysicsRecord</text>
+
+      <!-- 圖例 -->
+      <rect x="660" y="65" width="175" height="116" rx="4" fill="rgba(15,21,32,0.9)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+      <text x="670" y="83" font-family="IBM Plex Mono" font-size="9" fill="#4b6174" text-decoration="underline">圖例</text>
+      <line x1="670" y1="97" x2="710" y2="97" stroke="rgba(56,189,248,0.6)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="716" y="100" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">資料流</text>
+      <line x1="670" y1="114" x2="710" y2="114" stroke="rgba(34,211,165,0.6)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
+      <text x="716" y="117" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">控制流</text>
+      <line x1="670" y1="131" x2="710" y2="131" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
+      <text x="716" y="134" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">讀取顯示</text>
+      <line x1="670" y1="148" x2="710" y2="148" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="716" y="151" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">共用 config</text>
+      <line x1="670" y1="163" x2="710" y2="163" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="716" y="166" font-family="IBM Plex Mono" font-size="9" fill="#fb923c">實際工況回報</text>
+    </svg>
   </div>
 
-  <!-- 01 規格 -->
-  <div class="section" id="spec">
-    <div class="sec-title">01 馬達基本規格</div>
-    <div class="card" style="--accent:var(--cyan)">
-      <table class="spec-table">
-        <thead><tr><th>參數</th><th>數值</th></tr></thead>
-        <tbody>
-          <tr><td>額定功率</td><td>10 HP（7.46 kW）</td></tr>
-          <tr><td>電源電壓</td><td>380V 三相交流</td></tr>
-          <tr><td>極數</td><td>4 極</td></tr>
-          <tr><td>額定頻率</td><td>50 Hz</td></tr>
-          <tr><td>同步轉速</td><td>1500 RPM（= 120 × 50 / 4）</td></tr>
-          <tr><td>額定轉速</td><td>1450 RPM（轉差率約 3.3%）</td></tr>
-          <tr><td>額定電流（FLA）</td><td>15 A</td></tr>
-          <tr><td>額定功率因數</td><td>0.85</td></tr>
-          <tr><td>效率 η</td><td>0.88</td></tr>
-          <tr><td>額定轉矩</td><td>≈ 49 N·m</td></tr>
-          <tr><td>控制方式</td><td>變頻器（VFD）V/f 控制</td></tr>
-          <tr><td>正常操作頻率範圍</td><td>30 ~ 60 Hz</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <!-- 模組列表 -->
+  <div class="arch-list">
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">config.py</span><span class="arch-desc">馬達銘牌規格、系統參數、Rules 閾值的集中管理，所有模組都來這裡讀取設定</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">records.py</span><span class="arch-desc">定義 FullRecord 資料結構，存放合併後的完整紀錄，避免 main.py 和 database.py 循環引用</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">VFD_simulator.py</span><span class="arch-desc">模擬真實變頻器，只輸出三個原始訊號：Hz / A / V，同時提供 get_current_fault() 讓 dashboard 即時讀取目前模擬的工況</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">comms.py</span><span class="arch-desc">通訊層，VFD 與電腦的橋樑。目前從 simulator 讀取，未來換 Modbus 只改這裡</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">data_collector.py</span><span class="arch-desc">接收原始訊號，加上 timestamp 和 motor_id，完成資料擷取</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">physics.py</span><span class="arch-desc">用物理公式從三個原始值推算：同步轉速、轉差率、轉矩</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--amber)">rules.py</span><span class="arch-desc">規則式分析層，計算 Anomaly Score（0~100），第一層判斷，結果回傳給 main.py</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--purple)">ml_model.py</span><span class="arch-desc">隨機森林機器學習，100棵決策樹投票，第二層判斷，結果回傳給 main.py</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--green)">main.py</span><span class="arch-desc">流水線串接，判斷啟動遮蔽，合併 Rules + ML 結果，寫入資料庫</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--green)">control.py</span><span class="arch-desc">系統狀態唯一管理者，接收 dashboard 指令，通知 main 開始/停止</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--green)">database.py</span><span class="arch-desc">SQLite 資料庫，儲存完整紀錄，提供查詢介面給 dashboard</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--green)">dashboard.py</span><span class="arch-desc">展示層，只跟 control.py 說話傳送指令，從 database.py 讀取資料顯示，從 VFD_simulator 讀取實際工況</span></div>
   </div>
+</div>
 
-  <!-- 02 架構 -->
-  <div class="section" id="arch">
-    <div class="sec-title">02 系統架構</div>
-    <div class="card" style="--accent:var(--cyan)">
-      <div class="card-title">七個模組的職責分工</div>
-      <p>系統由七個模組組成，每個模組職責單一清楚。最重要的設計原則是：未來換真實硬體只需修改 device_adapter.py 和 control.py，其他模組完全不受影響。</p>
-    </div>
-
-    <div class="diagram-wrap">
-      <svg viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;display:block;margin:0 auto;">
-        <defs>
-          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="rgba(56,189,248,0.5)"/>
-          </marker>
-        </defs>
-        <rect x="330" y="10" width="200" height="44" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
-        <text x="430" y="29" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">dashboard.py</text>
-        <text x="430" y="46" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">監控介面 / 操作控制</text>
-        <rect x="330" y="90" width="200" height="44" rx="6" fill="#111827" stroke="rgba(34,211,165,0.3)" stroke-width="1.5"/>
-        <text x="430" y="109" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">control.py</text>
-        <text x="430" y="126" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">唯一控制入口</text>
-        <rect x="100" y="180" width="180" height="44" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
-        <text x="190" y="199" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">simulator.py</text>
-        <text x="190" y="216" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">產生 Hz / A / V</text>
-        <rect x="330" y="180" width="200" height="44" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
-        <text x="430" y="199" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">device_adapter.py</text>
-        <text x="430" y="216" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">推算完整物理量</text>
-        <rect x="330" y="270" width="200" height="44" rx="6" fill="#111827" stroke="rgba(34,211,165,0.3)" stroke-width="1.5"/>
-        <text x="430" y="289" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">main.py</text>
-        <text x="430" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">串接所有模組</text>
-        <rect x="160" y="360" width="160" height="44" rx="6" fill="#111827" stroke="rgba(251,191,36,0.3)" stroke-width="1.5"/>
-        <text x="240" y="379" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#fbbf24" font-weight="500">rules.py</text>
-        <text x="240" y="396" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">規則式異常評分</text>
-        <rect x="540" y="360" width="160" height="44" rx="6" fill="#111827" stroke="rgba(167,139,250,0.3)" stroke-width="1.5"/>
-        <text x="620" y="379" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#a78bfa" font-weight="500">ml_model.py</text>
-        <text x="620" y="396" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">隨機森林分類</text>
-        <rect x="330" y="450" width="200" height="44" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
-        <text x="430" y="469" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">database.py</text>
-        <text x="430" y="486" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">SQLite 資料儲存</text>
-        <line x1="430" y1="54" x2="430" y2="88" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
-        <path d="M330,112 L190,112 L190,178" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-        <line x1="280" y1="202" x2="328" y2="202" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="430" y1="134" x2="430" y2="178" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="430" y1="224" x2="430" y2="268" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" marker-end="url(#arr)"/>
-        <path d="M380,314 L240,314 L240,358" stroke="rgba(251,191,36,0.4)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-        <path d="M480,314 L620,314 L620,358" stroke="rgba(167,139,250,0.4)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-        <path d="M240,404 L240,430 L380,430 L380,448" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-        <path d="M620,404 L620,430 L480,430 L480,448" stroke="rgba(56,189,248,0.4)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-        <path d="M560,472 L760,472 L760,32 L532,32" stroke="rgba(56,189,248,0.2)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-        <text x="300" y="196" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Hz / A / V</text>
-        <text x="436" y="252" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">AdaptedRecord</text>
-        <text x="774" y="270" font-family="IBM Plex Mono" font-size="9" fill="#4b6174" transform="rotate(-90,774,270)">讀取顯示</text>
-      </svg>
-    </div>
+<!-- 03 資料流 -->
+<div class="section" id="dataflow">
+  <div class="sec-title">03 資料流</div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">每一筆資料的完整旅程</div>
+    <p>從操作員按下開機，到資料出現在 Dashboard，每筆資料會依序通過以下每個模組，整個過程約 300ms 完成一次循環。</p>
   </div>
-
-  <!-- 03 資料流 -->
-  <div class="section" id="dataflow">
-    <div class="sec-title">03 資料流</div>
-    <div class="card" style="--accent:var(--cyan)">
-      <div class="card-title">每一筆資料的完整旅程</div>
-      <p>從操作員按下開機，到資料出現在 Dashboard，每筆資料會經過以下七個步驟，整個過程約 300ms 完成一次循環。</p>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--green)">control.py</div><div class="flow-io">控制入口</div></div>
+      <div class="flow-right">
+        <div class="flow-data">power_on() / set_fault_type("STALL") / tick()</div>
+        <div class="flow-note">操作員的所有操作都透過 control.py，它是唯一的控制入口，把指令傳給 simulator，把 elapsed_sec 傳給 main</div>
+      </div>
     </div>
-    <div class="flow-steps">
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--green)">control.py</div>
-          <div class="flow-io">控制入口</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">ctrl.power_on()<br/>ctrl.set_fault_type("NORMAL")<br/>ctrl.set_frequency(47.0)</div>
-          <div class="flow-note">dashboard 操作後呼叫 control.py，control 是系統唯一控制入口，模擬模式控制 simulator，未來真實硬體透過 Modbus 送出頻率指令</div>
-        </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">comms.py</div><div class="flow-io">通訊層</div></div>
+      <div class="flow-right">
+        <div class="flow-data">read(power_state="ON", fault_type="STALL", elapsed_sec=10.0)</div>
+        <div class="flow-note">向 VFD_simulator 讀取原始訊號，未來接真實硬體只改這裡</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--cyan)">simulator.py</div>
-          <div class="flow-io">原始感測值</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">frequency_hz = 47.3<br/>current_a &nbsp;&nbsp;= 12.1<br/>voltage_v &nbsp;&nbsp;= 380.0</div>
-          <div class="flow-note">只輸出三個原始值，模擬真實硬體感測器的最小輸出</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">VFD_simulator</div><div class="flow-io">模擬訊號</div></div>
+      <div class="flow-right">
+        <div class="flow-data">frequency_hz = 27.3<br/>current_a   = 25.8<br/>voltage_v   = 380.0</div>
+        <div class="flow-note">根據工況和啟動狀態產生對應的三個原始值，這是整個系統的資料來源</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--cyan)">device_adapter.py</div>
-          <div class="flow-io">推算完整量</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">sync_rpm = 1419 &nbsp;&nbsp;<br/>rpm_est &nbsp;= 1362 &nbsp;&nbsp;<br/>slip &nbsp;&nbsp;&nbsp;= 0.040 &nbsp;&nbsp;<br/>torque &nbsp;= 44.2 N·m<br/>P_in &nbsp;&nbsp;&nbsp;= 6.83 kW</div>
-          <div class="flow-note">用物理公式從三個原始值推算出完整物理量</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">data_collector</div><div class="flow-io">加管理資訊</div></div>
+      <div class="flow-right">
+        <div class="flow-data">timestamp = "2026-05-11T14:30:01"<br/>motor_id  = "MOTOR-001"<br/>+ Hz / A / V</div>
+        <div class="flow-note">加上時間戳記和設備識別碼，完成最小的資料擷取</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--amber)">rules.py</div>
-          <div class="flow-io">第一層判斷</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">fault_type = "NORMAL"<br/>level &nbsp;&nbsp;&nbsp;&nbsp;= "NORMAL"<br/>score &nbsp;&nbsp;&nbsp;&nbsp;= 0</div>
-          <div class="flow-note">用物理條件計算 Anomaly Score，快速、透明、可解釋</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">physics.py</div><div class="flow-io">物理推算</div></div>
+      <div class="flow-right">
+        <div class="flow-data">sync_rpm  = 819<br/>slip_ratio = 0.171<br/>torque_nm  = 147.4</div>
+        <div class="flow-note">用物理公式從三個原始值推算出有意義的物理量，供 Rules 和 ML 使用</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--purple)">ml_model.py</div>
-          <div class="flow-io">第二層判斷</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">fault_type &nbsp;= "NORMAL"<br/>level &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= "NORMAL"<br/>confidence = 100%</div>
-          <div class="flow-note">隨機森林從 8 個特徵判斷異常類型，補捉規則式抓不到的模糊邊界</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--green)">main.py</div><div class="flow-io">啟動遮蔽判斷</div></div>
+      <div class="flow-right">
+        <div class="flow-data">elapsed_sec &lt; 5秒 → 填「啟動中」，不分析<br/>elapsed_sec ≥ 5秒 → 呼叫 Rules + ML</div>
+        <div class="flow-note">啟動期間電流很高是正常現象，這 5 秒內不進行異常判斷，避免誤報</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--cyan)">database.py</div>
-          <div class="flow-io">寫入儲存</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">FullRecord → SQLite</div>
-          <div class="flow-note">完整紀錄寫入資料庫，最多保留 10,000 筆，超過自動刪除最舊的</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--amber)">rules.py</div><div class="flow-io">第一層判斷</div></div>
+      <div class="flow-right">
+        <div class="flow-data">fault_type = "STALL"<br/>level      = "CRITICAL"<br/>score      = 84</div>
+        <div class="flow-note">用物理條件計算 Anomaly Score，快速、透明、可解釋</div>
       </div>
-      <div class="flow-step">
-        <div class="flow-left">
-          <div class="flow-module" style="color:var(--green)">dashboard.py</div>
-          <div class="flow-io">讀取顯示</div>
-        </div>
-        <div class="flow-right">
-          <div class="flow-data">即時數值 / 趨勢圖 / 告警記錄</div>
-          <div class="flow-note">每 500ms 從資料庫讀取最新資料刷新畫面</div>
-        </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--purple)">ml_model.py</div><div class="flow-io">第二層判斷</div></div>
+      <div class="flow-right">
+        <div class="flow-data">fault_type = "STALL"<br/>level      = "CRITICAL"<br/>confidence = 100%</div>
+        <div class="flow-note">100 棵決策樹投票，從 6 個特徵組合判斷異常類型</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--green)">main.py</div><div class="flow-io">合併結果</div></div>
+      <div class="flow-right">
+        <div class="flow-data">final_level = max(rule_level, ml_level) = "CRITICAL"</div>
+        <div class="flow-note">取 Rules 和 ML 兩者中較嚴重的等級，寫入資料庫</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">database.py</div><div class="flow-io">儲存</div></div>
+      <div class="flow-right">
+        <div class="flow-data">完整 FullRecord → SQLite，最多保留 10,000 筆</div>
+        <div class="flow-note">Dashboard 從這裡讀取資料顯示，每 500ms 刷新一次</div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 04 simulator -->
-  <div class="section" id="simulator">
-    <div class="sec-title">04 simulator.py — 模擬資料產生</div>
-    <div class="card" style="--accent:var(--cyan)">
-      <div class="card-title">為什麼需要模擬器</div>
-      <p>真實的工業監控系統需要連接實體感測器，但在開發和展示階段沒有真實硬體可用。simulator.py 的任務是產生「看起來像真實感測器」的資料，讓整個系統可以正常運作。</p>
-      <p>重要設計原則：<strong style="color:var(--text)">simulator 只輸出三個原始值</strong>——頻率（Hz）、電流（A）、電壓（V）——模擬真實變頻器透過 Modbus 能直接讀到的最小資料集。其餘所有物理量都交給 device_adapter.py 用公式推算。</p>
+<!-- 04 simulator -->
+<div class="section" id="simulator">
+  <div class="sec-title">04 VFD_simulator — 模擬資料產生</div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">為什麼需要模擬器</div>
+    <p>真實工業監控需要接實體感測器，但開發和展示階段沒有真實硬體。VFD_simulator.py 的任務是產生「看起來像真實變頻器輸出」的資料，<span class="highlight">只輸出三個原始值：Hz / A / V</span>，模擬真實硬體透過 Modbus 能直接讀到的最小資料集。</p>
+  </div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">連續性設計：資料不會一下高一下低</div>
+    <p>真實感測器的數值不會每秒大幅跳動，而是在某個中心值附近小幅浮動。simulator 用「滑動狀態」實現這個特性：</p>
+    <div class="formula-block">
+      第一筆：從工況的中心值範圍隨機取初始值<br/>
+      之後每筆：上一筆數值 + 小幅隨機漂移<br/><br/>
+      <span class="formula-comment"># 範例：NORMAL 模式，頻率中心值 47.3Hz</span><br/>
+      47.3 → 47.5 → 47.2 → 47.4 Hz（平滑連續，不跳動）
     </div>
-
-    <div class="card" style="--accent:var(--cyan)">
-      <div class="card-title">連續性設計：資料不會一下高一下低</div>
-      <p>真實感測器的數值不會每秒大幅跳動，而是在某個中心值附近小幅浮動。simulator 用「滑動狀態」實現這個特性：</p>
-      <div class="formula-block">
-        第一筆：從模式的中心值範圍隨機取初始值<br/>
-        之後每筆：上一筆數值 ＋ 隨機漂移量（很小）<br/><br/>
-        <span class="formula-comment"># 範例：NORMAL 模式，頻率中心值 47.3Hz</span><br/>
-        頻率最大漂移：± 0.2 Hz／筆<br/>
-        電流最大漂移：± 0.3 A／筆<br/>
-        → 47.3 → 47.5 → 47.2 → 47.4 Hz（平滑連續）
-      </div>
+  </div>
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">三種運作狀態</div>
+    <div class="formula-block" style="font-size:11px;">
+      OFF 狀態：<br/>
+      Hz=0 / A=0 / V=0，重置所有內部狀態<br/><br/>
+      STARTUP（開機後 0~5 秒）：<br/>
+      頻率從 5Hz 線性爬升到目標頻率<br/>
+      電流是額定的 1.5~2 倍（22~30A）← 變頻器限流啟動，正常現象<br/>
+      隨啟動完成線性降回正常範圍<br/><br/>
+      RUNNING（開機 5 秒後）：<br/>
+      依選擇的工況產生對應的穩態資料
     </div>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">六種工況設計</div>
+    <p>五種手動模式 + 一種自動模式，各模式的頻率和電流範圍刻意設計了重疊區間，讓 ML 能學到模糊邊界。</p>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card" style="--accent:var(--green)">
+      <div class="mode-name" style="color:var(--green)">NORMAL　正常運轉</div>
+      <div class="mode-range">頻率：30~60 Hz（操作員設定範圍）<br/>電流：10.5~14 A</div>
+      <div class="mode-logic">頻率由操作員決定，電流反映負載大小，兩者獨立，符合 V/f 控制</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--amber)">
+      <div class="mode-name" style="color:var(--amber)">OVERLOAD　過電流</div>
+      <div class="mode-range">頻率：45~50 Hz（正常）<br/>電流：18.5~22 A（110%+ FLA）</div>
+      <div class="mode-logic">頻率正常但電流超過額定值，模擬機械過載</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--red)">
+      <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
+      <div class="mode-range">頻率：20~35 Hz（拉不上去）<br/>電流：24~30 A（160%+ FLA）</div>
+      <div class="mode-logic">電流飆高且頻率拉不上去，模擬機械端堵轉</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--red)">
+      <div class="mode-name" style="color:var(--red)">LOAD_LOSS　負載流失</div>
+      <div class="mode-range">頻率：45~50 Hz（正常）<br/>電流：2~4 A（空載以下）</div>
+      <div class="mode-logic">頻率正常但電流極低，模擬皮帶斷裂或幫浦空轉</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--amber)">
+      <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
+      <div class="mode-range">頻率：45~50 Hz（穩定）<br/>電流：10~13 A（正常，但波動 ±2.5A）</div>
+      <div class="mode-logic">頻率穩定，電流中心值正常，但波動幅度放大，模擬電流漣波</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--purple)">
+      <div class="mode-name" style="color:var(--purple)">AUTO　自動隨機切換</div>
+      <div class="mode-range">每 10~20 秒自動切換工況<br/>BEARING_WEAR 持續 20~30 秒</div>
+      <div class="mode-logic">系統自動切換，用於驗證 ML 在不知道答案的情況下能否正確判斷</div>
+    </div>
+  </div>
+</div>
 
+<!-- 05 物理計算 -->
+<div class="section" id="physics">
+  <div class="sec-title">05 物理計算層 — 從三個原始值推算物理量</div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">為什麼要推算</div>
+    <p>真實變頻器透過 Modbus 只給出頻率、電流、電壓三個值，但監控和診斷需要更多有意義的物理量。physics.py 是系統裡<span class="highlight">唯一包含物理公式的地方</span>，所有推算都在這裡完成。</p>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">三個核心公式</div>
+    <div class="formula-block">
+      <span class="formula-comment"># 1. 同步轉速（理論最高轉速）</span><br/>
+      sync_rpm = 120 × frequency_hz / 極數<br/>
+      <span class="formula-comment">　　　　　= 120 × 50 / 4 = 1500 RPM（額定頻率下）</span><br/><br/>
+      <span class="formula-comment"># 2. 轉差率（從電流負載比估算）</span><br/>
+      load_ratio = current_a / RATED_CURRENT_A<br/>
+      slip_ratio = 0.02 + load_ratio × 0.05<br/>
+      <span class="formula-comment">　※ 沒有轉速感測器，用電流近似估算，是估計值</span><br/><br/>
+      <span class="formula-comment"># 3. 轉矩（理論值）</span><br/>
+      P_in  = √3 × V × I × cosφ<br/>
+      P_out = P_in × η<br/>
+      ω     = 2π × sync_rpm / 60<br/>
+      T     = P_out / ω
+    </div>
+  </div>
+  <div class="two-col">
     <div class="card" style="--accent:var(--amber)">
-      <div class="card-title">啟動過渡期（STARTUP）的特殊處理</div>
-      <p>馬達剛開機有 3 秒啟動過渡期，電氣特性跟穩定運轉完全不同：</p>
-      <div class="formula-block">
-        頻率：從 5Hz 線性爬升到目標頻率<br/>
-        電流：峰值為額定的 1.5~2 倍（22~30A）<span class="formula-comment"> ← 變頻器限流啟動，非直接啟動</span><br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;隨啟動完成線性降回正常範圍<br/>
-        轉矩：上限設為額定的 2.5 倍（≈ 122 N·m）<span class="formula-comment"> ← 避免低轉速時數值異常</span>
-      </div>
-      <p>啟動期間 rules.py 和 ml_model.py 自動暫停判斷（啟動遮蔽），避免把正常的高啟動電流誤判為異常。</p>
+      <div class="card-title">直接量測值（可信）</div>
+      <p style="font-family:var(--mono);font-size:12px;color:var(--cyan);">frequency_hz<br/>current_a<br/>voltage_v</p>
+      <p style="margin-top:8px;">這三個直接來自感測器，最可靠。</p>
     </div>
-
-    <div class="card" style="--accent:var(--purple)">
-      <div class="card-title">五種異常模式的設計邏輯</div>
-      <p>各模式的頻率和電流範圍刻意設計了重疊區間，讓 ML 模型能學到模糊邊界，更貼近真實情況。</p>
+    <div class="card" style="--accent:var(--text3)">
+      <div class="card-title">估算值（理論值）</div>
+      <p style="font-family:var(--mono);font-size:12px;color:var(--text2);">sync_rpm<br/>slip_ratio<br/>torque_nm</p>
+      <p style="margin-top:8px;">用公式推算，沒有轉速感測器，屬於理論估計值。</p>
     </div>
+  </div>
+</div>
 
-    <div class="mode-grid">
-      <div class="mode-card" style="--accent:var(--green)">
-        <div class="mode-name" style="color:var(--green)">NORMAL　正常運轉</div>
-        <div class="mode-range">頻率：30 ~ 60 Hz（操作員設定範圍）<br/>電流：10.5 ~ 14 A</div>
-        <div class="mode-logic">馬達正常負載下穩定運轉。頻率由操作員設定，電流反映負載大小，兩者獨立，符合 V/f 控制特性</div>
+<!-- 06 Rules -->
+<div class="section" id="rules">
+  <div class="sec-title">06 Rules 判斷 — 規則式異常評分</div>
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">核心概念：用分數取代是非題</div>
+    <p>傳統做法是直接判斷「正常」或「異常」，沒有灰色地帶。我們改用 <span class="highlight">Anomaly Score（0~100分）</span>，分數越高代表越嚴重，讓判斷有層次感。操作員不只知道「有沒有問題」，還能看到「分數在慢慢爬升」，提早做出應對。</p>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">白話比喻</div>
+    <div class="analogy-text">就像體溫計，不只告訴你「有沒有發燒」，而是告訴你「現在 38.5°C，比昨天的 37.8°C 高了」。分數的變化趨勢比單純的是非判斷更有價值。</div>
+  </div>
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">分數與風險等級對應</div>
+    <div class="score-bar">
+      <div class="score-labels">
+        <div class="score-label" style="background:rgba(34,211,165,.12);color:var(--green);">正常<br/>0~14</div>
+        <div class="score-label" style="background:rgba(251,191,36,.12);color:var(--amber);">警告<br/>15~39</div>
+        <div class="score-label" style="background:rgba(251,146,60,.12);color:var(--orange);">危險<br/>40~64</div>
+        <div class="score-label" style="background:rgba(248,113,113,.12);color:var(--red);">緊急<br/>65~100</div>
       </div>
-      <div class="mode-card" style="--accent:var(--amber)">
-        <div class="mode-name" style="color:var(--amber)">OVERLOAD　過電流</div>
-        <div class="mode-range">頻率：45 ~ 50 Hz<br/>電流：18.5 ~ 22 A（110%+ FLA）</div>
-        <div class="mode-logic">頻率正常但電流超過額定值，模擬機械過載的情境</div>
-      </div>
-      <div class="mode-card" style="--accent:var(--red)">
-        <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
-        <div class="mode-range">頻率：20 ~ 35 Hz<br/>電流：24 ~ 30 A（160%+ FLA）</div>
-        <div class="mode-logic">電流飆高且頻率拉不上去，模擬機械端堵轉的情境</div>
-      </div>
-      <div class="mode-card" style="--accent:var(--red)">
-        <div class="mode-name" style="color:var(--red)">LOAD_LOSS　負載流失</div>
-        <div class="mode-range">頻率：45 ~ 50 Hz（正常）<br/>電流：2 ~ 4 A（空載以下）</div>
-        <div class="mode-logic">頻率正常但電流極低，模擬皮帶斷裂或幫浦空轉的情境</div>
-      </div>
-      <div class="mode-card" style="--accent:var(--amber); grid-column:1/-1;">
-        <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
-        <div class="mode-range">頻率：45 ~ 50 Hz（穩定）／ 電流：10 ~ 13 A（中心值正常，漂移量放大到 ±2.5A）</div>
-        <div class="mode-logic">頻率穩定，電流中心值正常，但波動幅度刻意放大，模擬軸承磨損產生的電流漣波特徵。需累積數筆資料後才能偵測到</div>
+      <div class="score-track">
+        <div class="score-seg" style="background:var(--green);opacity:.7;"></div>
+        <div class="score-seg" style="background:var(--amber);opacity:.7;"></div>
+        <div class="score-seg" style="background:var(--orange);opacity:.7;"></div>
+        <div class="score-seg" style="background:var(--red);opacity:.7;"></div>
       </div>
     </div>
   </div>
-
-  <!-- 05 device_adapter -->
-  <div class="section" id="adapter">
-    <div class="sec-title">05 device_adapter.py — 物理量推算</div>
-
-    <div class="card" style="--accent:var(--cyan)">
-      <div class="card-title">唯一知道物理公式的地方</div>
-      <p>真實變頻器透過 Modbus 直接給出的只有頻率、電流、電壓三個值。device_adapter 專門負責用物理公式推算出完整的物理量，是系統裡唯一包含物理計算邏輯的地方。</p>
-      <p>這個設計讓系統具備<strong style="color:var(--text)">硬體可替換性</strong>：未來從模擬器換成真實硬體，只需修改 device_adapter 如何取得三個原始值，其餘模組完全不動。</p>
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">四個條件如何計分</div>
+    <p style="margin-bottom:12px;">四個條件<span class="highlight">各自獨立計分</span>，最後取分數最高的那個作為最終結果。</p>
+    <p style="margin-bottom:8px;"><strong style="color:var(--red);">STALL（機械卡死）</strong> → 最高 84 分 → 緊急</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      觸發條件：電流 &gt; 20A（133% FLA）且 轉差率 &gt; 12%<br/>
+      電流每超過 20A 一安培 → +8 分（最多 48 分）<br/>
+      滑差每超過 12% 一個百分點 → +6 分（最多 36 分）<br/>
+      <span class="formula-comment">兩個條件都滿足才給滿分，單一條件只給一半，避免誤報</span>
     </div>
-
-    <div class="card" style="--accent:var(--purple)">
-      <div class="card-title">核心物理公式</div>
-      <div class="formula-block">
-        <span class="formula-comment"># 1. 同步轉速（理論最高轉速）</span><br/>
-        n_sync = 120 × f / P = 120 × 50 / 4 = 1500 RPM<br/><br/>
-        <span class="formula-comment"># 2. 實際轉速（考慮轉差率）</span><br/>
-        n_act = n_sync × (1 - slip) = 1500 × 0.967 = 1450 RPM<br/><br/>
-        <span class="formula-comment"># 3. 三相輸入電功率</span><br/>
-        P_in = √3 × V × I × cosφ = 1.732 × 380 × 15 × 0.85 = 8.39 kW<br/><br/>
-        <span class="formula-comment"># 4. 輸出機械功率</span><br/>
-        P_out = P_in × η = 8.39 × 0.88 = 7.38 kW<br/><br/>
-        <span class="formula-comment"># 5. 轉矩（T = P / ω，ω = 2π × n / 60）</span><br/>
-        T = 7380 / (2π × 1450/60) = 48.6 N·m
-      </div>
+    <p style="margin-bottom:8px;"><strong style="color:var(--orange);">LOAD_LOSS（負載流失）</strong> → 最高 64 分 → 危險</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      觸發條件：頻率 &gt; 40Hz 且 電流 &lt; 5A<br/>
+      score = (5 - 電流) / 5 × 30 + 40，上限 64 分<br/>
+      <span class="formula-comment">兩個條件必須同時成立，避免低電流單獨誤報</span>
     </div>
+    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">OVERLOAD（過電流）</strong> → 最高 29 分 → 警告</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      觸發條件：電流 &gt; 16.5A（110% FLA）<br/>
+      每超過 1A → +6 分，上限 29 分（限制在 WARNING 區間）<br/>
+      <span class="formula-comment">上限設計目的：過電流是警告，不讓它跑到危險等級</span>
+    </div>
+    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">BEARING_WEAR（軸承磨損）</strong> → 最高 39 分 → 警告</p>
+    <div class="formula-block" style="font-size:11px;">
+      觸發條件：電流標準差 &gt; 0.8A 且 頻率變化 &lt; 0.5Hz<br/>
+      需累積最近 5 筆資料計算標準差（滑動窗口）<br/>
+      上限 39 分（限制在 WARNING 區間）<br/>
+      <span class="formula-comment">頻率必須穩定，排除頻率變化本身造成的電流波動</span>
+    </div>
+  </div>
+  <div class="card" style="--accent:var(--green)">
+    <div class="card-title">啟動遮蔽</div>
+    <p>馬達開機時電流是額定的 1.5~2 倍，這是正常現象不是異常。main.py 在開機後 5 秒內不呼叫 Rules，避免把正常的高啟動電流誤判為緊急告警。</p>
+  </div>
+</div>
 
-    <div class="two-col">
-      <div class="card" style="--accent:var(--amber)">
-        <div class="card-title">轉差率推算</div>
-        <p>轉差率（slip）反映實際轉速落後同步轉速的程度，負載越重轉差越大：</p>
-        <div class="formula-block" style="font-size:11px;">
-          正常（電流 &lt; 120% FLA）：<br/>
-          slip = 0.02 + ratio × 0.05<br/>
-          <span class="formula-comment">→ 2% ~ 8%</span><br/><br/>
-          過載（電流 &gt; 120% FLA）：<br/>
-          slip = 0.10 + (ratio-1.2) × 0.15<br/>
-          <span class="formula-comment">→ 10% ~ 25%</span>
-        </div>
-      </div>
-      <div class="card" style="--accent:var(--cyan)">
-        <div class="card-title">功率因數動態估算</div>
-        <p>功率因數在輕載時偏低，滿載時接近額定值 0.85：</p>
-        <div class="formula-block" style="font-size:11px;">
-          pf = min(0.60 + ratio × 0.25, 0.85)<br/><br/>
-          <span class="formula-comment">輕載（ratio=0.5）：pf ≈ 0.73</span><br/>
-          <span class="formula-comment">滿載（ratio=1.0）：pf = 0.85</span><br/>
-          <span class="formula-comment">啟動期間：pf ≈ 0.45~0.65</span>
-        </div>
-      </div>
+<!-- 07 ML -->
+<div class="section" id="ml">
+  <div class="sec-title">07 ML 判斷 — 隨機森林機器學習</div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">先理解：什麼是監督式學習</div>
+    <p>機器學習有很多種，我們用的是「監督式學習」。<span class="highlight">監督式學習的核心概念</span>：給機器看大量「有正確答案的例題」，讓它自己找出規律，之後遇到新題目就能判斷。</p>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">白話比喻</div>
+    <div class="analogy-text">就像教小孩認動物：給他看 1000 張貓的照片說「這是貓」，再給他看 1000 張狗的照片說「這是狗」。學習完之後，看到新照片就能自己判斷。我們的 ML 也是這樣，只不過學的是「這是 STALL」「這是 NORMAL」。</div>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">訓練資料怎麼來</div>
+    <p>我們沒有真實的歷史異常資料，所以用 VFD_simulator 批次產生訓練資料。每種工況產生 1000 筆，五種工況共 5000 筆，每筆都附有正確答案（label）。</p>
+    <div class="formula-block" style="font-size:11px;">
+      NORMAL       × 1000 筆 <span class="formula-comment">→ 讓模型學習正常運轉的特徵</span><br/>
+      OVERLOAD     × 1000 筆 <span class="formula-comment">→ 讓模型學習過電流的特徵</span><br/>
+      STALL        × 1000 筆 <span class="formula-comment">→ 讓模型學習機械卡死的特徵</span><br/>
+      LOAD_LOSS    × 1000 筆 <span class="formula-comment">→ 讓模型學習負載流失的特徵</span><br/>
+      BEARING_WEAR × 1000 筆 <span class="formula-comment">→ 讓模型學習軸承磨損的特徵</span><br/>
+      ──────────────────────────────<br/>
+      總計 5000 筆，打亂順序後分割：<br/>
+      訓練集 4000 筆（80%）← 拿來學習<br/>
+      測試集 1000 筆（20%）← 拿來考試，模型沒看過
+    </div>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">訓練集 vs 測試集：為什麼要分開</div>
+    <p>如果用同一批資料訓練又評估，就像用考古題練習然後用同一套考古題考試，100 分沒有意義。測試集是模型從來沒看過的資料，用它評估才能知道模型真正學會了多少。</p>
+    <p><span class="highlight">我們的測試集準確率：100%</span>，代表模型能正確區分五種異常模式。</p>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">決策樹是怎麼學習的</div>
+    <p>隨機森林是由很多棵「決策樹」組成的。先理解一棵決策樹怎麼學習，就能理解整個隨機森林。</p>
+    <p>訓練的時候，決策樹會從 4000 筆訓練資料裡，自動找出最能區分五種工況的問題，一層一層往下問，長出一棵樹狀判斷結構：</p>
+    <div class="formula-block" style="font-size:11px;">
+      根節點：「電流超過 20A 嗎？」<br/>
+      ├── 是 → 「滑差超過 12% 嗎？」<br/>
+      │　　　　├── 是 → STALL（機械卡死）<br/>
+      │　　　　└── 否 → OVERLOAD（過電流）<br/>
+      └── 否 → 「電流低於 5A 且頻率 &gt; 40Hz 嗎？」<br/>
+      　　　　　├── 是 → LOAD_LOSS（負載流失）<br/>
+      　　　　　└── 否 → 「電流標準差 &gt; 0.8A 嗎？」<br/>
+      　　　　　　　　　　├── 是 → BEARING_WEAR（軸承磨損）<br/>
+      　　　　　　　　　　└── 否 → NORMAL（正常）
+    </div>
+    <p>每個節點問的問題，是演算法從 6 個特徵裡自動找出「最能把資料分乾淨的切割點」，不是人工設定的。</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">為什麼要 100 棵樹而不是 1 棵</div>
+    <div class="analogy-text">一棵樹容易「記死答案」——它對訓練資料學得太好，但換一筆稍微不同的資料就可能判錯。100 棵樹的解法是：每棵樹訓練時隨機使用不同的資料子集和特徵組合，讓每棵樹各自走不同的路。就算幾棵樹判斷錯了，大多數還是對的，投票結果更可靠。就像問 100 位專家，多數決比一個人的判斷更穩定。</div>
+  </div>
+
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">決策樹怎麼「長出來」</div>
+    <p>隨機森林裡的每一棵決策樹，都是從訓練資料裡學出來的，不是人工寫的規則。學習過程如下：</p>
+    <div class="formula-block" style="font-size:11px;">
+      步驟一：隨機抽取約 3200 筆訓練資料（不用全部 4000 筆）<br/>
+      步驟二：在根節點，隨機選幾個特徵來考慮<br/>
+      步驟三：找出哪個問題能讓分出來的兩群「最純粹」<br/>
+      　例如：「torque_nm &gt; 80？」<br/>
+      　　→ 是：這群幾乎都是 STALL（純粹）<br/>
+      　　→ 否：這群混著 NORMAL / OVERLOAD（不純）<br/>
+      步驟四：對每一群繼續問問題，一層一層往下<br/>
+      步驟五：直到某群「只剩一種類別」就停下來，這裡叫葉子節點<br/>
+      步驟六：這棵樹長好了，存起來
+    </div>
+    <p>重複以上步驟 100 次，每次都隨機抽不同的資料和特徵，就長出 100 棵長相不同的樹。</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">白話比喻：為什麼每棵樹要隨機</div>
+    <div class="analogy-text">
+      如果 100 棵樹都用完全一樣的資料和特徵，長出來會完全一樣，投票就沒有意義了。<br/><br/>
+      隨機性讓每棵樹從不同角度學習：<br/>
+      樹001 主要看 torque 和 current → 擅長判斷 STALL<br/>
+      樹002 主要看 slip 和 frequency → 擅長判斷 LOAD_LOSS<br/>
+      樹003 主要看 current_std_5 → 擅長判斷 BEARING_WEAR<br/><br/>
+      就像三個專家各有所長，投票結果比任何一個人單獨判斷更可靠。
     </div>
   </div>
 
-  <!-- 06 rules -->
-  <div class="section" id="rules">
-    <div class="sec-title">06 rules.py — 規則式異常評分</div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">投票機制與信心分數</div>
+    <div class="formula-block" style="font-size:11px;">
+      新資料進來：Hz=25, A=24, slip=0.15, torque=85...<br/><br/>
+      樹001 → STALL ／ 樹002 → STALL ／ 樹003 → OVERLOAD<br/>
+      ...（共 100 棵）<br/><br/>
+      投票結果：STALL 87票 ／ OVERLOAD 13票<br/><br/>
+      最終答案：STALL<br/>
+      信心分數：87%（87票 / 100棵）
+    </div>
+    <p>信心分數低（50% 左右）代表資料落在模糊地帶，模型不確定，這時候 Rules 的判斷更有參考價值。</p>
+  </div>
+  <div class="card" style="--accent:var(--purple)">
+    <div class="card-title">六個輸入特徵</div>
+    <p>模型不直接看原始感測值，而是使用 6 個有物理意義的特徵：</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-item"><div class="feature-rank">01</div><div><div class="feature-name">torque_nm</div><div class="feature-desc">轉矩（最重要特徵）。STALL 時極高，LOAD_LOSS 時極低，區分度最大</div></div></div>
+    <div class="feature-item"><div class="feature-rank">02</div><div><div class="feature-name">current_a</div><div class="feature-desc">電流絕對值，最直接反映負載狀態的感測器數值</div></div></div>
+    <div class="feature-item"><div class="feature-rank">03</div><div><div class="feature-name">current_ratio</div><div class="feature-desc">電流 / 額定電流，正規化後的相對負載比，比絕對值更穩定</div></div></div>
+    <div class="feature-item"><div class="feature-rank">04</div><div><div class="feature-name">slip_ratio</div><div class="feature-desc">轉差率，STALL 時超過 12%，是判斷機械卡死的關鍵指標</div></div></div>
+    <div class="feature-item"><div class="feature-rank">05</div><div><div class="feature-name">frequency_hz</div><div class="feature-desc">頻率，STALL 時拉不上去，LOAD_LOSS 時正常，提供背景資訊</div></div></div>
+    <div class="feature-item"><div class="feature-rank">06</div><div><div class="feature-name">current_std_5</div><div class="feature-desc">最近 5 筆電流的標準差，BEARING_WEAR 的唯一關鍵特徵，捕捉電流漣波</div></div></div>
+  </div>
+  <div class="card" style="--accent:var(--green)">
+    <div class="card-title">為什麼選隨機森林</div>
+    <div class="formula-block" style="font-size:11px;">
+      ✅ 小資料集（5000筆）就能訓練得很好，神經網路需要更多<br/>
+      ✅ 不需要正規化，特徵單位不同（Hz、A、N·m）不影響<br/>
+      ✅ 可解釋性強，特徵重要性可以輸出，知道模型在看什麼<br/>
+      ✅ 不容易過擬合，100棵樹投票比單棵樹穩定<br/>
+      ✅ 訓練快，工業場景資料量不大，幾秒就完成<br/><br/>
+      ⚠️ 不擅長捕捉時間序列的漸進趨勢（如電流慢慢爬升）<br/>
+      ⚠️ 我們用 current_std_5 滑動窗口部分補償這個限制
+    </div>
+  </div>
+</div>
 
+<!-- 08 雙層互補 -->
+<div class="section" id="complement">
+  <div class="sec-title">08 雙層互補的價值</div>
+  <div class="two-col">
     <div class="card" style="--accent:var(--amber)">
-      <div class="card-title">設計理念：用分數取代是非題</div>
-      <p>傳統規則式系統直接給出結論（正常/異常），沒有灰色地帶。本系統改用 <strong style="color:var(--amber)">Anomaly Score（0~100分）</strong>，讓判斷更有層次。</p>
-      <p>分數越高代表越嚴重，各條件獨立計分後加總。操作員不只知道「有沒有異常」，還能看到「嚴重程度在增加還是減少」，提早做出應對。</p>
+      <div class="card-title">Rules 的強項</div>
+      <p>物理條件明確的異常，Rules 能快速給出結論，不需要累積資料，而且原因完全透明可解釋。</p>
+      <div class="formula-block" style="font-size:11px;">STALL：電流 26A + 滑差 17% → 84分 CRITICAL<br/>立即告警，不需要等待</div>
     </div>
-
-    <div class="card" style="--accent:var(--amber)">
-      <div class="card-title">分數與風險等級對應</div>
-      <div class="score-bar">
-        <div class="score-labels">
-          <div class="score-label" style="background:rgba(34,211,165,.12);color:var(--green);">正常<br/>0 ~ 14</div>
-          <div class="score-label" style="background:rgba(251,191,36,.12);color:var(--amber);">警告<br/>15 ~ 39</div>
-          <div class="score-label" style="background:rgba(251,146,60,.12);color:var(--orange);">危險<br/>40 ~ 64</div>
-          <div class="score-label" style="background:rgba(248,113,113,.12);color:var(--red);">緊急<br/>65 ~ 100</div>
-        </div>
-        <div class="score-track">
-          <div class="score-seg" style="background:var(--green);opacity:.7;"></div>
-          <div class="score-seg" style="background:var(--amber);opacity:.7;"></div>
-          <div class="score-seg" style="background:var(--orange);opacity:.7;"></div>
-          <div class="score-seg" style="background:var(--red);opacity:.7;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="--accent:var(--amber)">
-      <div class="card-title">四個異常條件的評分邏輯</div>
-
-      <p style="margin-bottom:10px;"><strong style="color:var(--red);">STALL（機械卡死）</strong><span class="tag tag-red">最高 84 分 → 緊急</span></p>
-      <div class="formula-block" style="font-size:11px;">
-        觸發條件：電流 &gt; 20A（133% FLA）且 轉差率 &gt; 12%<br/>
-        電流每超過 20A 一安培 → +8 分（最多 48 分）<br/>
-        轉差每超過 12% 一個百分點 → +6 分（最多 36 分）<br/>
-        <span class="formula-comment">兩個條件都滿足才給滿分，單一條件只給一半分數</span><br/>
-        <span class="formula-comment">設計目的：避免電流高或滑差大的單一條件就誤報</span>
-      </div>
-
-      <p style="margin-bottom:10px;margin-top:16px;"><strong style="color:var(--orange);">LOAD_LOSS（負載流失）</strong><span class="tag tag-amber">最高 64 分 → 危險</span></p>
-      <div class="formula-block" style="font-size:11px;">
-        觸發條件：頻率 &gt; 40Hz 且 電流 &lt; 5A<br/>
-        score = (5 - I) / 5 × 30 + 40，上限 64 分<br/>
-        <span class="formula-comment">兩個條件必須同時成立，避免低電流單獨誤報</span>
-      </div>
-
-      <p style="margin-bottom:10px;margin-top:16px;"><strong style="color:var(--amber);">OVERLOAD（過電流）</strong><span class="tag tag-amber">最高 29 分 → 警告</span></p>
-      <div class="formula-block" style="font-size:11px;">
-        觸發條件：電流 &gt; 16.5A（110% FLA）<br/>
-        每超過 1A → +6 分，上限 29 分（限制在 WARNING 區間）<br/>
-        <span class="formula-comment">上限設計目的：過電流是警告，不讓它跑到危險等級</span>
-      </div>
-
-      <p style="margin-bottom:10px;margin-top:16px;"><strong style="color:var(--amber);">BEARING_WEAR（軸承磨損）</strong><span class="tag tag-amber">最高 39 分 → 警告</span></p>
-      <div class="formula-block" style="font-size:11px;">
-        觸發條件：電流標準差 &gt; 0.8A 且 頻率變化 &lt; 0.5Hz<br/>
-        需累積最近 5 筆資料計算標準差（滑動窗口）<br/>
-        上限 39 分（限制在 WARNING 區間）<br/>
-        <span class="formula-comment">頻率必須穩定，排除頻率變化本身造成的電流波動</span>
-      </div>
-    </div>
-
-    <div class="card" style="--accent:var(--green)">
-      <div class="card-title">啟動遮蔽（Startup Masking）</div>
-      <p>馬達啟動時電流是額定的 1.5~2 倍，這是正常現象，不應被判定為異常。rules.py 在 machine_state = STARTUP 時自動跳過所有評分，直接回傳 score = 0，避免誤報。</p>
+    <div class="card" style="--accent:var(--purple)">
+      <div class="card-title">ML 的強項</div>
+      <p>多特徵組合的模糊地帶，ML 透過 100 棵樹的投票，比單一規則更精確。</p>
+      <div class="formula-block" style="font-size:11px;">BEARING_WEAR：Rules 需要 5 筆累積<br/>ML 第一筆就能從特徵組合識別</div>
     </div>
   </div>
-
-  <!-- 07 ml -->
-  <div class="section" id="ml">
-    <div class="sec-title">07 ml_model.py — 隨機森林機器學習</div>
-
-    <div class="card" style="--accent:var(--purple)">
-      <div class="card-title">隨機森林是什麼</div>
-      <p>隨機森林是一種機器學習演算法，概念很直觀：建立很多棵「決策樹」，每棵樹各自做判斷，最後用投票的方式決定最終結果。</p>
-      <p>就像一個由 100 位專家組成的委員會，每位專家看到相同的數據但各自獨立判斷，最後用多數決定答案。即使某幾位專家判斷錯誤，整體結果仍然可靠。本系統使用 100 棵決策樹。</p>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">最有價值的模糊地帶</div>
+    <p style="margin-bottom:10px;"><strong style="color:var(--amber);">NORMAL vs BEARING_WEAR</strong></p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      兩者：頻率正常、電流中心值相近（10~14A）<br/>
+      差別：電流波動大小（BEARING_WEAR 波動 ±2.5A，NORMAL 只有 ±0.3A）<br/>
+      Rules：需要累積 5 筆資料計算標準差才觸發<br/>
+      ML：從 current_std_5 特徵，更早識別出來
     </div>
-
-    <div class="two-col">
-      <div class="card" style="--accent:var(--purple)">
-        <div class="card-title">為什麼需要 ML</div>
-        <p>rules.py 的規則是人寫的，邊界是固定的。但真實異常不是非黑即白，例如：</p>
-        <p>電流 17A，rules 說「還沒超過 STALL 閾值 20A」→ 判正常。但如果同時轉差率也在上升，這個組合可能已經是早期異常的信號，規則式抓不到，ML 可以。</p>
-      </div>
-      <div class="card" style="--accent:var(--green)">
-        <div class="card-title">rules + ML 如何互補</div>
-        <p><strong style="color:var(--amber);">rules</strong> 負責保底：物理條件明確的異常直接觸發，快速、透明、可解釋。</p>
-        <p><strong style="color:var(--purple);">ML</strong> 負責細分：抓多特徵組合的模糊邊界，以及規則寫不完的情境。</p>
-        <p>最終等級取兩者中較嚴重的那個，兩層互補不衝突。</p>
-      </div>
-    </div>
-
-    <div class="card" style="--accent:var(--purple)">
-      <div class="card-title">訓練資料怎麼來</div>
-      <p>用 simulator.py 批次產生訓練資料，每個 fault_type 產生 1000 筆，五個類別共 5000 筆。每筆資料都附有正確答案（label），讓模型學習各種異常的特徵組合：</p>
-      <div class="formula-block">
-        NORMAL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× 1000 筆 <span class="formula-comment">→ 學習正常運轉的特徵</span><br/>
-        OVERLOAD &nbsp;&nbsp;&nbsp;&nbsp;× 1000 筆 <span class="formula-comment">→ 學習過電流的特徵</span><br/>
-        STALL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× 1000 筆 <span class="formula-comment">→ 學習機械卡死的特徵</span><br/>
-        LOAD_LOSS &nbsp;&nbsp;&nbsp;× 1000 筆 <span class="formula-comment">→ 學習負載流失的特徵</span><br/>
-        BEARING_WEAR × 1000 筆 <span class="formula-comment">→ 學習軸承磨損的特徵</span><br/>
-        ──────────────────────────────────<br/>
-        總計 5000 筆，訓練集 80%（4000筆）/ 測試集 20%（1000筆）<br/>
-        測試集準確率：100%
-      </div>
-    </div>
-
-    <div class="card" style="--accent:var(--purple)">
-      <div class="card-title">八個輸入特徵</div>
-      <p>模型不直接看原始感測值，而是從 device_adapter 推算的物理量中提取 8 個特徵，每個特徵都有明確的物理意義：</p>
-    </div>
-
-    <div class="feature-grid">
-      <div class="feature-item">
-        <div class="feature-rank">01</div>
-        <div>
-          <div class="feature-name">torque_nm</div>
-          <div class="feature-desc">轉矩（最重要，貢獻約 18%）。STALL 極高，LOAD_LOSS 極低，區分度最大</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">02</div>
-        <div>
-          <div class="feature-name">current_ratio</div>
-          <div class="feature-desc">電流 / 額定電流（正規化負載比），比絕對電流值更穩定可靠</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">03</div>
-        <div>
-          <div class="feature-name">current_a</div>
-          <div class="feature-desc">電流絕對值，配合 current_ratio 讓模型同時理解相對和絕對的電流狀態</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">04</div>
-        <div>
-          <div class="feature-name">slip_ratio</div>
-          <div class="feature-desc">轉差率，STALL 時超過 12%，是判斷機械卡死的關鍵特徵</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">05</div>
-        <div>
-          <div class="feature-name">rpm_est</div>
-          <div class="feature-desc">實際轉速，STALL 時被拖低，LOAD_LOSS 時接近同步轉速</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">06</div>
-        <div>
-          <div class="feature-name">frequency_hz</div>
-          <div class="feature-desc">頻率，STALL 時拉不上去，LOAD_LOSS 時正常，提供背景資訊</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">07</div>
-        <div>
-          <div class="feature-name">input_power_kw</div>
-          <div class="feature-desc">輸入電功率，整合電壓、電流、功率因數的綜合指標</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-rank">08</div>
-        <div>
-          <div class="feature-name">current_std_5</div>
-          <div class="feature-desc">最近 5 筆電流的標準差，BEARING_WEAR 的關鍵特徵，捕捉電流漣波現象</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="--accent:var(--green);margin-top:12px;">
-      <div class="card-title">輸出結果說明</div>
-      <div class="formula-block">
-        fault_type    <span class="formula-comment">→ 異常類型（NORMAL / OVERLOAD / STALL / LOAD_LOSS / BEARING_WEAR）</span><br/>
-        level         <span class="formula-comment">→ 風險等級（NORMAL / WARNING / DANGER / CRITICAL）</span><br/>
-        confidence    <span class="formula-comment">→ 信心分數 0~100%，模型對這個判斷有多確定</span><br/>
-        probabilities <span class="formula-comment">→ 五個類別各自的機率，加總為 100%</span>
-      </div>
-      <p>信心分數的意義：confidence = 87% 代表 100 棵決策樹中有 87 棵投票給這個類別。分數偏低時表示資料落在模糊邊界，此時 rules.py 的結果更具參考價值。</p>
+    <p style="margin-bottom:10px;"><strong style="color:var(--red);">OVERLOAD vs STALL（電流 20~22A 的模糊地帶）</strong></p>
+    <div class="formula-block" style="font-size:11px;">
+      電流 21A 時兩個條件都會給分，Rules 難以區分<br/>
+      OVERLOAD 分數：27分 ／ STALL 分數：約 30 分（差距很小）<br/>
+      ML 看頻率 + 滑差 + 轉矩的組合<br/>
+      OVERLOAD 頻率正常，STALL 頻率低 → ML 能準確區分
     </div>
   </div>
+  <div class="card" style="--accent:var(--green)">
+    <div class="card-title">綜合等級如何決定</div>
+    <p>取 Rules 等級和 ML 等級中<span class="highlight">較嚴重的那個</span>。設計原則：寧可多報一次警告，也不要漏掉一次真正的異常。</p>
+    <div class="formula-block" style="font-size:11px;">
+      Rules = NORMAL ／ ML = WARNING（BEARING_WEAR 65%）<br/>
+      → 綜合 = WARNING（ML 補位，提早發現軸承磨損）<br/><br/>
+      Rules = CRITICAL ／ ML = CRITICAL（STALL 87%）<br/>
+      → 綜合 = CRITICAL（兩層都確認，高度可信）
+    </div>
+  </div>
+</div>
+
+<!-- 09 風險等級 -->
+<div class="section" id="levels">
+  <div class="sec-title">09 風險等級</div>
+  <div class="level-grid">
+    <div class="level-card" style="--accent:var(--green)">
+      <div class="level-dot"></div>
+      <div class="level-name" style="color:var(--green);">正常</div>
+      <div class="level-score">Score 0 ~ 14</div>
+      <div class="level-action">設備運作正常，持續監控，無需採取行動</div>
+    </div>
+    <div class="level-card" style="--accent:var(--amber)">
+      <div class="level-dot"></div>
+      <div class="level-name" style="color:var(--amber);">警告</div>
+      <div class="level-score">Score 15 ~ 39</div>
+      <div class="level-action">出現異常趨勢，安排檢查，持續觀察是否惡化</div>
+    </div>
+    <div class="level-card" style="--accent:var(--orange)">
+      <div class="level-dot" style="background:var(--orange);box-shadow:0 0 8px var(--orange);"></div>
+      <div class="level-name" style="color:var(--orange);">危險</div>
+      <div class="level-score">Score 40 ~ 64</div>
+      <div class="level-action">立即檢查設備，考慮降載或計劃停機檢修</div>
+    </div>
+    <div class="level-card" style="--accent:var(--red)">
+      <div class="level-dot"></div>
+      <div class="level-name" style="color:var(--red);">緊急</div>
+      <div class="level-score">Score 65 ~ 100</div>
+      <div class="level-action">立即停機，繼續運轉可能造成設備損壞或人員安全事故</div>
+    </div>
+  </div>
+  <div class="card" style="--accent:var(--cyan)">
+    <div class="card-title">各工況對應的設計等級</div>
+    <div class="formula-block" style="font-size:11px;">
+      STALL        → 緊急（Score 最高 84）← 立即停機<br/>
+      LOAD_LOSS    → 危險（Score 最高 64）← 盡快處理<br/>
+      OVERLOAD     → 警告（Score 最高 29）← 安排檢查<br/>
+      BEARING_WEAR → 警告（Score 最高 39）← 預防性維護
+    </div>
+    <p>各工況的分數上限刻意設計成對應的等級，確保不同嚴重程度的異常落在正確的風險區間。</p>
+  </div>
+</div>
+
+<!-- 10 限制與展望 -->
+<div class="section" id="limits">
+  <div class="sec-title">10 系統誠實限制與未來展望</div>
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">現有的限制（誠實說明）</div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-icon">⚠️</div>
+    <div><div class="limit-title">訓練資料來自模擬器</div>
+    <div class="limit-text">訓練和測試資料都由同一個 simulator 產生，測試集準確率 100% 是在模擬資料分布上的結果。換成真實硬體資料後，準確率可能下降，需要用真實資料重新訓練或微調。這是 Simulation-to-Real 開發流程的標準限制。</div></div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-icon">⚠️</div>
+    <div><div class="limit-title">轉差率和轉矩是估算值</div>
+    <div class="limit-text">沒有轉速感測器，slip_ratio 是從電流負載比推算的近似值，torque_nm 是用同步轉速計算的理論值。加裝編碼器後才能得到真實的轉速和精確的轉矩。</div></div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-icon">⚠️</div>
+    <div><div class="limit-title">BEARING_WEAR 是簡化版</div>
+    <div class="limit-text">真實的軸承磨損偵測需要高頻取樣（1000Hz 以上）和 FFT 頻譜分析。我們用電流標準差做簡化版的特徵提取，適合 demo 展示，真實環境需要升級。</div></div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-icon">⚠️</div>
+    <div><div class="limit-title">STALL 雙條件實際上不完全獨立</div>
+    <div class="limit-text">STALL 的觸發條件是「電流高且滑差大」，但因為 slip_ratio 是從 current_a 估算的，兩個條件有相關性，不是真正獨立的雙條件。接上真實轉速感測器後才能真正獨立。</div></div>
+  </div>
+  <div class="card" style="--accent:var(--green);margin-top:12px;">
+    <div class="card-title">未來接軌真實硬體</div>
+    <p>系統架構已經為接真實硬體做好準備：</p>
+    <div class="formula-block" style="font-size:11px;">
+      換真實硬體：只改 comms.py（實作 Modbus RTU）<br/>
+      換不同規格馬達：只改 config.py（銘牌規格）<br/>
+      重新訓練 ML：用真實資料替換模擬訓練資料<br/>
+      校正 Rules 閾值：根據真實保護繼電器設定值調整<br/>
+      升級 BEARING_WEAR：加裝振動感測器 + FFT
+    </div>
+    <p>核心的雙層判斷架構、物理計算層、資料流設計都不需要改動。</p>
+  </div>
+</div>
 
 </div>
 </body>
