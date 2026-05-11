@@ -11,6 +11,12 @@ from streamlit_autorefresh import st_autorefresh
 import os
 from control import get_controller
 from database import fetch_latest, fetch_stats
+
+@st.cache_resource
+def init_ml_model():
+    """ML 模型只載入一次，Streamlit rerun 不重新訓練。"""
+    from ml_model import load_model
+    load_model()
 from config import (
     STARTUP_DURATION_SEC,
     DATA_INTERVAL_MS as DATA_GENERATE_INTERVAL_MS_CFG,
@@ -976,6 +982,7 @@ def main() -> None:
         initial_sidebar_state="collapsed",
     )
 
+    init_ml_model()      # 確保 ML 只初始化一次，Streamlit rerun 不重新訓練
     init_session_state()
 
     # autorefresh 要在最前面，確保持續觸發
