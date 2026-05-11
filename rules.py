@@ -3,55 +3,42 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Literal, Tuple
 
-from device_adapter import AdaptedRecord
+from config import (
+    BEARING_FREQ_STABLE_RANGE,
+    BEARING_MAX_SCORE,
+    BEARING_STD_THRESHOLD,
+    BEARING_WINDOW_SIZE,
+    LOAD_LOSS_CURRENT_MAX,
+    LOAD_LOSS_FREQ_MIN,
+    LOAD_LOSS_MAX_SCORE,
+    OVERLOAD_CURRENT_BASE,
+    OVERLOAD_MAX_SCORE,
+    OVERLOAD_SCORE_PER_AMP,
+    RATED_CURRENT_A,
+    STALL_CURRENT_BASE,
+    STALL_CURRENT_MAX_SCORE,
+    STALL_CURRENT_SCORE_PER_AMP,
+    STALL_SLIP_MAX_SCORE,
+    STALL_SLIP_SCORE_PER_PCT,
+    STALL_SLIP_THRESHOLD,
+)
+from physics import PhysicsRecord
 
 # ---------------------------------------------------------------------------
 # 型別定義
 # ---------------------------------------------------------------------------
 RuleLevel = Literal["NORMAL", "WARNING", "DANGER", "CRITICAL"]
-RuleFaultType = Literal[
-    "NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR", "STARTUP"
-]
+RuleFaultType = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR"]
 
 # ---------------------------------------------------------------------------
-# 風險等級對應分數區間
+# 風險等級對應分數區間（從 config.py 的 LEVEL_THRESHOLDS）
 # ---------------------------------------------------------------------------
-#   0  ~ 29  → NORMAL
-#   30 ~ 59  → WARNING
-#   60 ~ 79  → DANGER
-#   80 ~ 100 → CRITICAL
-
 LEVEL_THRESHOLDS: List[Tuple[int, RuleLevel]] = [
     (65, "CRITICAL"),
     (40, "DANGER"),
     (15, "WARNING"),
     (0, "NORMAL"),
 ]
-
-# ---------------------------------------------------------------------------
-# 馬達規格
-# ---------------------------------------------------------------------------
-RATED_CURRENT = 15.0  # FLA (A)
-
-# ---------------------------------------------------------------------------
-# 各條件閾值
-# ---------------------------------------------------------------------------
-
-# STALL
-STALL_CURRENT_BASE = 20.0  # 133% FLA（避免與 OVERLOAD 重疊）
-STALL_SLIP_BASE = 0.12  # 滑差 12%（OVERLOAD 滑差約 8~10%，拉高門檻）
-
-# LOAD_LOSS
-LOAD_LOSS_FREQ_MIN = 40.0
-LOAD_LOSS_CURRENT_MAX = 5.0
-
-# OVERLOAD
-OVERLOAD_CURRENT_BASE = RATED_CURRENT * 1.10  # 110% FLA = 16.5A
-
-# BEARING_WEAR
-BEARING_WINDOW_SIZE = 5
-BEARING_STD_THRESHOLD = 0.8
-BEARING_FREQ_STABLE_RANGE = 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -62,9 +49,8 @@ class RuleResult:
     fault_type: RuleFaultType
     level: RuleLevel
     anomaly_score: int
-    contributions: Dict[str, int]  # 各條件的分數貢獻
-    reasons: List[str]
-    is_startup: bool
+    contributions: Dict[str, int]
+    reasons: List[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -98,6 +84,10 @@ class _SlidingWindow:
             return 0.0
         return max(self._freq) - min(self._freq)
 
+    def clear(self) -> None:
+        self._current.clear()
+        self._freq.clear()
+
 
 _windows: Dict[str, _SlidingWindow] = {}
 
@@ -108,6 +98,12 @@ def _get_window(motor_id: str) -> _SlidingWindow:
     return _windows[motor_id]
 
 
+def clear_windows() -> None:
+    """關機時清除所有滑動窗口。"""
+    for w in _windows.values():
+        w.clear()
+
+
 # ---------------------------------------------------------------------------
 # 各條件分數計算
 # ---------------------------------------------------------------------------
@@ -115,46 +111,48 @@ def _get_window(motor_id: str) -> _SlidingWindow:
 
 def _score_stall(current_a: float, slip_ratio: float) -> Tuple[int, List[str]]:
     """
+    STALL 判斷：電流和滑差雙條件確認。
     兩個條件都滿足才給滿分，單一條件只給一半。
-    電流每超過 120% FLA 1A → +8 分（最多 48）
-    滑差每超過 10% 一個百分點 → +6 分（最多 36）
     """
     score = 0
     reasons = []
 
     current_over = max(0.0, current_a - STALL_CURRENT_BASE)
-    slip_over = max(0.0, slip_ratio - STALL_SLIP_BASE)
-    current_score = min(int(current_over * 8), 48)
-    slip_score = min(int(slip_over * 600), 36)
-    both = current_a > STALL_CURRENT_BASE and slip_ratio > STALL_SLIP_BASE
+    slip_over = max(0.0, slip_ratio - STALL_SLIP_THRESHOLD)
+    current_score = min(
+        int(current_over * STALL_CURRENT_SCORE_PER_AMP), STALL_CURRENT_MAX_SCORE
+    )
+    slip_score = min(
+        int(slip_over * 600 * STALL_SLIP_SCORE_PER_PCT / 6), STALL_SLIP_MAX_SCORE
+    )
+    both = current_a > STALL_CURRENT_BASE and slip_ratio > STALL_SLIP_THRESHOLD
 
     if current_a > STALL_CURRENT_BASE:
         s = current_score if both else current_score // 2
         score += s
         reasons.append(
-            f"電流 {current_a:.1f}A > {STALL_CURRENT_BASE:.1f}A (120% FLA) [{s}分]"
+            f"電流 {current_a:.1f}A > {STALL_CURRENT_BASE:.1f}A (133% FLA) [{s}分]"
         )
 
-    if slip_ratio > STALL_SLIP_BASE:
+    if slip_ratio > STALL_SLIP_THRESHOLD:
         s = slip_score if both else slip_score // 2
         score += s
-        reasons.append(f"轉差率 {slip_ratio:.1%} > {STALL_SLIP_BASE:.0%} [{s}分]")
+        reasons.append(f"轉差率 {slip_ratio:.1%} > {STALL_SLIP_THRESHOLD:.0%} [{s}分]")
 
     return score, reasons
 
 
 def _score_load_loss(frequency_hz: float, current_a: float) -> Tuple[int, List[str]]:
     """
-    兩個條件都滿足才給分，電流越低分數越高（最多 70）。
+    LOAD_LOSS 判斷：頻率正常但電流極低。
+    兩個條件都滿足才給分，電流越低分數越高。
     """
     score = 0
     reasons = []
 
     if frequency_hz > LOAD_LOSS_FREQ_MIN and current_a < LOAD_LOSS_CURRENT_MAX:
         deficit = max(0.0, LOAD_LOSS_CURRENT_MAX - current_a)
-        score = min(
-            int(deficit / LOAD_LOSS_CURRENT_MAX * 30) + 40, 64
-        )  # 上限 64，穩定在 DANGER
+        score = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 30) + 40, LOAD_LOSS_MAX_SCORE)
         half = score // 2
         reasons.append(
             f"頻率 {frequency_hz:.1f}Hz > {LOAD_LOSS_FREQ_MIN:.0f}Hz [{half}分]"
@@ -168,15 +166,15 @@ def _score_load_loss(frequency_hz: float, current_a: float) -> Tuple[int, List[s
 
 def _score_overload(current_a: float) -> Tuple[int, List[str]]:
     """
-    電流超過 110% FLA 才給分，每超過 1A → +6 分。
-    上限 29 分，確保 OVERLOAD 最高只到 WARNING，不進入 DANGER。
+    OVERLOAD 判斷：電流超過 110% FLA。
+    上限 WARNING 區間，不讓 OVERLOAD 跑到 DANGER。
     """
     score = 0
     reasons = []
 
     over = max(0.0, current_a - OVERLOAD_CURRENT_BASE)
     if over > 0:
-        score = min(int(over * 6), 29)  # 上限 29，WARNING 區間最高值
+        score = min(int(over * OVERLOAD_SCORE_PER_AMP), OVERLOAD_MAX_SCORE)
         reasons.append(
             f"電流 {current_a:.1f}A > {OVERLOAD_CURRENT_BASE:.1f}A (110% FLA) [{score}分]"
         )
@@ -188,7 +186,8 @@ def _score_bearing(
     motor_id: str, current_a: float, frequency_hz: float
 ) -> Tuple[int, List[str]]:
     """
-    累積足夠筆數後，電流標準差 > 閾值 且 頻率穩定才給分（最多 40）。
+    BEARING_WEAR 判斷：電流波動大且頻率穩定。
+    需累積足夠筆數（滑動窗口）才觸發。
     """
     score = 0
     reasons = []
@@ -204,7 +203,7 @@ def _score_bearing(
 
     if std > BEARING_STD_THRESHOLD and freq_range < BEARING_FREQ_STABLE_RANGE:
         over = std - BEARING_STD_THRESHOLD
-        score = min(int(over * 15) + 20, 39)  # 上限 39，確保只到 WARNING
+        score = min(int(over * 15) + 20, BEARING_MAX_SCORE)
         reasons.append(
             f"電流波動標準差 {std:.2f}A > {BEARING_STD_THRESHOLD}A [{score}分]"
         )
@@ -243,33 +242,14 @@ def _dominant_fault(contributions: Dict[str, int]) -> RuleFaultType:
 # ---------------------------------------------------------------------------
 
 
-def evaluate(record: AdaptedRecord) -> RuleResult:
+def evaluate(record: PhysicsRecord) -> RuleResult:
     """
-    計算 anomaly score（0~100）並回傳 RuleResult。
-    各條件分數獨立計算後加總，clamp 到 100。
-    fault_type 由分數最高的條件決定。
+    接收 physics.py 的完整物理量，計算 Anomaly Score 並回傳 RuleResult。
+
+    注意：
+        啟動遮蔽由 main.py 負責，rules.py 不判斷狀態。
+        直接傳入資料就給出判斷結果。
     """
-
-    if record.power_state == "OFF":
-        return RuleResult(
-            fault_type="NORMAL",
-            level="NORMAL",
-            anomaly_score=0,
-            contributions={},
-            reasons=["馬達已關機"],
-            is_startup=False,
-        )
-
-    if record.machine_state == "STARTUP":
-        return RuleResult(
-            fault_type="STARTUP",
-            level="NORMAL",
-            anomaly_score=0,
-            contributions={},
-            reasons=["啟動過渡期，暫停異常判斷"],
-            is_startup=True,
-        )
-
     contributions: Dict[str, int] = {}
     all_reasons: List[str] = []
 
@@ -311,96 +291,5 @@ def evaluate(record: AdaptedRecord) -> RuleResult:
         anomaly_score=total_score,
         contributions=contributions,
         reasons=all_reasons,
-        is_startup=False,
     )
 
-
-# ---------------------------------------------------------------------------
-# Demo
-# ---------------------------------------------------------------------------
-
-
-def demo() -> None:
-    import random
-    from simulator import generate_sensor_record, _reset_state
-    from device_adapter import adapt
-
-    random.seed(None)
-
-    print("=" * 70)
-    print("單筆測試")
-    print("=" * 70)
-
-    for power_state, fault_type, elapsed in [
-        ("OFF", "NORMAL", 0.0),
-        ("ON", "NORMAL", 0.0),
-        ("ON", "NORMAL", 4.0),
-        ("ON", "OVERLOAD", 4.0),
-        ("ON", "STALL", 4.0),
-        ("ON", "LOAD_LOSS", 4.0),
-    ]:
-        _reset_state("MOTOR-001")
-        _windows.clear()
-        raw = generate_sensor_record(power_state, fault_type, elapsed)
-        rec = adapt(raw)
-        res = evaluate(rec)
-        print(
-            f"fault_type={fault_type:<14} "
-            f"→ rule={res.fault_type:<14} "
-            f"score={res.anomaly_score:>3}  "
-            f"level={res.level:<8}  "
-            f"{res.contributions}"
-        )
-
-    print()
-    print("=" * 70)
-    print("BEARING_WEAR 累積窗口（連續 10 筆）")
-    print("=" * 70)
-
-    _reset_state("MOTOR-001")
-    _windows.clear()
-    for i in range(10):
-        raw = generate_sensor_record("ON", "BEARING_WEAR", 4.0)
-        rec = adapt(raw)
-        res = evaluate(rec)
-        print(
-            f"  筆 {i+1:>2}  A={rec.current_a:.2f}  "
-            f"→ score={res.anomaly_score:>3}  {res.fault_type:<14} {res.level}"
-        )
-
-    print()
-    print("=" * 70)
-    print("分數漸進測試（STALL 從輕微到嚴重）")
-    print("=" * 70)
-
-    from device_adapter import AdaptedRecord
-
-    for current in [16.0, 18.5, 21.0, 24.0, 27.0, 30.0]:
-        slip = 0.02 + (current / RATED_CURRENT) * 0.08
-        r = AdaptedRecord(
-            timestamp="2026-01-01T00:00:00",
-            motor_id="MOTOR-TEST",
-            power_state="ON",
-            machine_state="RUNNING",
-            fault_type="STALL",
-            frequency_hz=45.0,
-            current_a=current,
-            voltage_v=380.0,
-            sync_rpm=1350.0,
-            slip_ratio=slip,
-            rpm_est=1200.0,
-            power_factor=0.85,
-            input_power_kw=10.0,
-            output_power_kw=8.8,
-            torque_nm=70.0,
-        )
-        _windows.clear()
-        res = evaluate(r)
-        print(
-            f"  A={current:.1f}  slip={slip:.3f}  "
-            f"→ score={res.anomaly_score:>3}  {res.level}"
-        )
-
-
-if __name__ == "__main__":
-    demo()
