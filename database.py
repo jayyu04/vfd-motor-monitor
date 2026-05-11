@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-import json
 import sqlite3
 from contextlib import contextmanager
 from dataclasses import asdict
-from pathlib import Path
 from typing import Dict, Generator, List, Optional
 
-from main import FullRecord
+from records import FullRecord
+from config import MAX_DB_RECORDS
 
 # ---------------------------------------------------------------------------
 # 常數
 # ---------------------------------------------------------------------------
 DB_PATH = "motor_monitor.db"
-MAX_HISTORY = 10_000  # 最多保留幾筆（超過自動刪最舊的）
+MAX_HISTORY = MAX_DB_RECORDS
 
 # ---------------------------------------------------------------------------
 # 資料庫初始化
@@ -26,38 +25,34 @@ def init_db(db_path: str = DB_PATH) -> None:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS motor_records (
                 id               INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                -- 系統資訊
                 timestamp        TEXT    NOT NULL,
                 motor_id         TEXT    NOT NULL,
-                power_state      TEXT    NOT NULL,
                 machine_state    TEXT    NOT NULL,
-                fault_type       TEXT    NOT NULL,
 
-                -- 電氣 / 機械量
+                -- 感測器原始值
                 frequency_hz     REAL,
                 current_a        REAL,
                 voltage_v        REAL,
+
+                -- 物理推算
                 sync_rpm         REAL,
                 slip_ratio       REAL,
-                rpm_est          REAL,
-                power_factor     REAL,
-                input_power_kw   REAL,
-                output_power_kw  REAL,
                 torque_nm        REAL,
 
-                -- rules 結果
+                -- Rules 結果
                 rule_fault_type  TEXT,
                 rule_level       TEXT,
                 rule_score       INTEGER,
-                rule_reasons     TEXT,    -- JSON array
-                rule_is_startup  INTEGER, -- 0/1
+                rule_reasons     TEXT,
 
-                -- ml 結果
+                -- ML 結果
                 ml_fault_type    TEXT,
                 ml_level         TEXT,
                 ml_confidence    REAL,
-                ml_probabilities TEXT,    -- JSON object
 
-                -- 綜合
+                -- 綜合結果
                 final_level      TEXT
             )
         """)
@@ -106,29 +101,22 @@ def insert_record(record: FullRecord, db_path: str = DB_PATH) -> int:
     """
     d = asdict(record)
 
-    # List / Dict 轉 JSON 字串儲存
-    d["rule_reasons"] = json.dumps(d["rule_reasons"], ensure_ascii=False)
-    d["ml_probabilities"] = json.dumps(d["ml_probabilities"], ensure_ascii=False)
-    d["rule_is_startup"] = int(d["rule_is_startup"])
-
     with _connect(db_path) as conn:
         cursor = conn.execute(
             """
             INSERT INTO motor_records (
-                timestamp, motor_id, power_state, machine_state, fault_type,
+                timestamp, motor_id, machine_state,
                 frequency_hz, current_a, voltage_v,
-                sync_rpm, slip_ratio, rpm_est,
-                power_factor, input_power_kw, output_power_kw, torque_nm,
-                rule_fault_type, rule_level, rule_score, rule_reasons, rule_is_startup,
-                ml_fault_type, ml_level, ml_confidence, ml_probabilities,
+                sync_rpm, slip_ratio, torque_nm,
+                rule_fault_type, rule_level, rule_score, rule_reasons,
+                ml_fault_type, ml_level, ml_confidence,
                 final_level
             ) VALUES (
-                :timestamp, :motor_id, :power_state, :machine_state, :fault_type,
+                :timestamp, :motor_id, :machine_state,
                 :frequency_hz, :current_a, :voltage_v,
-                :sync_rpm, :slip_ratio, :rpm_est,
-                :power_factor, :input_power_kw, :output_power_kw, :torque_nm,
-                :rule_fault_type, :rule_level, :rule_score, :rule_reasons, :rule_is_startup,
-                :ml_fault_type, :ml_level, :ml_confidence, :ml_probabilities,
+                :sync_rpm, :slip_ratio, :torque_nm,
+                :rule_fault_type, :rule_level, :rule_score, :rule_reasons,
+                :ml_fault_type, :ml_level, :ml_confidence,
                 :final_level
             )
         """,
@@ -161,17 +149,15 @@ def insert_record(record: FullRecord, db_path: str = DB_PATH) -> int:
 
 
 def _row_to_dict(row: sqlite3.Row) -> Dict:
-    d = dict(row)
-    d["rule_reasons"] = json.loads(d["rule_reasons"])
-    d["ml_probabilities"] = json.loads(d["ml_probabilities"])
-    d["rule_is_startup"] = bool(d["rule_is_startup"])
-    return d
+    return dict(row)
 
 
 def fetch_latest(
-    n: int = 50, motor_id: Optional[str] = None, db_path: str = DB_PATH
+    n: int = 50,
+    motor_id: Optional[str] = None,
+    db_path: str = DB_PATH,
 ) -> List[Dict]:
-    """取最新 n 筆，可依 motor_id 篩選"""
+    """取最新 n 筆，可依 motor_id 篩選。"""
     with _connect(db_path) as conn:
         if motor_id:
             rows = conn.execute(
@@ -195,7 +181,9 @@ def fetch_latest(
 
 
 def fetch_alerts(
-    level: str = "WARNING", n: int = 100, db_path: str = DB_PATH
+    level: str = "WARNING",
+    n: int = 100,
+    db_path: str = DB_PATH,
 ) -> List[Dict]:
     """
     取出風險等級 >= level 的告警紀錄。
@@ -219,12 +207,15 @@ def fetch_alerts(
     return [_row_to_dict(r) for r in rows]
 
 
-def fetch_stats(motor_id: Optional[str] = None, db_path: str = DB_PATH) -> Dict:
+def fetch_stats(
+    motor_id: Optional[str] = None,
+    db_path: str = DB_PATH,
+) -> Dict:
     """
     取統計摘要：
     - 總筆數
     - 各 final_level 分佈
-    - 各 fault_type 分佈
+    - 各 rule_fault_type 分佈
     - 最新一筆時間
     """
     where = "WHERE motor_id = ?" if motor_id else ""
@@ -261,81 +252,6 @@ def fetch_stats(motor_id: Optional[str] = None, db_path: str = DB_PATH) -> Dict:
 
 
 def clear_all(db_path: str = DB_PATH) -> None:
-    """清空所有資料（測試用）"""
+    """清空所有資料。"""
     with _connect(db_path) as conn:
         conn.execute("DELETE FROM motor_records")
-
-
-# ---------------------------------------------------------------------------
-# Demo
-# ---------------------------------------------------------------------------
-
-
-def demo() -> None:
-    import random
-    import os
-
-    random.seed(None)
-
-    from ml_model import load_model
-    from main import MotorMonitor
-
-    # 清掉舊的測試資料庫
-    if os.path.exists("test_motor.db"):
-        os.remove("test_motor.db")
-
-    db = "test_motor.db"
-    init_db(db)
-    print("資料庫初始化完成")
-
-    load_model()
-    monitor = MotorMonitor(interval_sec=1.0)
-
-    print("\n寫入各模式資料各 5 筆...")
-    from simulator import FaultType
-
-    fault_types: List[FaultType] = [
-        "NORMAL",
-        "OVERLOAD",
-        "STALL",
-        "LOAD_LOSS",
-        "BEARING_WEAR",
-    ]
-
-    for fault_type in fault_types:
-        monitor.set_power("ON")
-        monitor.set_fault_type(fault_type)
-        monitor._state.startup_elapsed_sec = 10.0
-        for _ in range(5):
-            rec = monitor.tick()
-            insert_record(rec, db_path=db)
-
-    print("\n最新 5 筆：")
-    for row in fetch_latest(5, db_path=db):
-        print(
-            f"  {row['timestamp']}  "
-            f"fault={row['fault_type']:<14} "
-            f"final={row['final_level']}"
-        )
-
-    print("\n告警紀錄（>= WARNING）：")
-    alerts = fetch_alerts("WARNING", db_path=db)
-    print(f"  共 {len(alerts)} 筆告警")
-    for row in alerts[:5]:
-        print(
-            f"  {row['timestamp']}  "
-            f"rule={row['rule_fault_type']:<14} "
-            f"ml={row['ml_fault_type']:<14} "
-            f"final={row['final_level']}"
-        )
-
-    print("\n統計摘要：")
-    stats = fetch_stats(db_path=db)
-    print(f"  總筆數：{stats['total']}")
-    print(f"  等級分佈：{stats['level_dist']}")
-    print(f"  異常分佈：{stats['fault_dist']}")
-    print(f"  最新時間：{stats['latest_timestamp']}")
-
-
-if __name__ == "__main__":
-    demo()
