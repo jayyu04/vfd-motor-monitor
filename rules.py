@@ -9,18 +9,13 @@ from config import (
     BEARING_STD_THRESHOLD,
     BEARING_WINDOW_SIZE,
     LOAD_LOSS_CURRENT_MAX,
-    LOAD_LOSS_FREQ_MIN,
     LOAD_LOSS_MAX_SCORE,
     OVERLOAD_CURRENT_BASE,
     OVERLOAD_MAX_SCORE,
     OVERLOAD_SCORE_PER_AMP,
-    RATED_CURRENT_A,
     STALL_CURRENT_BASE,
     STALL_CURRENT_MAX_SCORE,
     STALL_CURRENT_SCORE_PER_AMP,
-    STALL_SLIP_MAX_SCORE,
-    STALL_SLIP_SCORE_PER_PCT,
-    STALL_SLIP_THRESHOLD,
 )
 from physics import PhysicsRecord
 
@@ -118,7 +113,7 @@ def _score_stall(current_a: float, slip_ratio: float) -> Tuple[int, List[str]]:
     reasons = []
 
     current_over  = max(0.0, current_a - STALL_CURRENT_BASE)
-    current_score = min(int(current_over * STALL_CURRENT_SCORE_PER_AMP), STALL_CURRENT_MAX_SCORE + STALL_SLIP_MAX_SCORE)
+    current_score = min(int(current_over * STALL_CURRENT_SCORE_PER_AMP), STALL_CURRENT_MAX_SCORE)
 
     if current_a > STALL_CURRENT_BASE:
         score = current_score
@@ -138,7 +133,7 @@ def _score_load_loss(frequency_hz: float, current_a: float) -> Tuple[int, List[s
 
     if current_a < LOAD_LOSS_CURRENT_MAX:
         deficit = max(0.0, LOAD_LOSS_CURRENT_MAX - current_a)
-        score   = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 49) + 25, LOAD_LOSS_MAX_SCORE)
+        score   = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 24) + 50, LOAD_LOSS_MAX_SCORE)
         reasons.append(f"電流 {current_a:.1f}A < {LOAD_LOSS_CURRENT_MAX:.0f}A（負載流失）[{score}分]")
 
     return score, reasons
@@ -179,7 +174,7 @@ def _score_bearing(motor_id: str, current_a: float, frequency_hz: float) -> Tupl
 
     if std > BEARING_STD_THRESHOLD and freq_range < BEARING_FREQ_STABLE_RANGE:
         over  = std - BEARING_STD_THRESHOLD
-        score = min(int(over * 15) + 20, BEARING_MAX_SCORE)
+        score = min(int(over * 15) + 25, BEARING_MAX_SCORE)
         reasons.append(f"電流波動標準差 {std:.2f}A > {BEARING_STD_THRESHOLD}A [{score}分]")
         reasons.append(f"頻率穩定（變化 {freq_range:.2f}Hz）[輔助確認]")
 
