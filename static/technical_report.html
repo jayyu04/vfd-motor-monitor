@@ -269,13 +269,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <path d="M220,452 L220,575 L328,575" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2" fill="none" marker-end="url(#arr-d)"/>
       <!-- database → dashboard（讀取，虛線，從右側繞） -->
       <path d="M570,575 L860,575 L860,84 L572,84" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
-      <!-- VFD_simulator → dashboard（目前工況顯示，橙色虛線） -->
-      <path d="M155,210 L155,84 L328,84" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-      <text x="162" y="148" font-family="IBM Plex Mono" font-size="8" fill="#fb923c">get_current_fault()</text>
+      <!-- VFD_simulator → dashboard（目前工況顯示，橙色虛線，左側繞） -->
+      <path d="M60,229 L20,229 L20,84 L328,84" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="26" y="160" font-family="IBM Plex Mono" font-size="8" fill="#fb923c" transform="rotate(-90,26,160)">get_current_fault()</text>
 
-      <!-- config 虛線連到各模組 -->
-      <line x1="310" y1="28" x2="250" y2="28" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
-      <line x1="250" y1="28" x2="250" y2="210" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
+
 
       <!-- 資料標籤 -->
       <text x="276" y="222" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Hz/A/V</text>
@@ -284,7 +282,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <text x="456" y="401" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">PhysicsRecord</text>
 
       <!-- 圖例 -->
-      <rect x="660" y="65" width="175" height="116" rx="4" fill="rgba(15,21,32,0.9)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+      <rect x="660" y="65" width="175" height="100" rx="4" fill="rgba(15,21,32,0.9)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
       <text x="670" y="83" font-family="IBM Plex Mono" font-size="9" fill="#4b6174" text-decoration="underline">圖例</text>
       <line x1="670" y1="97" x2="710" y2="97" stroke="rgba(56,189,248,0.6)" stroke-width="1.5" marker-end="url(#arr)"/>
       <text x="716" y="100" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">資料流</text>
@@ -292,10 +290,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <text x="716" y="117" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">控制流</text>
       <line x1="670" y1="131" x2="710" y2="131" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
       <text x="716" y="134" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">讀取顯示</text>
-      <line x1="670" y1="148" x2="710" y2="148" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
-      <text x="716" y="151" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">共用 config</text>
-      <line x1="670" y1="163" x2="710" y2="163" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-      <text x="716" y="166" font-family="IBM Plex Mono" font-size="9" fill="#fb923c">實際工況回報</text>
+
+      <line x1="670" y1="148" x2="710" y2="148" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="716" y="151" font-family="IBM Plex Mono" font-size="9" fill="#fb923c">實際工況回報</text>
     </svg>
   </div>
 
