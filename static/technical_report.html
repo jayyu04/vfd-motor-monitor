@@ -439,27 +439,27 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：18.5~22 A（110%+ FLA）</div>
       <div class="mode-logic">任何操作頻率下電流超過額定值，模擬機械過載。頻率不侷限於特定範圍，因為過載可以在任何轉速下發生</div>
     </div>
-    <div class="mode-card" style="--accent:var(--red)">
-      <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
-      <div class="mode-range">頻率：20~35 Hz（拉不上去）<br/>電流：24~30 A（160%+ FLA）</div>
-      <div class="mode-logic">電流飆高且頻率拉不上去，模擬機械端堵轉</div>
-    </div>
-    <div class="mode-card" style="--accent:var(--red)">
-      <div class="mode-name" style="color:var(--red)">LOAD_LOSS　負載流失</div>
-      <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：2~4 A（空載以下）</div>
-      <div class="mode-logic">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。負載流失可以在任何轉速下發生</div>
-    </div>
     <div class="mode-card" style="--accent:var(--amber)">
       <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
       <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：10~13 A（正常，但波動 ±2.5A）</div>
       <div class="mode-logic">任何操作頻率下電流中心值正常但波動幅度大，模擬軸承磨損產生的電流漣波</div>
     </div>
+    <div class="mode-card" style="--accent:var(--orange)">
+      <div class="mode-name" style="color:var(--orange)">LOAD_LOSS　負載流失</div>
+      <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：2~4 A（空載以下）</div>
+      <div class="mode-logic">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。負載流失可以在任何轉速下發生</div>
+    </div>
+    <div class="mode-card" style="--accent:var(--red)">
+      <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
+      <div class="mode-range">頻率：20~35 Hz（拉不上去）<br/>電流：24~30 A（160%+ FLA）</div>
+      <div class="mode-logic">電流飆高且頻率拉不上去，模擬機械端堵轉</div>
+    </div>
     <div class="mode-card" style="--accent:var(--purple)">
       <div class="mode-name" style="color:var(--purple)">AUTO　自動隨機切換</div>
-      <div class="mode-range">每 10~20 秒自動切換工況<br/>BEARING_WEAR 持續 20~30 秒</div>
-      <div class="mode-logic">系統自動切換，用於驗證 ML 在不知道答案的情況下能否正確判斷</div>
+      <div class="mode-range">每 10~20 秒自動切換工況（不重複上一個）</div>
+      <div class="mode-logic">系統自動切換工況，Rules 和 ML 在不知道工況的情況下自己判斷。VFD Header 即時顯示目前實際工況，趨勢圖下方出現對比表格，可以即時驗證 ML 準不準確。這是展示 ML 真實能力最有說服力的方式。</div>
     </div>
-  </div>
+  </div></div>
 </div>
 
 <!-- 05 物理計算 -->
