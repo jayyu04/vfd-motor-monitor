@@ -474,7 +474,7 @@ def build_dashboard_html(
             "DANGER": "val-danger", "CRITICAL": "val-danger",
         }.get(l_final_raw, "val-muted")
 
-        rule_cls = "val-warn" if l_rscore > 30 else "val-normal"
+        rule_cls = "val-danger" if l_rscore >= 75 else "val-warn" if l_rscore >= 25 else "val-normal"
         ml_cls   = "val-danger" if l_final_raw in ("DANGER", "CRITICAL") else "val-warn" if l_final_raw == "WARNING" else "val-normal"
     else:
         l_freq = l_curr = l_rpm = l_torq = 0
@@ -505,8 +505,8 @@ def build_dashboard_html(
         alert_rows = ""
         for _, r in adf.iterrows():
             fl  = str(r["final_level"])
-            sev_cls = {"WARNING": "sev-warn", "DANGER": "sev-warn", "CRITICAL": "sev-crit"}.get(fl, "sev-info")
-            pill_cls = {"WARNING": "pill-warn", "DANGER": "pill-warn", "CRITICAL": "pill-crit"}.get(fl, "pill-ok")
+            sev_cls = {"WARNING": "sev-warn", "DANGER": "sev-danger", "CRITICAL": "sev-crit"}.get(fl, "sev-info")
+            pill_cls = {"WARNING": "pill-warn", "DANGER": "pill-danger", "CRITICAL": "pill-crit"}.get(fl, "pill-ok")
             alert_rows += (
                 f"<tr>"
                 f"<td>{r['timestamp'].strftime('%H:%M:%S')}</td>"
@@ -728,9 +728,10 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
 .alert-table td{{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);
   color:var(--text2);white-space:nowrap;}}
 .alert-table tr:hover td{{background:var(--bg3);}}
-.sev-warn{{color:var(--amber);}} .sev-crit{{color:var(--red);}} .sev-info{{color:var(--cyan);}}
+.sev-warn{{color:var(--amber);}} .sev-danger{{color:var(--orange);}} .sev-crit{{color:var(--red);}} .sev-info{{color:var(--cyan);}}
 .pill{{padding:2px 7px;border-radius:3px;font-size:10px;}}
 .pill-warn{{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);}}
+.pill-danger{{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);color:var(--orange);}}
 .pill-crit{{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);}}
 .pill-ok{{background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.3);color:var(--green);}}
 .full-table-wrap{{background:var(--panel);border:1px solid var(--border);border-radius:8px;
@@ -877,7 +878,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
       <div class="panel-title">異常分數</div>
       <div class="score-row" style="margin-top:8px;">
         <div class="score-block">
-          <div class="score-num val-warn">{l_rscore}</div>
+          <div class="score-num {rule_cls}">{l_rscore}</div>
           <div class="score-label">Rule Score<br/>0~100</div>
         </div>
         <div class="score-block">
