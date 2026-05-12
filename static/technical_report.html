@@ -436,8 +436,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
     <div class="mode-card" style="--accent:var(--amber)">
       <div class="mode-name" style="color:var(--amber)">OVERLOAD　過電流</div>
-      <div class="mode-range">頻率：45~50 Hz（正常）<br/>電流：18.5~22 A（110%+ FLA）</div>
-      <div class="mode-logic">頻率正常但電流超過額定值，模擬機械過載</div>
+      <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：18.5~22 A（110%+ FLA）</div>
+      <div class="mode-logic">任何操作頻率下電流超過額定值，模擬機械過載。頻率不侷限於特定範圍，因為過載可以在任何轉速下發生</div>
     </div>
     <div class="mode-card" style="--accent:var(--red)">
       <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
@@ -446,13 +446,13 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
     <div class="mode-card" style="--accent:var(--red)">
       <div class="mode-name" style="color:var(--red)">LOAD_LOSS　負載流失</div>
-      <div class="mode-range">頻率：45~50 Hz（正常）<br/>電流：2~4 A（空載以下）</div>
-      <div class="mode-logic">頻率正常但電流極低，模擬皮帶斷裂或幫浦空轉</div>
+      <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：2~4 A（空載以下）</div>
+      <div class="mode-logic">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。負載流失可以在任何轉速下發生</div>
     </div>
     <div class="mode-card" style="--accent:var(--amber)">
       <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
-      <div class="mode-range">頻率：45~50 Hz（穩定）<br/>電流：10~13 A（正常，但波動 ±2.5A）</div>
-      <div class="mode-logic">頻率穩定，電流中心值正常，但波動幅度放大，模擬電流漣波</div>
+      <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：10~13 A（正常，但波動 ±2.5A）</div>
+      <div class="mode-logic">任何操作頻率下電流中心值正常但波動幅度大，模擬軸承磨損產生的電流漣波</div>
     </div>
     <div class="mode-card" style="--accent:var(--purple)">
       <div class="mode-name" style="color:var(--purple)">AUTO　自動隨機切換</div>
@@ -553,7 +553,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <p style="margin-bottom:8px;"><strong style="color:var(--amber);">BEARING_WEAR（軸承磨損）</strong> → 最高 39 分 → 警告</p>
     <div class="formula-block" style="font-size:11px;">
       觸發條件：電流標準差 &gt; 0.8A 且 頻率變化 &lt; 0.5Hz<br/>
-      需累積最近 5 筆資料計算標準差（滑動窗口）<br/>
+      需累積最近 20 筆資料計算標準差（滑動窗口，約 6 秒）<br/>
       上限 39 分（限制在 WARNING 區間）<br/>
       <span class="formula-comment">頻率必須穩定，排除頻率變化本身造成的電流波動</span>
     </div>
@@ -669,7 +669,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <div class="feature-item"><div class="feature-rank">03</div><div><div class="feature-name">current_ratio</div><div class="feature-desc">電流 / 額定電流，正規化後的相對負載比，比絕對值更穩定</div></div></div>
     <div class="feature-item"><div class="feature-rank">04</div><div><div class="feature-name">slip_ratio</div><div class="feature-desc">轉差率，STALL 時超過 12%，是判斷機械卡死的關鍵指標</div></div></div>
     <div class="feature-item"><div class="feature-rank">05</div><div><div class="feature-name">frequency_hz</div><div class="feature-desc">頻率，STALL 時拉不上去，LOAD_LOSS 時正常，提供背景資訊</div></div></div>
-    <div class="feature-item"><div class="feature-rank">06</div><div><div class="feature-name">current_std_5</div><div class="feature-desc">最近 5 筆電流的標準差，BEARING_WEAR 的唯一關鍵特徵，捕捉電流漣波</div></div></div>
+    <div class="feature-item"><div class="feature-rank">06</div><div><div class="feature-name">current_std_5</div><div class="feature-desc">最近 20 筆電流的標準差，BEARING_WEAR 的唯一關鍵特徵，捕捉電流漣波。20 筆（約 6 秒）讓標準差更穩定，誤報更少</div></div></div>
   </div>
   <div class="card" style="--accent:var(--green)">
     <div class="card-title">為什麼選隨機森林</div>
