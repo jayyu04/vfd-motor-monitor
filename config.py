@@ -31,36 +31,36 @@ MAX_CHART_POINTS            = 200   # 趨勢圖最多顯示筆數
 
 # STALL（機械卡死）
 STALL_CURRENT_BASE          = 20.0  # 觸發電流門檻（133% FLA）
-STALL_SLIP_THRESHOLD        = 0.12  # 觸發轉差率門檻（12%）
-STALL_CURRENT_SCORE_PER_AMP = 8     # 電流每超過 1A → +8 分
-STALL_SLIP_SCORE_PER_PCT    = 6     # 滑差條件已移除，保留供參考
-STALL_CURRENT_MAX_SCORE     = 84    # 電流條件最高分（合併原滑差分數）
+STALL_SLIP_THRESHOLD        = 0.12  # 滑差條件已移除，保留供參考
+STALL_CURRENT_SCORE_PER_AMP = 10    # 電流每超過 1A → +10 分
+STALL_SLIP_SCORE_PER_PCT    = 0     # 滑差條件已移除
+STALL_CURRENT_MAX_SCORE     = 100   # 電流條件最高分（CRITICAL 最高）
 STALL_SLIP_MAX_SCORE        = 0     # 滑差條件已移除
 
 # LOAD_LOSS（負載流失）
-LOAD_LOSS_FREQ_MIN          = 40.0  # 觸發頻率門檻（Hz）
+LOAD_LOSS_FREQ_MIN          = 40.0  # 頻率限制已移除，保留供參考
 LOAD_LOSS_CURRENT_MAX       = 5.0   # 觸發電流門檻（A）
-LOAD_LOSS_MAX_SCORE         = 64    # 最高分（DANGER 上緣）
+LOAD_LOSS_MAX_SCORE         = 74    # 最高分（DANGER 上緣）
 
 # OVERLOAD（過電流）
 OVERLOAD_CURRENT_BASE       = 16.5  # 觸發電流門檻（110% FLA）
-OVERLOAD_SCORE_PER_AMP      = 6     # 每超過 1A → +6 分
-OVERLOAD_MAX_SCORE          = 29    # 最高分（WARNING 上緣）
+OVERLOAD_SCORE_PER_AMP      = 9     # 每超過 1A → +9 分
+OVERLOAD_MAX_SCORE          = 49    # 最高分（WARNING 上緣）
 
 # BEARING_WEAR（軸承磨損）
 BEARING_STD_THRESHOLD       = 0.8   # 電流標準差觸發門檻（A）
 BEARING_FREQ_STABLE_RANGE   = 0.5   # 頻率穩定判斷範圍（Hz）
 BEARING_WINDOW_SIZE         = 20    # 滑動窗口大小（筆）
-BEARING_MAX_SCORE           = 39    # 最高分（WARNING 上緣）
+BEARING_MAX_SCORE           = 49    # 最高分（WARNING 上緣）
 
 # -----------------------------------------------------------------------------
 # Anomaly Score 等級對應
 # -----------------------------------------------------------------------------
 LEVEL_THRESHOLDS = {
-    "NORMAL":   (0,  14),
-    "WARNING":  (15, 39),
-    "DANGER":   (40, 64),
-    "CRITICAL": (65, 100),
+    "NORMAL":   (0,  24),
+    "WARNING":  (25, 49),
+    "DANGER":   (50, 74),
+    "CRITICAL": (75, 100),
 }
 
 # -----------------------------------------------------------------------------
