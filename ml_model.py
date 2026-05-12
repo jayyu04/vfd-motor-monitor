@@ -14,7 +14,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from config import (
-    MOTOR_ID,
     RATED_CURRENT_A,
     BEARING_WINDOW_SIZE,
 )
@@ -35,12 +34,14 @@ SAMPLES_PER_CLASS = 1000
 CURRENT_WINDOW    = BEARING_WINDOW_SIZE
 
 # fault_type → 風險等級對應
+# STALL 是漸進式，ML 無法知道電流確切值來判斷 DANGER 或 CRITICAL
+# 所以 ML 輸出 STALL 時統一給 DANGER，讓 Rules 的漸進分數決定最終等級
 FAULT_TO_LEVEL: Dict[str, MlLevel] = {
     "NORMAL":       "NORMAL",
     "OVERLOAD":     "WARNING",
     "BEARING_WEAR": "WARNING",
     "LOAD_LOSS":    "DANGER",
-    "STALL":        "CRITICAL",
+    "STALL":        "DANGER",
 }
 
 # ---------------------------------------------------------------------------
@@ -63,7 +64,7 @@ FEATURE_NAMES = [
     "current_ratio",
     "slip_ratio",
     "torque_nm",
-    "current_std_5",
+    "current_std",   # 滑動窗口標準差，窗口大小由 config.BEARING_WINDOW_SIZE 決定（目前 20 筆）
 ]
 
 
