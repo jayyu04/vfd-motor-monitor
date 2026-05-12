@@ -94,7 +94,6 @@ class _RunningState:
     frequency_hz: float = 0.0
     current_a:    float = 0.0
     initialized:  bool  = False
-    step:         int   = 0
 
 
 _running_states: Dict[str, _RunningState] = {}
