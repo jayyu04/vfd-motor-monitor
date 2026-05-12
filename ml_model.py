@@ -121,7 +121,7 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
 
         current_window: Deque[float] = deque(maxlen=CURRENT_WINDOW)
 
-        # BEARING_WEAR 先跑 20 筆預熱，讓窗口填滿，確保訓練資料的 current_std 有意義
+        # BEARING_WEAR 先跑預熱，讓窗口填滿，確保訓練資料的 current_std 有意義
         if fault_type == "BEARING_WEAR":
             for _ in range(CURRENT_WINDOW):
                 raw = comms.read(power_state="ON", fault_type=fault_type, elapsed_sec=10.0)
