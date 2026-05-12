@@ -322,7 +322,7 @@ def build_full_table_html(df: pd.DataFrame) -> str:
         ("torque_nm",       "轉矩 N·m"),
         ("rule_fault_type", "Rule 判斷"),
         ("rule_level",      "Rule 等級"),
-        ("rule_confidence", "Rule 信心"),
+        ("rule_confidence" if "rule_confidence" in df.columns else "rule_score", "Rule 信心"),
         ("ml_fault_type",   "ML 判斷"),
         ("ml_level",        "ML 等級"),
         ("ml_confidence",   "ML 信心"),
@@ -457,7 +457,9 @@ def build_dashboard_html(
         l_mstate   = str(latest["machine_state"])
         l_rfault   = fmt_fault(str(latest["rule_fault_type"]))
         l_rlevel   = fmt_level(str(latest["rule_level"]))
-        l_rscore   = int(latest["rule_confidence"])
+        # 相容舊版資料庫（rule_score）和新版（rule_confidence）
+        _score_col = "rule_confidence" if "rule_confidence" in latest.index else "rule_score"
+        l_rscore   = int(latest[_score_col])
         l_mlfault  = fmt_fault(str(latest["ml_fault_type"]))
         l_mllevel  = fmt_level(str(latest["ml_level"]))
         l_mlconf   = round(float(latest["ml_confidence"]) * 100, 1)
@@ -493,7 +495,8 @@ def build_dashboard_html(
         curr_ser   = [round(float(v), 2) for v in cdf["current_a"]]
         rpm_ser    = [int(float(v)) for v in cdf["sync_rpm"]]
         torq_ser   = [round(float(v), 2) for v in cdf["torque_nm"]]
-        rscore_ser = [int(v) for v in cdf["rule_confidence"]]
+        _score_col2 = "rule_confidence" if "rule_confidence" in cdf.columns else "rule_score"
+        rscore_ser = [int(v) for v in cdf[_score_col2]]
         mlconf_ser = [round(float(v) * 100, 1) for v in cdf["ml_confidence"]]
     else:
         ts_labels = freq_ser = curr_ser = rpm_ser = torq_ser = rscore_ser = mlconf_ser = []
