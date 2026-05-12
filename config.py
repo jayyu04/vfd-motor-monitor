@@ -31,6 +31,7 @@ MAX_CHART_POINTS            = 200   # 趨勢圖最多顯示筆數
 
 # STALL（機械卡死）
 STALL_CURRENT_BASE          = 20.0  # 觸發電流門檻（133% FLA）
+STALL_FREQ_THRESHOLD        = 40.0  # 觸發頻率門檻（Hz），低頻才判 STALL
 STALL_SLIP_THRESHOLD        = 0.12  # 滑差條件已移除，保留供參考
 STALL_CURRENT_SCORE_PER_AMP = 10    # 電流每超過 1A → +10 分
 STALL_SLIP_SCORE_PER_PCT    = 0     # 滑差條件已移除
@@ -48,7 +49,7 @@ OVERLOAD_SCORE_PER_AMP      = 9     # 每超過 1A → +9 分
 OVERLOAD_MAX_SCORE          = 49    # 最高分（WARNING 上緣）
 
 # BEARING_WEAR（軸承磨損）
-BEARING_STD_THRESHOLD       = 0.8   # 電流標準差觸發門檻（A）
+BEARING_STD_THRESHOLD       = 0.6   # 電流標準差觸發門檻（A）
 BEARING_FREQ_STABLE_RANGE   = 0.5   # 頻率穩定判斷範圍（Hz）
 BEARING_WINDOW_SIZE         = 20    # 滑動窗口大小（筆）
 BEARING_MAX_SCORE           = 49    # 最高分（WARNING 上緣）
