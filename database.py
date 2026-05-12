@@ -11,13 +11,12 @@ from config import MAX_DB_RECORDS
 # ---------------------------------------------------------------------------
 # 常數
 # ---------------------------------------------------------------------------
-DB_PATH = "motor_monitor.db"
+DB_PATH     = "motor_monitor.db"
 MAX_HISTORY = MAX_DB_RECORDS
 
 # ---------------------------------------------------------------------------
 # 資料庫初始化
 # ---------------------------------------------------------------------------
-
 
 def init_db(db_path: str = DB_PATH) -> None:
     """建立資料表（若已存在則跳過）"""
@@ -44,7 +43,7 @@ def init_db(db_path: str = DB_PATH) -> None:
                 -- Rules 結果
                 rule_fault_type  TEXT,
                 rule_level       TEXT,
-                rule_score       INTEGER,
+                rule_confidence  INTEGER,
                 rule_reasons     TEXT,
 
                 -- ML 結果
@@ -74,7 +73,6 @@ def init_db(db_path: str = DB_PATH) -> None:
 # 連線工具
 # ---------------------------------------------------------------------------
 
-
 @contextmanager
 def _connect(db_path: str = DB_PATH) -> Generator[sqlite3.Connection, None, None]:
     conn = sqlite3.connect(db_path)
@@ -93,7 +91,6 @@ def _connect(db_path: str = DB_PATH) -> Generator[sqlite3.Connection, None, None
 # 寫入
 # ---------------------------------------------------------------------------
 
-
 def insert_record(record: FullRecord, db_path: str = DB_PATH) -> int:
     """
     寫入一筆 FullRecord，回傳新插入的 id。
@@ -102,43 +99,37 @@ def insert_record(record: FullRecord, db_path: str = DB_PATH) -> int:
     d = asdict(record)
 
     with _connect(db_path) as conn:
-        cursor = conn.execute(
-            """
+        cursor = conn.execute("""
             INSERT INTO motor_records (
                 timestamp, motor_id, machine_state,
                 frequency_hz, current_a, voltage_v,
                 sync_rpm, slip_ratio, torque_nm,
-                rule_fault_type, rule_level, rule_score, rule_reasons,
+                rule_fault_type, rule_level, rule_confidence, rule_reasons,
                 ml_fault_type, ml_level, ml_confidence,
                 final_level
             ) VALUES (
                 :timestamp, :motor_id, :machine_state,
                 :frequency_hz, :current_a, :voltage_v,
                 :sync_rpm, :slip_ratio, :torque_nm,
-                :rule_fault_type, :rule_level, :rule_score, :rule_reasons,
+                :rule_fault_type, :rule_level, :rule_confidence, :rule_reasons,
                 :ml_fault_type, :ml_level, :ml_confidence,
                 :final_level
             )
-        """,
-            d,
-        )
+        """, d)
 
         new_id = cursor.lastrowid
 
         # 超過上限時刪最舊的
         count = conn.execute("SELECT COUNT(*) FROM motor_records").fetchone()[0]
         if count > MAX_HISTORY:
-            conn.execute(
-                """
+            conn.execute("""
                 DELETE FROM motor_records
                 WHERE id IN (
                     SELECT id FROM motor_records
                     ORDER BY id ASC
                     LIMIT ?
                 )
-            """,
-                (count - MAX_HISTORY,),
-            )
+            """, (count - MAX_HISTORY,))
 
     return new_id
 
@@ -146,7 +137,6 @@ def insert_record(record: FullRecord, db_path: str = DB_PATH) -> int:
 # ---------------------------------------------------------------------------
 # 讀取
 # ---------------------------------------------------------------------------
-
 
 def _row_to_dict(row: sqlite3.Row) -> Dict:
     return dict(row)
@@ -160,22 +150,16 @@ def fetch_latest(
     """取最新 n 筆，可依 motor_id 篩選。"""
     with _connect(db_path) as conn:
         if motor_id:
-            rows = conn.execute(
-                """
+            rows = conn.execute("""
                 SELECT * FROM motor_records
                 WHERE motor_id = ?
                 ORDER BY id DESC LIMIT ?
-            """,
-                (motor_id, n),
-            ).fetchall()
+            """, (motor_id, n)).fetchall()
         else:
-            rows = conn.execute(
-                """
+            rows = conn.execute("""
                 SELECT * FROM motor_records
                 ORDER BY id DESC LIMIT ?
-            """,
-                (n,),
-            ).fetchall()
+            """, (n,)).fetchall()
 
     return [_row_to_dict(r) for r in rows]
 
@@ -191,18 +175,15 @@ def fetch_alerts(
     """
     level_map = {"WARNING": 1, "DANGER": 2, "CRITICAL": 3}
     min_order = level_map.get(level, 1)
-    levels = [k for k, v in level_map.items() if v >= min_order]
+    levels    = [k for k, v in level_map.items() if v >= min_order]
     placeholders = ",".join("?" * len(levels))
 
     with _connect(db_path) as conn:
-        rows = conn.execute(
-            f"""
+        rows = conn.execute(f"""
             SELECT * FROM motor_records
             WHERE final_level IN ({placeholders})
             ORDER BY id DESC LIMIT ?
-        """,
-            (*levels, n),
-        ).fetchall()
+        """, (*levels, n)).fetchall()
 
     return [_row_to_dict(r) for r in rows]
 
@@ -218,7 +199,7 @@ def fetch_stats(
     - 各 rule_fault_type 分佈
     - 最新一筆時間
     """
-    where = "WHERE motor_id = ?" if motor_id else ""
+    where  = "WHERE motor_id = ?" if motor_id else ""
     params = (motor_id,) if motor_id else ()
 
     with _connect(db_path) as conn:
@@ -228,25 +209,23 @@ def fetch_stats(
 
         level_rows = conn.execute(
             f"SELECT final_level, COUNT(*) as cnt FROM motor_records {where} "
-            f"GROUP BY final_level",
-            params,
+            f"GROUP BY final_level", params
         ).fetchall()
 
         fault_rows = conn.execute(
             f"SELECT rule_fault_type, COUNT(*) as cnt FROM motor_records {where} "
-            f"GROUP BY rule_fault_type",
-            params,
+            f"GROUP BY rule_fault_type", params
         ).fetchall()
 
         latest_ts = conn.execute(
-            f"SELECT timestamp FROM motor_records {where} " f"ORDER BY id DESC LIMIT 1",
-            params,
+            f"SELECT timestamp FROM motor_records {where} "
+            f"ORDER BY id DESC LIMIT 1", params
         ).fetchone()
 
     return {
-        "total": total,
-        "level_dist": {r["final_level"]: r["cnt"] for r in level_rows},
-        "fault_dist": {r["rule_fault_type"]: r["cnt"] for r in fault_rows},
+        "total":            total,
+        "level_dist":       {r["final_level"]: r["cnt"] for r in level_rows},
+        "fault_dist":       {r["rule_fault_type"]: r["cnt"] for r in fault_rows},
         "latest_timestamp": latest_ts[0] if latest_ts else None,
     }
 
