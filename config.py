@@ -33,9 +33,9 @@ MAX_CHART_POINTS            = 200   # 趨勢圖最多顯示筆數
 STALL_CURRENT_BASE          = 20.0  # 觸發電流門檻（133% FLA）
 STALL_SLIP_THRESHOLD        = 0.12  # 觸發轉差率門檻（12%）
 STALL_CURRENT_SCORE_PER_AMP = 8     # 電流每超過 1A → +8 分
-STALL_SLIP_SCORE_PER_PCT    = 6     # 滑差每超過 1% → +6 分
-STALL_CURRENT_MAX_SCORE     = 48    # 電流條件最高分
-STALL_SLIP_MAX_SCORE        = 36    # 滑差條件最高分
+STALL_SLIP_SCORE_PER_PCT    = 6     # 滑差條件已移除，保留供參考
+STALL_CURRENT_MAX_SCORE     = 84    # 電流條件最高分（合併原滑差分數）
+STALL_SLIP_MAX_SCORE        = 0     # 滑差條件已移除
 
 # LOAD_LOSS（負載流失）
 LOAD_LOSS_FREQ_MIN          = 40.0  # 觸發頻率門檻（Hz）
