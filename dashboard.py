@@ -220,7 +220,7 @@ def render_top_controls() -> None:
         "NORMAL":       ("#22d3a5", "rgba(34,211,165,.12)",  "rgba(34,211,165,.35)"),
         "OVERLOAD":     ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
         "STALL":        ("#f87171", "rgba(248,113,113,.18)", "rgba(248,113,113,.5)"),
-        "LOAD_LOSS":    ("#f87171", "rgba(248,113,113,.12)", "rgba(248,113,113,.3)"),
+        "LOAD_LOSS":    ("#fb923c", "rgba(251,146,60,.15)",  "rgba(251,146,60,.4)"),
         "BEARING_WEAR": ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
     }
     amc, ambg, ambd = fault_cfg.get(applied, fault_cfg["NORMAL"])
@@ -590,17 +590,17 @@ def build_dashboard_html(
     ms_bd     = {"關機": "rgba(75,97,116,.35)", "啟動中": "rgba(251,191,36,.4)",  "運轉中": "rgba(34,211,165,.35)"}.get(machine_state, "rgba(75,97,116,.35)")
     fault_color = {
         "NORMAL": "#22d3a5", "OVERLOAD": "#fbbf24",
-        "STALL": "#f87171", "LOAD_LOSS": "#f87171", "BEARING_WEAR": "#fbbf24",
+        "STALL": "#f87171", "LOAD_LOSS": "#fb923c", "BEARING_WEAR": "#fbbf24",
         "AUTO": "#a78bfa",
     }.get(applied_fault, "#22d3a5")
     fault_bg  = {
         "NORMAL": "rgba(34,211,165,.12)", "OVERLOAD": "rgba(251,191,36,.15)",
-        "STALL": "rgba(248,113,113,.18)", "LOAD_LOSS": "rgba(248,113,113,.12)",
+        "STALL": "rgba(248,113,113,.18)", "LOAD_LOSS": "rgba(251,146,60,.15)",
         "BEARING_WEAR": "rgba(251,191,36,.15)", "AUTO": "rgba(167,139,250,.12)",
     }.get(applied_fault, "rgba(34,211,165,.12)")
     fault_bd  = {
         "NORMAL": "rgba(34,211,165,.35)", "OVERLOAD": "rgba(251,191,36,.4)",
-        "STALL": "rgba(248,113,113,.5)",  "LOAD_LOSS": "rgba(248,113,113,.3)",
+        "STALL": "rgba(248,113,113,.5)",  "LOAD_LOSS": "rgba(251,146,60,.4)",
         "BEARING_WEAR": "rgba(251,191,36,.4)", "AUTO": "rgba(167,139,250,.35)",
     }.get(applied_fault, "rgba(34,211,165,.35)")
 
@@ -767,7 +767,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     </div>
     <div>
       <div class="header-title">VFD MOTOR MONITORING SYSTEM</div>
-      <div class="header-sub">變頻器馬達異常監測與風險分析 · v3.0 · Rule-based Anomaly Score + Random Forest</div>
+      <div class="header-sub">變頻器馬達異常監測與風險分析 · v3.0 · Rule Confidence + Random Forest</div>
     </div>
   </div>
   <div class="header-right">
@@ -882,7 +882,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
       <div class="score-row" style="margin-top:8px;">
         <div class="score-block">
           <div class="score-num {rule_cls}">{l_rscore}</div>
-          <div class="score-label">Rule Score<br/>0~100</div>
+          <div class="score-label">Rule 信心<br/>Confidence</div>
         </div>
         <div class="score-block">
           <div class="score-num {ml_cls}">{l_mlconf}%</div>
@@ -913,7 +913,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     <div style="position:relative;height:180px;"><canvas id="c3"></canvas></div>
   </div>
   <div class="chart-card">
-    <div class="chart-header"><span class="chart-title">Rule 分數（0~100）/ ML 信心（%）</span><span class="badge-live">LIVE</span></div>
+    <div class="chart-header"><span class="chart-title">Rule 信心（0~100%）/ ML 信心（%）</span><span class="badge-live">LIVE</span></div>
     <div style="position:relative;height:180px;"><canvas id="c4"></canvas></div>
   </div>
 </div>
