@@ -530,19 +530,18 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   </div>
   <div class="card" style="--accent:var(--amber)">
     <div class="card-title">四個條件如何計分</div>
-    <p style="margin-bottom:12px;">四個條件<span class="highlight">各自獨立計分</span>，最後取分數最高的那個作為最終結果。</p>
+    <p style="margin-bottom:12px;">四個條件各自獨立計算分數，<span class="highlight">取分數最高的那個</span>作為最終結果，不累加。這樣設計確保各模式的嚴重程度不會互相干擾。</p>
     <p style="margin-bottom:8px;"><strong style="color:var(--red);">STALL（機械卡死）</strong> → 最高 84 分 → 緊急</p>
     <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
-      觸發條件：電流 &gt; 20A（133% FLA）且 轉差率 &gt; 12%<br/>
-      電流每超過 20A 一安培 → +8 分（最多 48 分）<br/>
-      滑差每超過 12% 一個百分點 → +6 分（最多 36 分）<br/>
-      <span class="formula-comment">兩個條件都滿足才給滿分，單一條件只給一半，避免誤報</span>
+      觸發條件：電流 &gt; 20A（133% FLA）<br/>
+      電流每超過 20A 一安培 → +8 分（最多 84 分）<br/>
+      <span class="formula-comment">只看電流，不看滑差。滑差是從電流估算的，加入滑差條件是假的雙重確認，兩個條件不獨立。模糊地帶（OVERLOAD vs STALL）由 ML 負責區分。</span>
     </div>
     <p style="margin-bottom:8px;"><strong style="color:var(--orange);">LOAD_LOSS（負載流失）</strong> → 最高 64 分 → 危險</p>
     <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
-      觸發條件：頻率 &gt; 40Hz 且 電流 &lt; 5A<br/>
+      觸發條件：電流 &lt; 5A（不限頻率）<br/>
       score = (5 - 電流) / 5 × 30 + 40，上限 64 分<br/>
-      <span class="formula-comment">兩個條件必須同時成立，避免低電流單獨誤報</span>
+      <span class="formula-comment">頻率限制已移除，因為任何操作頻率下都可能發生負載流失。電流越低分數越高。</span>
     </div>
     <p style="margin-bottom:8px;"><strong style="color:var(--amber);">OVERLOAD（過電流）</strong> → 最高 29 分 → 警告</p>
     <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
@@ -711,10 +710,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
     <p style="margin-bottom:10px;"><strong style="color:var(--red);">OVERLOAD vs STALL（電流 20~22A 的模糊地帶）</strong></p>
     <div class="formula-block" style="font-size:11px;">
-      電流 21A 時兩個條件都會給分，Rules 難以區分<br/>
-      OVERLOAD 分數：27分 ／ STALL 分數：約 30 分（差距很小）<br/>
-      ML 看頻率 + 滑差 + 轉矩的組合<br/>
-      OVERLOAD 頻率正常，STALL 頻率低 → ML 能準確區分
+      電流 21A 時：<br/>
+      STALL    分數：(21-20) × 8 = 8分（取最高後被 OVERLOAD 蓋過）<br/>
+      OVERLOAD 分數：(21-16.5) × 6 = 27分 → WARNING<br/>
+      Rules 取最高：OVERLOAD 27分，但不確定是哪個異常<br/><br/>
+      ML 看頻率 + 轉矩的組合：<br/>
+      OVERLOAD → 頻率正常、轉矩正常<br/>
+      STALL    → 頻率低、轉矩極高<br/>
+      → ML 能準確區分，這正是雙層設計的價值
     </div>
   </div>
   <div class="card" style="--accent:var(--green)">
