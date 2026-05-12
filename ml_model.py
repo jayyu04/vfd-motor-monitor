@@ -121,9 +121,17 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
 
         current_window: Deque[float] = deque(maxlen=CURRENT_WINDOW)
 
+        # BEARING_WEAR 先跑 20 筆預熱，讓窗口填滿，確保訓練資料的 current_std 有意義
+        if fault_type == "BEARING_WEAR":
+            for _ in range(CURRENT_WINDOW):
+                raw = comms.read(power_state="ON", fault_type=fault_type, elapsed_sec=10.0)
+                rec = collect(raw)
+                phy = calculate(rec)
+                current_window.append(phy.current_a)
+
         for i in range(samples_per_class):
-            # 每個 fault_type 第一筆重置狀態
-            if i == 0:
+            # 每個 fault_type 第一筆重置狀態（BEARING_WEAR 已在上方預熱）
+            if i == 0 and fault_type != "BEARING_WEAR":
                 _reset_all_states()
             # NORMAL 每 20 筆重置一次（跟窗口大小一致）確保頻率覆蓋 30~60Hz 全範圍
             elif fault_type == "NORMAL" and i % 20 == 0:
