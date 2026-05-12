@@ -132,7 +132,7 @@ class MotorMonitor:
             torque_nm       = phy.torque_nm,
             rule_fault_type = rule_res.fault_type,
             rule_level      = rule_res.level,
-            rule_confidence = rule_res.rule_confidence,
+            rule_confidence = getattr(rule_res, "rule_confidence", None) or getattr(rule_res, "anomaly_score", 0),
             rule_reasons    = " | ".join(rule_res.reasons),
             ml_fault_type   = ml_res.fault_type,
             ml_level        = ml_res.level,
