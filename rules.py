@@ -5,17 +5,14 @@ from typing import Dict, List, Literal, Tuple
 
 from config import (
     BEARING_FREQ_STABLE_RANGE,
-    BEARING_MAX_SCORE,
     BEARING_STD_THRESHOLD,
     BEARING_WINDOW_SIZE,
     LOAD_LOSS_CURRENT_MAX,
-    LOAD_LOSS_MAX_SCORE,
     OVERLOAD_CURRENT_BASE,
-    OVERLOAD_MAX_SCORE,
     OVERLOAD_SCORE_PER_AMP,
     STALL_CURRENT_BASE,
-    STALL_CURRENT_MAX_SCORE,
     STALL_CURRENT_SCORE_PER_AMP,
+    STALL_FREQ_THRESHOLD,
 )
 from physics import PhysicsRecord
 
@@ -26,25 +23,26 @@ RuleLevel     = Literal["NORMAL", "WARNING", "DANGER", "CRITICAL"]
 RuleFaultType = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR"]
 
 # ---------------------------------------------------------------------------
-# 風險等級對應分數區間（從 config.py 的 LEVEL_THRESHOLDS）
+# 模式直接綁定等級（不再用分數決定等級）
 # ---------------------------------------------------------------------------
-LEVEL_THRESHOLDS: List[Tuple[int, RuleLevel]] = [
-    (75, "CRITICAL"),
-    (50, "DANGER"),
-    (25, "WARNING"),
-    (0,  "NORMAL"),
-]
+FAULT_TO_LEVEL: Dict[str, RuleLevel] = {
+    "NORMAL":       "NORMAL",
+    "OVERLOAD":     "WARNING",
+    "BEARING_WEAR": "WARNING",
+    "LOAD_LOSS":    "DANGER",
+    "STALL":        "CRITICAL",
+}
 
 # ---------------------------------------------------------------------------
 # 判斷結果
 # ---------------------------------------------------------------------------
 @dataclass
 class RuleResult:
-    fault_type:    RuleFaultType
-    level:         RuleLevel
-    anomaly_score: int
-    contributions: Dict[str, int]
-    reasons:       List[str] = field(default_factory=list)
+    fault_type:       RuleFaultType
+    level:            RuleLevel
+    rule_confidence:  int            # 0~100，觸發條件的信心程度
+    contributions:    Dict[str, int]
+    reasons:          List[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -99,70 +97,60 @@ def clear_windows() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 各條件分數計算
+# 各模式信心分數計算（各自 0~100，互相獨立）
 # ---------------------------------------------------------------------------
 
-def _score_stall(current_a: float, slip_ratio: float) -> Tuple[int, List[str]]:
+def _conf_stall(current_a: float, frequency_hz: float) -> Tuple[int, List[str]]:
     """
-    STALL 判斷：只看電流是否超過 133% FLA。
-    滑差條件已移除，因為 slip_ratio 是從電流估算的，
-    加入滑差是假的雙重確認，兩個條件不獨立。
-    模糊地帶（OVERLOAD vs STALL）由 ML 負責區分。
+    STALL 信心分數：電流超過 133% FLA 且頻率低於 40Hz。
+    頻率條件區分 STALL（低頻高電流）vs OVERLOAD（正常頻率高電流）。
+    電流越高信心越高，滿分 100。
     """
-    score   = 0
-    reasons = []
+    if current_a <= STALL_CURRENT_BASE or frequency_hz >= STALL_FREQ_THRESHOLD:
+        return 0, []
 
-    current_over  = max(0.0, current_a - STALL_CURRENT_BASE)
-    current_score = min(int(current_over * STALL_CURRENT_SCORE_PER_AMP), STALL_CURRENT_MAX_SCORE)
+    over       = current_a - STALL_CURRENT_BASE
+    confidence = min(int(over * STALL_CURRENT_SCORE_PER_AMP), 100)
+    reasons    = [
+        f"電流 {current_a:.1f}A > {STALL_CURRENT_BASE:.1f}A (133% FLA) [{confidence}%]",
+        f"頻率 {frequency_hz:.1f}Hz < {STALL_FREQ_THRESHOLD:.0f}Hz（低頻確認堵轉）",
+    ]
+    return confidence, reasons
 
-    if current_a > STALL_CURRENT_BASE:
-        score = current_score
-        reasons.append(f"電流 {current_a:.1f}A > {STALL_CURRENT_BASE:.1f}A (133% FLA) [{score}分]")
 
-    return score, reasons
-
-
-def _score_load_loss(frequency_hz: float, current_a: float) -> Tuple[int, List[str]]:
+def _conf_load_loss(current_a: float) -> Tuple[int, List[str]]:
     """
-    LOAD_LOSS 判斷：只看電流是否極低（< 5A）。
-    頻率限制已移除，因為任何操作頻率下都可能發生負載流失。
-    電流越低分數越高，上限 DANGER 區間。
+    LOAD_LOSS 信心分數：電流低於 5A。
+    電流越低信心越高，滿分 100。
     """
-    score   = 0
-    reasons = []
+    if current_a >= LOAD_LOSS_CURRENT_MAX:
+        return 0, []
 
-    if current_a < LOAD_LOSS_CURRENT_MAX:
-        deficit = max(0.0, LOAD_LOSS_CURRENT_MAX - current_a)
-        score   = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 24) + 50, LOAD_LOSS_MAX_SCORE)
-        reasons.append(f"電流 {current_a:.1f}A < {LOAD_LOSS_CURRENT_MAX:.0f}A（負載流失）[{score}分]")
-
-    return score, reasons
+    deficit    = LOAD_LOSS_CURRENT_MAX - current_a
+    confidence = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 100), 100)
+    reasons    = [f"電流 {current_a:.1f}A < {LOAD_LOSS_CURRENT_MAX:.0f}A（負載流失）[{confidence}%]"]
+    return confidence, reasons
 
 
-def _score_overload(current_a: float) -> Tuple[int, List[str]]:
+def _conf_overload(current_a: float) -> Tuple[int, List[str]]:
     """
-    OVERLOAD 判斷：電流超過 110% FLA。
-    上限 WARNING 區間，不讓 OVERLOAD 跑到 DANGER。
+    OVERLOAD 信心分數：電流超過 110% FLA。
+    電流越高信心越高，滿分 100。
     """
-    score   = 0
-    reasons = []
+    if current_a <= OVERLOAD_CURRENT_BASE:
+        return 0, []
 
-    over = max(0.0, current_a - OVERLOAD_CURRENT_BASE)
-    if over > 0:
-        score = min(int(over * OVERLOAD_SCORE_PER_AMP), OVERLOAD_MAX_SCORE)
-        reasons.append(f"電流 {current_a:.1f}A > {OVERLOAD_CURRENT_BASE:.1f}A (110% FLA) [{score}分]")
-
-    return score, reasons
+    over       = current_a - OVERLOAD_CURRENT_BASE
+    confidence = min(int(over * OVERLOAD_SCORE_PER_AMP), 100)
+    reasons    = [f"電流 {current_a:.1f}A > {OVERLOAD_CURRENT_BASE:.1f}A (110% FLA) [{confidence}%]"]
+    return confidence, reasons
 
 
-def _score_bearing(motor_id: str, current_a: float, frequency_hz: float) -> Tuple[int, List[str]]:
+def _conf_bearing(motor_id: str, current_a: float, frequency_hz: float) -> Tuple[int, List[str]]:
     """
-    BEARING_WEAR 判斷：電流波動大且頻率穩定。
-    需累積足夠筆數（滑動窗口）才觸發。
+    BEARING_WEAR 信心分數：電流標準差超過門檻且頻率穩定。
+    標準差越大信心越高，滿分 100。
     """
-    score   = 0
-    reasons = []
-
     window = _get_window(motor_id)
     window.push(current_a, frequency_hz)
 
@@ -172,37 +160,16 @@ def _score_bearing(motor_id: str, current_a: float, frequency_hz: float) -> Tupl
     std        = window.current_std()
     freq_range = window.freq_range()
 
-    if std > BEARING_STD_THRESHOLD and freq_range < BEARING_FREQ_STABLE_RANGE:
-        over  = std - BEARING_STD_THRESHOLD
-        score = min(int(over * 15) + 25, BEARING_MAX_SCORE)
-        reasons.append(f"電流波動標準差 {std:.2f}A > {BEARING_STD_THRESHOLD}A [{score}分]")
-        reasons.append(f"頻率穩定（變化 {freq_range:.2f}Hz）[輔助確認]")
+    if std <= BEARING_STD_THRESHOLD or freq_range >= BEARING_FREQ_STABLE_RANGE:
+        return 0, []
 
-    return score, reasons
-
-
-# ---------------------------------------------------------------------------
-# 工具函式
-# ---------------------------------------------------------------------------
-
-def _score_to_level(score: int) -> RuleLevel:
-    for threshold, level in LEVEL_THRESHOLDS:
-        if score >= threshold:
-            return level
-    return "NORMAL"
-
-
-def _dominant_fault(contributions: Dict[str, int]) -> RuleFaultType:
-    if not contributions:
-        return "NORMAL"
-    dominant = max(contributions, key=lambda k: contributions[k])
-    mapping: Dict[str, RuleFaultType] = {
-        "stall":        "STALL",
-        "load_loss":    "LOAD_LOSS",
-        "overload":     "OVERLOAD",
-        "bearing_wear": "BEARING_WEAR",
-    }
-    return mapping.get(dominant, "NORMAL")
+    over       = std - BEARING_STD_THRESHOLD
+    confidence = min(int(over / BEARING_STD_THRESHOLD * 100), 100)
+    reasons    = [
+        f"電流波動標準差 {std:.2f}A > {BEARING_STD_THRESHOLD}A [{confidence}%]",
+        f"頻率穩定（變化 {freq_range:.2f}Hz）[輔助確認]",
+    ]
+    return confidence, reasons
 
 
 # ---------------------------------------------------------------------------
@@ -211,53 +178,69 @@ def _dominant_fault(contributions: Dict[str, int]) -> RuleFaultType:
 
 def evaluate(record: PhysicsRecord) -> RuleResult:
     """
-    接收 physics.py 的完整物理量，計算 Anomaly Score 並回傳 RuleResult。
+    接收 physics.py 的完整物理量，計算各模式的 Rule Confidence 並回傳 RuleResult。
 
-    注意：
-        啟動遮蔽由 main.py 負責，rules.py 不判斷狀態。
-        直接傳入資料就給出判斷結果。
+    設計原則：
+    - 各模式各自計算 0~100 的信心分數，互相獨立
+    - 取信心分數最高的模式作為判斷結果
+    - 等級直接跟模式綁定，不再由分數決定
+    - 啟動遮蔽由 main.py 負責，rules.py 不判斷狀態
     """
-    contributions: Dict[str, int] = {}
-    all_reasons:   List[str]      = []
-
-    stall_score,    stall_reasons    = _score_stall(record.current_a, record.slip_ratio)
-    load_score,     load_reasons     = _score_load_loss(record.frequency_hz, record.current_a)
-    bearing_score,  bearing_reasons  = _score_bearing(
+    stall_conf,    stall_reasons    = _conf_stall(record.current_a, record.frequency_hz)
+    load_conf,     load_reasons     = _conf_load_loss(record.current_a)
+    overload_conf, overload_reasons = _conf_overload(record.current_a)
+    bearing_conf,  bearing_reasons  = _conf_bearing(
         record.motor_id, record.current_a, record.frequency_hz
     )
 
-    overload_score, overload_reasons = _score_overload(record.current_a)
+    # STALL 觸發時（低頻 + 高電流），OVERLOAD 不參與競爭
+    # 因為 STALL 的頻率條件已確認是堵轉，不應讓 OVERLOAD 蓋過
+    if stall_conf > 0:
+        overload_conf = 0
 
-    # 各條件獨立計分，取最高分那個
-    # STALL 和 OVERLOAD 可能同時觸發（電流 20~22A 模糊地帶）
-    # 取分數最高的那個，不累加
-    all_contributions = {
-        "stall":        stall_score,
-        "load_loss":    load_score,
-        "overload":     overload_score,
-        "bearing_wear": bearing_score,
+    all_conf = {
+        "stall":        stall_conf,
+        "load_loss":    load_conf,
+        "overload":     overload_conf,
+        "bearing_wear": bearing_conf,
     }
 
-    # 只保留分數最高的那個
-    if any(v > 0 for v in all_contributions.values()):
-        dominant = max(all_contributions, key=lambda k: all_contributions[k])
-        contributions[dominant] = all_contributions[dominant]
-        if dominant == "stall":        all_reasons.extend(stall_reasons)
-        elif dominant == "load_loss":  all_reasons.extend(load_reasons)
-        elif dominant == "overload":   all_reasons.extend(overload_reasons)
-        elif dominant == "bearing_wear": all_reasons.extend(bearing_reasons)
+    # 同分時的優先順序：等級較嚴重的優先
+    # STALL > LOAD_LOSS > OVERLOAD > BEARING_WEAR
+    PRIORITY = {"stall": 4, "load_loss": 3, "overload": 2, "bearing_wear": 1}
 
-    total_score = min(max(all_contributions.values(), default=0), 100)
-    level       = _score_to_level(total_score)
-    fault_type  = _dominant_fault(contributions) if contributions else "NORMAL"
+    if any(v > 0 for v in all_conf.values()):
+        dominant   = max(all_conf, key=lambda k: (all_conf[k], PRIORITY[k]))
+        confidence = all_conf[dominant]
+        contributions = {dominant: confidence}
 
-    if not all_reasons:
-        all_reasons = ["各項數值正常"]
+        reasons_map = {
+            "stall":        stall_reasons,
+            "load_loss":    load_reasons,
+            "overload":     overload_reasons,
+            "bearing_wear": bearing_reasons,
+        }
+        all_reasons = reasons_map[dominant]
+
+        fault_map: Dict[str, RuleFaultType] = {
+            "stall":        "STALL",
+            "load_loss":    "LOAD_LOSS",
+            "overload":     "OVERLOAD",
+            "bearing_wear": "BEARING_WEAR",
+        }
+        fault_type = fault_map[dominant]
+    else:
+        fault_type    = "NORMAL"
+        confidence    = 0
+        contributions = {}
+        all_reasons   = ["各項數值正常"]
+
+    level = FAULT_TO_LEVEL[fault_type]
 
     return RuleResult(
-        fault_type    = fault_type,
-        level         = level,
-        anomaly_score = total_score,
-        contributions = contributions,
-        reasons       = all_reasons,
+        fault_type      = fault_type,
+        level           = level,
+        rule_confidence = confidence,
+        contributions   = contributions,
+        reasons         = all_reasons,
     )
