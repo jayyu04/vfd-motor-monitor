@@ -226,6 +226,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <text x="715" y="510" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#a78bfa" font-weight="500">ml_model.py</text>
       <text x="715" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">隨機森林 100棵樹</text>
 
+      <!-- records -->
+      <rect x="60" y="414" width="160" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.2)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="140" y="430" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#38bdf8" font-weight="500">records.py</text>
+      <text x="140" y="444" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">FullRecord 資料結構</text>
+
       <!-- database -->
       <rect x="330" y="556" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="450" y="572" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">database.py</text>
@@ -258,6 +263,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <path d="M715,532 L715,546 L590,546 L590,433 L572,433" stroke="rgba(167,139,250,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
       <!-- main → database -->
       <line x1="450" y1="452" x2="450" y2="554" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- records → main（虛線，共用資料結構）-->
+      <line x1="220" y1="433" x2="328" y2="433" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-d)"/>
+      <!-- records → database（虛線，共用資料結構）-->
+      <path d="M220,452 L220,575 L328,575" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2" fill="none" marker-end="url(#arr-d)"/>
       <!-- database → dashboard（讀取，虛線） -->
       <path d="M330,575 L60,575 L60,84 L328,84" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
       <!-- VFD_simulator → dashboard（目前工況顯示，橙色虛線） -->
