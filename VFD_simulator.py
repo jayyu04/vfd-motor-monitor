@@ -94,6 +94,7 @@ class _RunningState:
     frequency_hz: float = 0.0
     current_a:    float = 0.0
     initialized:  bool  = False
+    step:         int   = 0
 
 
 _running_states: Dict[str, _RunningState] = {}
@@ -174,11 +175,12 @@ def _generate_running(fault_type: str) -> RawSignal:
                 cfg["freq_center"][1] + 1.0,
             ), 2
         )
+        amp_margin = cfg.get("drift_amp", 1.5) * 1.2
         state.current_a = round(
             _clamp(
                 state.current_a + d_amp,
-                cfg["amp_center"][0] - 1.5,
-                cfg["amp_center"][1] + 1.5,
+                cfg["amp_center"][0] - amp_margin,
+                cfg["amp_center"][1] + amp_margin,
             ), 2
         )
 
