@@ -513,83 +513,80 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   </div>
 </div>
 
-<!-- 06 Rules -->
+<!-- 06 Rules 判斷 — Rule Confidence -->
 <div class="section" id="rules">
-  <div class="sec-title">06 Rules 判斷 — 規則式異常評分</div>
+  <div class="sec-title">06 Rules 判斷 — Rule Confidence</div>
+
   <div class="card" style="--accent:var(--amber)">
-    <div class="card-title">核心概念：用分數取代是非題</div>
-    <p>傳統做法是直接判斷「正常」或「異常」，沒有灰色地帶。我們改用 <span class="highlight">Anomaly Score（0~100分）</span>，分數越高代表越嚴重，讓判斷有層次感。操作員不只知道「有沒有問題」，還能看到「分數在慢慢爬升」，提早做出應對。</p>
+    <div class="card-title">核心概念：判斷模式，等級跟模式綁定</div>
+    <p>傳統做法是用分數對應等級，分數高低決定嚴重程度。我們現在改成：<span class="highlight">Rules 的任務只有一件事——判斷是哪種模式</span>，等級直接跟模式綁定，不再由分數決定。</p>
+    <p>每個模式計算 0~100 的信心分數，取信心分數最高的那個模式，等級就自動出來。</p>
+    <div class="formula-block" style="font-size:11px;">
+      STALL        → 信心分數最高 → CRITICAL<br/>
+      LOAD_LOSS    → 信心分數最高 → DANGER<br/>
+      OVERLOAD     → 信心分數最高 → WARNING<br/>
+      BEARING_WEAR → 信心分數最高 → WARNING<br/>
+      四個都是 0   → NORMAL
+    </div>
   </div>
+
   <div class="analogy-box">
     <div class="analogy-title">白話比喻</div>
-    <div class="analogy-text">就像體溫計，不只告訴你「有沒有發燒」，而是告訴你「現在 38.5°C，比昨天的 37.8°C 高了」。分數的變化趨勢比單純的是非判斷更有價值。</div>
+    <div class="analogy-text">就像醫生問診：不是給你打一個「嚴重程度分數」，而是診斷出「你得了什麼病」，病名決定嚴重程度。得了感冒就是輕症，得了心肌梗塞就是危重，不會因為感冒症狀很嚴重就升格成危重。</div>
   </div>
+
   <div class="card" style="--accent:var(--amber)">
-    <div class="card-title">分數與風險等級對應</div>
-    <div class="score-bar">
-      <div class="score-labels">
-        <div class="score-label" style="background:rgba(34,211,165,.12);color:var(--green);">正常<br/>0~24</div>
-        <div class="score-label" style="background:rgba(251,191,36,.12);color:var(--amber);">警告<br/>25~49</div>
-        <div class="score-label" style="background:rgba(251,146,60,.12);color:var(--orange);">危險<br/>50~74</div>
-        <div class="score-label" style="background:rgba(248,113,113,.12);color:var(--red);">緊急<br/>75~100</div>
-      </div>
-      <div class="score-track">
-        <div class="score-seg" style="background:var(--green);opacity:.7;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono);color:white;">NORMAL</div>
-        <div class="score-seg" style="background:var(--amber);opacity:.7;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono);color:white;">OVERLOAD / BEARING_WEAR</div>
-        <div class="score-seg" style="background:var(--orange);opacity:.7;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono);color:white;">LOAD_LOSS</div>
-        <div class="score-seg" style="background:var(--red);opacity:.7;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono);color:white;">STALL嚴重</div>
-      </div>
+    <div class="card-title">四個模式的觸發條件與信心計算</div>
+    <p style="margin-bottom:16px;">各模式各自計算 0~100 的信心分數，互相獨立，取最高的那個模式作為判斷結果。</p>
 
-    </div>
-  </div>
-  <div class="card" style="--accent:var(--amber)">
-    <div class="card-title">四個條件如何計分</div>
-    <p style="margin-bottom:16px;">四個條件各自獨立計算分數，<span class="highlight">取分數最高的那個</span>作為最終結果，不累加。這樣設計確保各模式的嚴重程度不會互相干擾。</p>
-
-    <!-- STALL -->
-    <p style="margin-bottom:8px;"><strong style="color:var(--red);">STALL（機械卡死）</strong> → 最高 100 分 → 漸進式 DANGER / CRITICAL</p>
-    <div class="formula-block" style="font-size:11px;margin-bottom:8px;">
-      觸發條件：電流 &gt; 20A（133% FLA，IEC 60947）<br/>
-      計分公式：score = (電流 - 20) × 10，上限 100<br/><br/>
-      電流 22A → 20分 → NORMAL　電流 25A → 50分 → DANGER<br/>
-      電流 28A → 80分 → CRITICAL　電流 30A → 100分 → CRITICAL<br/><br/>
-      <span class="formula-comment">為什麼這樣設計：STALL 是漸進式的，電流剛超過 133% FLA 可能只是暫時性過載，電流越高才越確定是卡死。漸進分數讓操作員能觀察到惡化趨勢，不是一超過門檻就直接 CRITICAL。模糊地帶（20~22A）由 ML 負責判斷是 OVERLOAD 還是 STALL。</span>
+    <p style="margin-bottom:8px;"><strong style="color:var(--red);">STALL（機械卡死）</strong> → 觸發即 CRITICAL</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      觸發條件：電流 &gt; 20A（133% FLA）且 頻率 &lt; 40Hz<br/>
+      信心公式：(電流 - 20) × 10，上限 100%<br/>
+      電流 22A Hz=28 → 信心 20%　電流 25A Hz=28 → 信心 50%<br/>
+      電流 28A Hz=28 → 信心 80%　電流 30A Hz=28 → 信心 100%<br/><br/>
+      <span class="formula-comment">頻率條件區分 STALL vs OVERLOAD：同樣電流 22A，頻率正常（47Hz）→ OVERLOAD，頻率低（28Hz）→ STALL。STALL 觸發時 OVERLOAD 不參與競爭。</span>
     </div>
 
-    <!-- LOAD_LOSS -->
-    <p style="margin-bottom:8px;"><strong style="color:var(--orange);">LOAD_LOSS（負載流失）</strong> → 最高 74 分 → 永遠 DANGER</p>
-    <div class="formula-block" style="font-size:11px;margin-bottom:8px;">
-      觸發條件：電流 &lt; 5A<br/>
-      計分公式：score = (5 - 電流) / 5 × 24 + 50，上限 74<br/><br/>
-      電流 4.9A → 50分 → DANGER 下緣　電流 3A → 59分 → DANGER<br/>
-      電流 1A → 69分 → DANGER　電流 0A → 74分 → DANGER 上緣<br/><br/>
-      <span class="formula-comment">為什麼這樣設計：負載流失代表皮帶斷裂或幫浦空轉，馬達在空轉毫無產出，屬於結構性異常，一旦發生就是危險，所以分數從 DANGER 下緣（50分）開始，不給 WARNING 緩衝。電流越低代表越確定是空轉，分數越高。</span>
+    <p style="margin-bottom:8px;"><strong style="color:var(--orange);">LOAD_LOSS（負載流失）</strong> → 觸發即 DANGER</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
+      觸發條件：電流 &lt; 5A（不限頻率）<br/>
+      信心公式：(5 - 電流) / 5 × 100，上限 100%<br/>
+      電流 4A → 信心 20%　電流 2A → 信心 60%　電流 0A → 信心 100%<br/><br/>
+      <span class="formula-comment">任何操作頻率下電流極低就是負載流失，電流越低信心越高。</span>
     </div>
 
-    <!-- OVERLOAD -->
-    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">OVERLOAD（過電流）</strong> → 最高 49 分 → 永遠 WARNING</p>
-    <div class="formula-block" style="font-size:11px;margin-bottom:8px;">
+    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">OVERLOAD（過電流）</strong> → 觸發即 WARNING</p>
+    <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
       觸發條件：電流 &gt; 16.5A（110% FLA，IEC 60947）<br/>
-      計分公式：score = (電流 - 16.5) × 9，上限 49<br/><br/>
-      電流 17A → 4分 → NORMAL　電流 20A → 31分 → WARNING<br/>
-      電流 21A → 40分 → WARNING　電流 22A → 49分 → WARNING 上緣<br/><br/>
-      <span class="formula-comment">為什麼這樣設計：過電流是馬達可以短暫承受的狀態，不是立即危險。設計上限 49 分確保 OVERLOAD 永遠在 WARNING，提醒操作員注意但不造成恐慌。輕度過電流（17~19A）分數落在 NORMAL，由 ML 補位，反映了「剛超過門檻不一定是異常」的現實。</span>
+      信心公式：(電流 - 16.5) × 9，上限 100%<br/>
+      電流 17A → 信心 4%　電流 20A → 信心 31%　電流 22A → 信心 49%<br/><br/>
+      <span class="formula-comment">輕度過電流（17~19A）信心分數低，Rules 判為 NORMAL，由 ML 補位為 WARNING。</span>
     </div>
 
-    <!-- BEARING_WEAR -->
-    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">BEARING_WEAR（軸承磨損）</strong> → 最高 49 分 → 永遠 WARNING</p>
+    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">BEARING_WEAR（軸承磨損）</strong> → 觸發即 WARNING</p>
     <div class="formula-block" style="font-size:11px;">
-      觸發條件：電流標準差 &gt; 0.8A 且 頻率變化 &lt; 0.5Hz<br/>
-      需累積最近 20 筆（約 6 秒）計算滑動窗口標準差<br/>
-      計分公式：score = (標準差 - 0.8) × 15 + 25，上限 49<br/><br/>
-      標準差 0.81A → 25分 → WARNING 下緣　標準差 1.5A → 36分 → WARNING<br/>
-      標準差 2.5A+ → 上限 49分 → WARNING 上緣<br/><br/>
-      <span class="formula-comment">為什麼這樣設計：軸承磨損是慢性劣化，不是緊急事故，設計上限 49 分讓它永遠在 WARNING，是預防性維護的訊號。頻率必須穩定才觸發，避免頻率變化本身造成的電流波動被誤判。窗口 20 筆讓標準差更穩定，寧可晚 6 秒發現也不要誤報。</span>
+      觸發條件：電流標準差 &gt; 0.6A 且 頻率變化 &lt; 0.5Hz<br/>
+      需累積最近 20 筆資料（約 6 秒）計算滑動窗口標準差<br/>
+      信心公式：(標準差 - 0.6) / 0.6 × 100，上限 100%<br/>
+      標準差 0.7A → 信心 17%　標準差 1.0A → 信心 67%　標準差 1.5A+ → 信心 100%<br/><br/>
+      <span class="formula-comment">頻率必須穩定才觸發，排除頻率變化本身造成的電流波動。20 筆窗口讓標準差更穩定，寧可晚 6 秒發現也不要誤報。</span>
     </div>
   </div>
+
+  <div class="card" style="--accent:var(--amber)">
+    <div class="card-title">同分時的優先順序</div>
+    <p>兩個模式信心分數相同時，取等級較嚴重的那個：</p>
+    <div class="formula-block" style="font-size:11px;">
+      STALL &gt; LOAD_LOSS &gt; OVERLOAD &gt; BEARING_WEAR<br/><br/>
+      例如 OVERLOAD 和 BEARING_WEAR 同時得到 30% 信心<br/>
+      → 取 OVERLOAD（等級 WARNING，兩者相同，取排序較前的）
+    </div>
+  </div>
+
   <div class="card" style="--accent:var(--green)">
     <div class="card-title">啟動遮蔽</div>
-    <p>馬達開機時電流是額定的 1.5~2 倍，這是正常現象不是異常。main.py 在開機後 5 秒內不呼叫 Rules，避免把正常的高啟動電流誤判為緊急告警。</p>
+    <p>馬達開機時電流是額定的 1.5~2 倍，這是正常現象不是異常。main.py 在開機後 5 秒內不呼叫 Rules，避免把正常的高啟動電流誤判為 STALL 或 OVERLOAD。</p>
   </div>
 </div>
 
@@ -694,20 +691,20 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   <div class="two-col">
     <div class="card" style="--accent:var(--amber)">
       <div class="card-title">Rules 的強項</div>
-      <p>物理條件明確、特徵極端的異常，Rules 快速給出結論，原因完全透明可解釋。</p>
+      <p>觸發條件明確的異常，Rules 直接給出模式和等級，原因完全透明可解釋。</p>
       <div class="formula-block" style="font-size:11px;">
-        STALL：電流 27A → score=70 → DANGER<br/>
-        LOAD_LOSS：電流 2A → score=64 → DANGER<br/>
-        立即告警，不需要等待
+        STALL：電流 27A Hz=28 → 信心 70% → CRITICAL<br/>
+        LOAD_LOSS：電流 2A → 信心 60% → DANGER<br/>
+        立即給出結果，不需要等待
       </div>
     </div>
     <div class="card" style="--accent:var(--purple)">
       <div class="card-title">ML 的強項</div>
-      <p>Rules 看不到的三個場景，ML 靠多特徵組合補位：</p>
+      <p>Rules 信心分數低或窗口未滿時，ML 靠多特徵組合補位：</p>
       <div class="formula-block" style="font-size:11px;">
-        輕度 OVERLOAD → Rules NORMAL / ML WARNING<br/>
-        STALL 低電流  → Rules OVERLOAD / ML STALL<br/>
-        BEARING_WEAR 初期 → Rules 等窗口 / ML 先補位
+        輕度 OVERLOAD → Rules 信心 4% / ML 確認 WARNING<br/>
+        BEARING_WEAR 前 20 筆 → Rules 等窗口 / ML 先補位<br/>
+        STALL vs OVERLOAD 邊界 → ML 靠頻率+轉矩確認
       </div>
     </div>
   </div>
@@ -715,29 +712,27 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   <div class="card" style="--accent:var(--cyan)">
     <div class="card-title">三個 ML 補位的具體場景</div>
 
-    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">場景一：OVERLOAD 輕度（電流 17~19A）</strong></p>
+    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">場景一：OVERLOAD 輕度（電流 16.5~19A）</strong></p>
     <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
-      電流 18A：<br/>
-      OVERLOAD score = (18-16.5) × 9 = 13分 → NORMAL（未到 WARNING 門檻）<br/>
-      ML 看電流比例 + 轉矩特徵 → 判 OVERLOAD WARNING<br/>
+      電流 18A：OVERLOAD 信心 = (18-16.5) × 9 = 13%<br/>
+      Rules 取最高：13% 的 OVERLOAD → 判 NORMAL（信心太低）<br/>
+      ML 從電流比例 + 轉矩組合 → 判 OVERLOAD WARNING<br/>
       → final = WARNING（ML 補位）
     </div>
 
-    <p style="margin-bottom:8px;"><strong style="color:var(--red);">場景二：STALL 低電流模糊地帶（電流 20~24A）</strong></p>
+    <p style="margin-bottom:8px;"><strong style="color:var(--red);">場景二：BEARING_WEAR 前 20 筆（窗口未填滿）</strong></p>
     <div class="formula-block" style="font-size:11px;margin-bottom:16px;">
-      電流 22A：<br/>
-      STALL    score = (22-20) × 10 = 20分<br/>
-      OVERLOAD score = (22-16.5) × 9 = 49分 → 取最高，判 OVERLOAD WARNING<br/>
-      ML 看頻率低 + 轉矩高 → 判 STALL DANGER<br/>
-      → final = DANGER（ML 升等）
+      第 1~19 筆：Rules 窗口未滿 → 信心 0% → 判 NORMAL<br/>
+      ML 從單筆電流振幅特徵 → 判 BEARING_WEAR WARNING<br/>
+      → final = WARNING（ML 提早約 6 秒補位）
     </div>
 
-    <p style="margin-bottom:8px;"><strong style="color:var(--amber);">場景三：BEARING_WEAR 前 20 筆（窗口未填滿）</strong></p>
+    <p style="margin-bottom:8px;"><strong style="color:var(--red);">場景三：兩層都確認（最可信）</strong></p>
     <div class="formula-block" style="font-size:11px;">
-      第 1~19 筆：<br/>
-      Rules 標準差窗口未滿 → score=0 → NORMAL<br/>
-      ML 從電流振幅特徵 → 判 BEARING_WEAR WARNING<br/>
-      → final = WARNING（ML 補位，提早約 6 秒發現）
+      STALL 電流 28A Hz=25：<br/>
+      Rules 信心 80% → STALL CRITICAL<br/>
+      ML 信心 100% → STALL CRITICAL<br/>
+      → final = CRITICAL（兩層一致，高度可信）
     </div>
   </div>
 
@@ -745,12 +740,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <div class="card-title">綜合等級如何決定</div>
     <p>取 Rules 等級和 ML 等級中<span class="highlight">較嚴重的那個</span>，不會因為一層說正常就放過。</p>
     <div class="formula-block" style="font-size:11px;">
-      Rules = NORMAL / ML = WARNING（BEARING_WEAR 初期）<br/>
-      → final = WARNING（ML 補位）<br/><br/>
-      Rules = WARNING（OVERLOAD）/ ML = DANGER（STALL）<br/>
-      → final = DANGER（ML 升等）<br/><br/>
-      Rules = CRITICAL / ML = CRITICAL（STALL 電流 28A+）<br/>
-      → final = CRITICAL（兩層確認，高度可信）
+      Rules = NORMAL / ML = WARNING → final = WARNING（ML 補位）<br/>
+      Rules = WARNING / ML = CRITICAL → final = CRITICAL（ML 升等）<br/>
+      Rules = CRITICAL / ML = CRITICAL → final = CRITICAL（兩層確認）
     </div>
   </div>
 </div>
@@ -758,41 +750,44 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 09 風險等級 -->
 <div class="section" id="levels">
   <div class="sec-title">09 風險等級</div>
+
   <div class="level-grid">
     <div class="level-card" style="--accent:var(--green)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--green);">正常</div>
-      <div class="level-score">Score 0 ~ 24</div>
+      <div class="level-score" style="font-size:10px;color:var(--text3);">NORMAL</div>
       <div class="level-action">設備運作正常，持續監控，無需採取行動</div>
     </div>
     <div class="level-card" style="--accent:var(--amber)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--amber);">警告</div>
-      <div class="level-score">Score 25 ~ 49</div>
+      <div class="level-score" style="font-size:10px;color:var(--text3);">OVERLOAD / BEARING_WEAR</div>
       <div class="level-action">出現異常趨勢，安排檢查，持續觀察是否惡化</div>
     </div>
     <div class="level-card" style="--accent:var(--orange)">
       <div class="level-dot" style="background:var(--orange);box-shadow:0 0 8px var(--orange);"></div>
       <div class="level-name" style="color:var(--orange);">危險</div>
-      <div class="level-score">Score 50 ~ 74</div>
+      <div class="level-score" style="font-size:10px;color:var(--text3);">LOAD_LOSS</div>
       <div class="level-action">立即檢查設備，考慮降載或計劃停機檢修</div>
     </div>
     <div class="level-card" style="--accent:var(--red)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--red);">緊急</div>
-      <div class="level-score">Score 75 ~ 100</div>
+      <div class="level-score" style="font-size:10px;color:var(--text3);">STALL</div>
       <div class="level-action">立即停機，繼續運轉可能造成設備損壞或人員安全事故</div>
     </div>
   </div>
+
   <div class="card" style="--accent:var(--cyan)">
-    <div class="card-title">各工況對應的設計等級</div>
+    <div class="card-title">等級直接跟模式綁定</div>
     <div class="formula-block" style="font-size:11px;">
-      STALL        → 漸進式 DANGER / CRITICAL（Score 最高 100）← 立即停機<br/>
-      LOAD_LOSS    → 危險（Score 50~74）← 盡快處理<br/>
-      OVERLOAD     → 警告（Score 最高 49）← 安排檢查<br/>
-      BEARING_WEAR → 警告（Score 最高 49）← 預防性維護
+      STALL（機械卡死）    → 緊急 CRITICAL ← 立即停機<br/>
+      LOAD_LOSS（負載流失）→ 危險 DANGER   ← 盡快處理<br/>
+      OVERLOAD（過電流）   → 警告 WARNING  ← 安排檢查<br/>
+      BEARING_WEAR（軸承） → 警告 WARNING  ← 預防性維護<br/>
+      NORMAL（正常）       → 正常 NORMAL   ← 持續監控
     </div>
-    <p>各工況的分數上限刻意對應等級上緣，確保不同嚴重程度的異常永遠落在正確的風險區間。</p>
+    <p>等級不再由分數高低決定，而是由模式直接決定。判出是什麼模式，等級就自動確定。</p>
   </div>
 </div>
 
@@ -836,4 +831,5 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 </div>
 </div>
 </body>
+</html>
 </html>
