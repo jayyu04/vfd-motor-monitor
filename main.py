@@ -24,52 +24,44 @@ LEVEL_ORDER = ["NORMAL", "WARNING", "DANGER", "CRITICAL"]
 # ---------------------------------------------------------------------------
 def _higher_level(level_a: str, level_b: str) -> str:
     """取兩個等級中較嚴重的。"""
-
     def rank(lv: str) -> int:
         try:
             return LEVEL_ORDER.index(lv)
         except ValueError:
-            return -1  # 啟動中等非標準等級排最低
+            return -1   # 啟動中等非標準等級排最低
 
     return level_a if rank(level_a) >= rank(level_b) else level_b
 
 
-def _make_startup_record(
-    timestamp: str,
-    motor_id: str,
-    frequency_hz: float,
-    current_a: float,
-    voltage_v: float,
-    slip_ratio: float,
-    torque_nm: float,
-    sync_rpm: float,
-) -> FullRecord:
+def _make_startup_record(timestamp: str, motor_id: str,
+                          frequency_hz: float, current_a: float,
+                          voltage_v: float, slip_ratio: float,
+                          torque_nm: float, sync_rpm: float) -> FullRecord:
     """產生啟動中的資料庫紀錄，rules / ml 欄位填啟動中 / 0。"""
     return FullRecord(
-        timestamp=timestamp,
-        motor_id=motor_id,
-        machine_state="啟動中",
-        frequency_hz=frequency_hz,
-        current_a=current_a,
-        voltage_v=voltage_v,
-        sync_rpm=round(120.0 * frequency_hz / 4, 1),
-        slip_ratio=slip_ratio,
-        torque_nm=torque_nm,
-        rule_fault_type="啟動中",
-        rule_level="啟動中",
-        rule_score=0,
-        rule_reasons="啟動過渡期，暫停異常判斷",
-        ml_fault_type="啟動中",
-        ml_level="啟動中",
-        ml_confidence=0.0,
-        final_level="啟動中",
+        timestamp       = timestamp,
+        motor_id        = motor_id,
+        machine_state   = "啟動中",
+        frequency_hz    = frequency_hz,
+        current_a       = current_a,
+        voltage_v       = voltage_v,
+        sync_rpm        = round(120.0 * frequency_hz / 4, 1),
+        slip_ratio      = slip_ratio,
+        torque_nm       = torque_nm,
+        rule_fault_type = "啟動中",
+        rule_level      = "啟動中",
+        rule_confidence = 0,
+        rule_reasons    = "啟動過渡期，暫停異常判斷",
+        ml_fault_type   = "啟動中",
+        ml_level        = "啟動中",
+        ml_confidence   = 0.0,
+        final_level     = "啟動中",
     )
 
 
 # ---------------------------------------------------------------------------
 # 主流水線
 # ---------------------------------------------------------------------------
-
 
 class MotorMonitor:
     """
@@ -84,9 +76,9 @@ class MotorMonitor:
 
     def tick(
         self,
-        power_state: str,
-        fault_type: str,
-        elapsed_sec: float,
+        power_state:  str,
+        fault_type:   str,
+        elapsed_sec:  float,
     ) -> Optional[FullRecord]:
         """
         執行一次完整的資料流水線。
@@ -110,42 +102,42 @@ class MotorMonitor:
         # ── 啟動遮蔽 ──
         if elapsed_sec < STARTUP_DURATION_SEC:
             full = _make_startup_record(
-                timestamp=phy.timestamp,
-                motor_id=phy.motor_id,
-                frequency_hz=phy.frequency_hz,
-                current_a=phy.current_a,
-                voltage_v=phy.voltage_v,
-                slip_ratio=phy.slip_ratio,
-                torque_nm=phy.torque_nm,
-                sync_rpm=phy.sync_rpm,
+                timestamp    = phy.timestamp,
+                motor_id     = phy.motor_id,
+                frequency_hz = phy.frequency_hz,
+                current_a    = phy.current_a,
+                voltage_v    = phy.voltage_v,
+                slip_ratio   = phy.slip_ratio,
+                torque_nm    = phy.torque_nm,
+                sync_rpm     = phy.sync_rpm,
             )
             database.insert_record(full)
             return full
 
         # ── 正常運轉，呼叫 rules 和 ml ──
         rule_res: RuleResult = evaluate(phy)
-        ml_res: MlResult = predict(phy)
+        ml_res:   MlResult   = predict(phy)
 
         final = _higher_level(rule_res.level, ml_res.level)
 
         full = FullRecord(
-            timestamp=phy.timestamp,
-            motor_id=phy.motor_id,
-            machine_state="運轉中",
-            frequency_hz=phy.frequency_hz,
-            current_a=phy.current_a,
-            voltage_v=phy.voltage_v,
-            sync_rpm=phy.sync_rpm,
-            slip_ratio=phy.slip_ratio,
-            torque_nm=phy.torque_nm,
-            rule_fault_type=rule_res.fault_type,
-            rule_level=rule_res.level,
-            rule_score=rule_res.anomaly_score,
-            rule_reasons=" | ".join(rule_res.reasons),
-            ml_fault_type=ml_res.fault_type,
-            ml_level=ml_res.level,
-            ml_confidence=ml_res.confidence,
-            final_level=final,
+            timestamp       = phy.timestamp,
+            motor_id        = phy.motor_id,
+            machine_state   = "運轉中",
+            frequency_hz    = phy.frequency_hz,
+            current_a       = phy.current_a,
+            voltage_v       = phy.voltage_v,
+            sync_rpm        = phy.sync_rpm,
+            slip_ratio      = phy.slip_ratio,
+            torque_nm       = phy.torque_nm,
+            rule_fault_type = rule_res.fault_type,
+            rule_level      = rule_res.level,
+            rule_confidence = rule_res.rule_confidence,
+            rule_reasons    = " | ".join(rule_res.reasons),
+            ml_fault_type   = ml_res.fault_type,
+            ml_level        = ml_res.level,
+            ml_confidence   = ml_res.confidence,
+            final_level     = final,
         )
 
         database.insert_record(full)
