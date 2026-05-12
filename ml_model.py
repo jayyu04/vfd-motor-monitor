@@ -24,34 +24,33 @@ from physics import PhysicsRecord
 # 型別定義
 # ---------------------------------------------------------------------------
 MlFaultType = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR"]
-MlLevel = Literal["NORMAL", "WARNING", "DANGER", "CRITICAL"]
+MlLevel     = Literal["NORMAL", "WARNING", "DANGER", "CRITICAL"]
 
 # ---------------------------------------------------------------------------
 # 常數
 # ---------------------------------------------------------------------------
-MODEL_PATH = "rf_model.pkl"
-ENCODER_PATH = "rf_encoder.pkl"
+MODEL_PATH        = "rf_model.pkl"
+ENCODER_PATH      = "rf_encoder.pkl"
 SAMPLES_PER_CLASS = 1000
-CURRENT_WINDOW = BEARING_WINDOW_SIZE
+CURRENT_WINDOW    = BEARING_WINDOW_SIZE
 
 # fault_type → 風險等級對應
 FAULT_TO_LEVEL: Dict[str, MlLevel] = {
-    "NORMAL": "NORMAL",
-    "OVERLOAD": "WARNING",
+    "NORMAL":       "NORMAL",
+    "OVERLOAD":     "WARNING",
     "BEARING_WEAR": "WARNING",
-    "LOAD_LOSS": "DANGER",
-    "STALL": "CRITICAL",
+    "LOAD_LOSS":    "DANGER",
+    "STALL":        "CRITICAL",
 }
-
 
 # ---------------------------------------------------------------------------
 # 推論結果
 # ---------------------------------------------------------------------------
 @dataclass
 class MlResult:
-    fault_type: MlFaultType
-    level: MlLevel
-    confidence: float
+    fault_type:    MlFaultType
+    level:         MlLevel
+    confidence:    float
     probabilities: Dict[str, float]
 
 
@@ -87,7 +86,7 @@ def extract_features(record: PhysicsRecord, current_std: float = 0.0) -> List[fl
     return [
         record.frequency_hz,
         record.current_a,
-        record.current_a / RATED_CURRENT_A,  # current_ratio
+        record.current_a / RATED_CURRENT_A,   # current_ratio
         record.slip_ratio,
         record.torque_nm,
         current_std,
@@ -97,7 +96,6 @@ def extract_features(record: PhysicsRecord, current_std: float = 0.0) -> List[fl
 # ---------------------------------------------------------------------------
 # 訓練資料產生
 # ---------------------------------------------------------------------------
-
 
 def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.DataFrame:
     """
@@ -111,14 +109,10 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
     from VFD_simulator import _reset_all_states
 
     fault_types: List[MlFaultType] = [
-        "NORMAL",
-        "OVERLOAD",
-        "STALL",
-        "LOAD_LOSS",
-        "BEARING_WEAR",
+        "NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR"
     ]
 
-    comms = VFDComms(mode="MOCK")
+    comms    = VFDComms(mode="MOCK")
     all_rows = []
 
     for fault_type in fault_types:
@@ -130,15 +124,15 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
             # 每個 fault_type 第一筆重置狀態
             if i == 0:
                 _reset_all_states()
-            # NORMAL 每 10 筆重置一次，確保頻率覆蓋 30~60Hz 全範圍
-            elif fault_type == "NORMAL" and i % 10 == 0:
+            # NORMAL 每 20 筆重置一次（跟窗口大小一致）確保頻率覆蓋 30~60Hz 全範圍
+            elif fault_type == "NORMAL" and i % 20 == 0:
                 _reset_all_states()
                 current_window.clear()
 
             raw = comms.read(
-                power_state="ON",
-                fault_type=fault_type,
-                elapsed_sec=10.0,
+                power_state = "ON",
+                fault_type  = fault_type,
+                elapsed_sec = 10.0,
             )
             rec = collect(raw)
             phy = calculate(rec)
@@ -146,12 +140,10 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
             current_window.append(phy.current_a)
 
             # 直接用真實的電流標準差，不強制調整
-            std = (
-                float(np.std(list(current_window))) if len(current_window) > 1 else 0.0
-            )
+            std = float(np.std(list(current_window))) if len(current_window) > 1 else 0.0
 
             features = extract_features(phy, current_std=std)
-            row = dict(zip(FEATURE_NAMES, features))
+            row      = dict(zip(FEATURE_NAMES, features))
             row["label"] = fault_type
             all_rows.append(row)
 
@@ -164,7 +156,6 @@ def generate_training_data(samples_per_class: int = SAMPLES_PER_CLASS) -> pd.Dat
 # ---------------------------------------------------------------------------
 # 訓練
 # ---------------------------------------------------------------------------
-
 
 def train(
     samples_per_class: int = SAMPLES_PER_CLASS,
@@ -180,7 +171,7 @@ def train(
     X = df[FEATURE_NAMES].values
     y = df["label"].values
 
-    le = LabelEncoder()
+    le    = LabelEncoder()
     y_enc = le.fit_transform(y)
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -189,11 +180,11 @@ def train(
 
     print("\n開始訓練隨機森林（100棵決策樹）...")
     clf = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=None,
-        min_samples_split=5,
-        random_state=42,
-        n_jobs=-1,
+        n_estimators   = 100,
+        max_depth      = None,
+        min_samples_split = 5,
+        random_state   = 42,
+        n_jobs         = -1,
     )
     clf.fit(X_train, y_train)
 
@@ -205,9 +196,8 @@ def train(
     # 特徵重要性
     importances = clf.feature_importances_
     print("特徵重要性：")
-    for name, imp in sorted(
-        zip(FEATURE_NAMES, importances), key=lambda x: x[1], reverse=True
-    ):
+    for name, imp in sorted(zip(FEATURE_NAMES, importances),
+                             key=lambda x: x[1], reverse=True):
         bar = "█" * int(imp * 40)
         print(f"  {name:<18} {imp:.4f}  {bar}")
 
@@ -225,7 +215,6 @@ def train(
 # 推論引擎
 # ---------------------------------------------------------------------------
 
-
 class MotorMLPredictor:
     """
     封裝模型載入與推論邏輯。
@@ -234,14 +223,14 @@ class MotorMLPredictor:
 
     def __init__(
         self,
-        model_path: str = MODEL_PATH,
+        model_path:   str = MODEL_PATH,
         encoder_path: str = ENCODER_PATH,
     ):
-        self._clf: Optional[RandomForestClassifier] = None
-        self._le: Optional[LabelEncoder] = None
-        self._windows: Dict[str, Deque[float]] = {}
-        self._model_path = model_path
-        self._encoder_path = encoder_path
+        self._clf:          Optional[RandomForestClassifier] = None
+        self._le:           Optional[LabelEncoder]           = None
+        self._windows:      Dict[str, Deque[float]]          = {}
+        self._model_path    = model_path
+        self._encoder_path  = encoder_path
 
     def load(self) -> None:
         """載入已訓練的模型。若模型不存在則自動訓練。"""
@@ -272,34 +261,33 @@ class MotorMLPredictor:
             啟動遮蔽由 main.py 負責。
             ml_model 只負責推論，不判斷狀態。
         """
-        assert (
-            self._clf is not None and self._le is not None
-        ), "請先呼叫 load() 載入模型"
+        assert self._clf is not None and self._le is not None, \
+            "請先呼叫 load() 載入模型"
 
         # 更新電流窗口
-        window = self._get_window(record.motor_id)
+        window  = self._get_window(record.motor_id)
         window.append(record.current_a)
         raw_std = float(np.std(list(window))) if len(window) > 1 else 0.0
 
         # 提取特徵並推論
         features = np.array([extract_features(record, current_std=raw_std)])
-        proba = self._clf.predict_proba(features)[0]
+        proba    = self._clf.predict_proba(features)[0]
 
         # 組成機率字典
-        classes = self._le.classes_
+        classes    = self._le.classes_
         proba_dict = {cls: round(float(p), 4) for cls, p in zip(classes, proba)}
 
         # 取最高機率的類別
-        best_idx = int(np.argmax(proba))
+        best_idx   = int(np.argmax(proba))
         fault_type = str(classes[best_idx])
         confidence = float(proba[best_idx])
-        level = FAULT_TO_LEVEL.get(fault_type, "NORMAL")
+        level      = FAULT_TO_LEVEL.get(fault_type, "NORMAL")
 
         return MlResult(
-            fault_type=fault_type,  # type: ignore[arg-type]
-            level=level,
-            confidence=round(confidence, 4),
-            probabilities=proba_dict,
+            fault_type    = fault_type,     # type: ignore[arg-type]
+            level         = level,
+            confidence    = round(confidence, 4),
+            probabilities = proba_dict,
         )
 
 
