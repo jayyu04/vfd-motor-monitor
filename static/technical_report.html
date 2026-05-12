@@ -107,7 +107,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   </div>
   <div>
     <div class="header-title">技術報告</div>
-    <div class="header-sub">VFD Motor Monitoring System · v3.0 · Rule-based + Random Forest</div>
+    <div class="header-sub">VFD Motor Monitoring System · v3.0 · Rule-based Anomaly Score + Random Forest</div>
   </div>
   <div class="header-tag">TECHNICAL REPORT</div>
 </div>
@@ -464,7 +464,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <div class="mode-range">每 10~20 秒自動切換工況（不重複上一個）</div>
       <div class="mode-logic">系統自動切換工況，Rules 和 ML 在不知道工況的情況下自己判斷。VFD Header 即時顯示目前實際工況，趨勢圖下方出現對比表格，可以即時驗證 ML 準不準確。這是展示 ML 真實能力最有說服力的方式。</div>
     </div>
-  </div></div>
+  </div>
 </div>
 
 <!-- 05 物理計算 -->
@@ -828,7 +828,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
     <p>核心的雙層判斷架構、物理計算層、資料流設計都不需要改動。</p>
   </div>
-</div>
 </div>
 </body>
 </html>
