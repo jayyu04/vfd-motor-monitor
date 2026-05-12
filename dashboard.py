@@ -456,7 +456,8 @@ def build_dashboard_html(
         l_torq     = round(float(latest["torque_nm"]), 1)
         l_mstate   = str(latest["machine_state"])
         l_rfault   = fmt_fault(str(latest["rule_fault_type"]))
-        l_rlevel   = fmt_level(str(latest["rule_level"]))
+        l_rlevel_raw = str(latest["rule_level"])
+        l_rlevel   = fmt_level(l_rlevel_raw)
         # 相容舊版資料庫（rule_score）和新版（rule_confidence）
         _score_col = "rule_confidence" if "rule_confidence" in latest.index else "rule_score"
         l_rscore   = int(latest[_score_col])
@@ -476,10 +477,11 @@ def build_dashboard_html(
             "DANGER": "val-danger", "CRITICAL": "val-danger",
         }.get(l_final_raw, "val-muted")
 
-        rule_cls = "val-danger" if l_rscore >= 75 else "val-warn" if l_rscore >= 25 else "val-normal"
+        rule_cls = {"NORMAL": "val-normal", "WARNING": "val-warn", "DANGER": "val-danger", "CRITICAL": "val-danger"}.get(l_rlevel_raw, "val-normal")
         ml_cls   = "val-danger" if l_final_raw in ("DANGER", "CRITICAL") else "val-warn" if l_final_raw == "WARNING" else "val-normal"
     else:
         l_freq = l_curr = l_rpm = l_torq = 0
+        l_rlevel_raw = "NORMAL"
         l_mstate = l_rfault = l_rlevel = l_mlfault = l_mllevel = l_final = "—"
         l_rscore = 0
         l_mlconf = 0.0
