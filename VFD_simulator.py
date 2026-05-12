@@ -20,22 +20,20 @@ from config import (
 # ---------------------------------------------------------------------------
 # 型別定義
 # ---------------------------------------------------------------------------
-FaultType = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR", "AUTO"]
-PowerState = Literal["ON", "OFF"]
+FaultType   = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR", "AUTO"]
+PowerState  = Literal["ON", "OFF"]
 
 # ---------------------------------------------------------------------------
 # AUTO 模式內部狀態
 # ---------------------------------------------------------------------------
 _AUTO_FAULT_TYPES = ["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR"]
 
-
 @dataclass
 class _AutoState:
-    current_fault: str = "NORMAL"
-    prev_fault: str = ""
+    current_fault:   str   = "NORMAL"
+    prev_fault:      str   = ""
     elapsed_in_mode: float = 0.0
-    duration: float = 0.0
-
+    duration:        float = 0.0
 
 _auto_state = _AutoState()
 
@@ -68,7 +66,7 @@ def _update_auto_state(dt: float = 0.3) -> str:
 
     # 超過持續時間，切換工況
     if _auto_state.elapsed_in_mode >= _auto_state.duration:
-        _auto_state.prev_fault = _auto_state.current_fault
+        _auto_state.prev_fault    = _auto_state.current_fault
         _auto_state.current_fault, _auto_state.duration = _next_auto_fault()
         _auto_state.elapsed_in_mode = 0.0
         # 切換工況時重置連續性狀態
@@ -83,10 +81,9 @@ def _update_auto_state(dt: float = 0.3) -> str:
 @dataclass
 class RawSignal:
     """VFD 輸出的原始訊號，只有三個感測值。"""
-
     frequency_hz: float
-    current_a: float
-    voltage_v: float
+    current_a:    float
+    voltage_v:    float
 
 
 # ---------------------------------------------------------------------------
@@ -95,8 +92,8 @@ class RawSignal:
 @dataclass
 class _RunningState:
     frequency_hz: float = 0.0
-    current_a: float = 0.0
-    initialized: bool = False
+    current_a:    float = 0.0
+    initialized:  bool  = False
 
 
 _running_states: Dict[str, _RunningState] = {}
@@ -127,7 +124,6 @@ def _clamp(value: float, lo: float, hi: float) -> float:
 # 各狀態的訊號產生
 # ---------------------------------------------------------------------------
 
-
 def _generate_off() -> RawSignal:
     """關機：全部輸出 0。"""
     _reset_all_states()
@@ -140,15 +136,16 @@ def _generate_startup(elapsed: float) -> RawSignal:
     - 頻率從 STARTUP_FREQ_START 線性爬升到額定頻率
     - 電流為額定的 1.5~2 倍，隨啟動完成線性下降
     """
-    progress = min(elapsed / STARTUP_DURATION_SEC, 1.0)
-    freq = STARTUP_FREQ_START + progress * (RATED_FREQ_HZ - STARTUP_FREQ_START)
-    peak = RATED_CURRENT_A * random.uniform(*STARTUP_CURRENT_MULTIPLIER)
-    current = peak * (1.0 - progress * 0.6)
+    progress    = min(elapsed / STARTUP_DURATION_SEC, 1.0)
+    freq        = STARTUP_FREQ_START + progress * (RATED_FREQ_HZ - STARTUP_FREQ_START)
+    peak        = RATED_CURRENT_A * random.uniform(*STARTUP_CURRENT_MULTIPLIER)
+    current     = peak * (1.0 - progress * 0.6)
 
+    voltage = round(VOLTAGE_V * freq / RATED_FREQ_HZ, 1)
     return RawSignal(
-        frequency_hz=round(freq, 2),
-        current_a=round(current, 2),
-        voltage_v=VOLTAGE_V,
+        frequency_hz = round(freq, 2),
+        current_a    = round(current, 2),
+        voltage_v    = voltage,
     )
 
 
@@ -159,13 +156,13 @@ def _generate_running(fault_type: str) -> RawSignal:
     - 之後在上一筆基礎上小幅漂移（連續性）
     - BEARING_WEAR 漂移量刻意放大模擬電流漣波
     """
-    cfg = MODE_CONFIG[fault_type]
+    cfg   = MODE_CONFIG[fault_type]
     state = _get_running_state(fault_type)
 
     if not state.initialized:
         state.frequency_hz = round(random.uniform(*cfg["freq_center"]), 2)
-        state.current_a = round(random.uniform(*cfg["amp_center"]), 2)
-        state.initialized = True
+        state.current_a    = round(random.uniform(*cfg["amp_center"]), 2)
+        state.initialized  = True
     else:
         d_hz = random.uniform(-cfg["drift_hz"], cfg["drift_hz"])
         d_amp = random.uniform(-cfg["drift_amp"], cfg["drift_amp"])
@@ -175,22 +172,21 @@ def _generate_running(fault_type: str) -> RawSignal:
                 state.frequency_hz + d_hz,
                 cfg["freq_center"][0] - 1.0,
                 cfg["freq_center"][1] + 1.0,
-            ),
-            2,
+            ), 2
         )
         state.current_a = round(
             _clamp(
                 state.current_a + d_amp,
                 cfg["amp_center"][0] - 1.5,
                 cfg["amp_center"][1] + 1.5,
-            ),
-            2,
+            ), 2
         )
 
+    voltage = round(VOLTAGE_V * state.frequency_hz / RATED_FREQ_HZ, 1)
     return RawSignal(
-        frequency_hz=state.frequency_hz,
-        current_a=state.current_a,
-        voltage_v=VOLTAGE_V,
+        frequency_hz = state.frequency_hz,
+        current_a    = state.current_a,
+        voltage_v    = voltage,
     )
 
 
@@ -198,11 +194,10 @@ def _generate_running(fault_type: str) -> RawSignal:
 # 對外主入口（control.py 呼叫這裡）
 # ---------------------------------------------------------------------------
 
-
 def generate(
-    power_state: PowerState,
-    fault_type: FaultType,
-    elapsed_sec: float,
+    power_state:  PowerState,
+    fault_type:   FaultType,
+    elapsed_sec:  float,
 ) -> RawSignal:
     """
     control.py 傳入：
@@ -239,7 +234,6 @@ def get_auto_current_fault() -> str:
 # ---------------------------------------------------------------------------
 # 目前工況查詢（dashboard 直接讀取）
 # ---------------------------------------------------------------------------
-
 
 def get_current_fault(fault_type: str) -> str:
     """回傳目前實際模擬的工況。
