@@ -34,9 +34,9 @@ RuleFaultType = Literal["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEA
 # 風險等級對應分數區間（從 config.py 的 LEVEL_THRESHOLDS）
 # ---------------------------------------------------------------------------
 LEVEL_THRESHOLDS: List[Tuple[int, RuleLevel]] = [
-    (65, "CRITICAL"),
-    (40, "DANGER"),
-    (15, "WARNING"),
+    (75, "CRITICAL"),
+    (50, "DANGER"),
+    (25, "WARNING"),
     (0,  "NORMAL"),
 ]
 
@@ -138,7 +138,7 @@ def _score_load_loss(frequency_hz: float, current_a: float) -> Tuple[int, List[s
 
     if current_a < LOAD_LOSS_CURRENT_MAX:
         deficit = max(0.0, LOAD_LOSS_CURRENT_MAX - current_a)
-        score   = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 30) + 40, LOAD_LOSS_MAX_SCORE)
+        score   = min(int(deficit / LOAD_LOSS_CURRENT_MAX * 49) + 25, LOAD_LOSS_MAX_SCORE)
         reasons.append(f"電流 {current_a:.1f}A < {LOAD_LOSS_CURRENT_MAX:.0f}A（負載流失）[{score}分]")
 
     return score, reasons
