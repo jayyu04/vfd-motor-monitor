@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 
 import pandas as pd
@@ -8,15 +9,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_autorefresh import st_autorefresh
 
-import os
 from control import get_controller
 from database import fetch_latest, fetch_stats
+
 
 @st.cache_resource
 def init_ml_model():
     """ML 模型只載入一次，Streamlit rerun 不重新訓練。"""
     from ml_model import load_model
     load_model()
+
+
 from config import (
     STARTUP_DURATION_SEC,
     DATA_INTERVAL_MS as DATA_GENERATE_INTERVAL_MS_CFG,
@@ -27,25 +30,26 @@ from config import (
 # ---------------------------------------------------------------------------
 # 控制參數
 # ---------------------------------------------------------------------------
-DATA_GENERATE_INTERVAL_MS    = 300
+DATA_GENERATE_INTERVAL_MS = 300
 DASHBOARD_REFRESH_INTERVAL_MS = 500
-MAX_CHART_POINTS             = 200
+MAX_CHART_POINTS = 200
 
 FAULT_TYPES = ["NORMAL", "OVERLOAD", "STALL", "LOAD_LOSS", "BEARING_WEAR", "AUTO"]
 
 FAULT_LABEL_MAP = {
-    "NORMAL":       "正常",
-    "OVERLOAD":     "過電流",
-    "STALL":        "機械卡死",
-    "LOAD_LOSS":    "負載斷裂",
+    "NORMAL": "正常",
+    "OVERLOAD": "過電流",
+    "STALL": "機械卡死",
+    "LOAD_LOSS": "負載斷裂",
     "BEARING_WEAR": "軸承磨損",
-    "STARTUP":      "啟動中",
+    "STARTUP": "啟動中",
+    "AUTO": "自動測試",
 }
 
 LEVEL_LABEL_MAP = {
-    "NORMAL":   "正常",
-    "WARNING":  "警告",
-    "DANGER":   "危險",
+    "NORMAL": "正常",
+    "WARNING": "警告",
+    "DANGER": "危險",
     "CRITICAL": "緊急",
 }
 
@@ -55,12 +59,12 @@ LEVEL_LABEL_MAP = {
 # ---------------------------------------------------------------------------
 def init_session_state() -> None:
     defaults = {
-        "is_running":         False,
-        "selected_fault":     "NORMAL",
-        "applied_fault":      "NORMAL",
-        "last_generated_ts":  0.0,
-        "page":               "dashboard",
-        "startup_begin":      None,   # 開機時間，存在 session_state 避免 rerun 消失
+        "is_running": False,
+        "selected_fault": "NORMAL",
+        "applied_fault": "NORMAL",
+        "last_generated_ts": 0.0,
+        "page": "dashboard",
+        "startup_begin": None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -81,7 +85,7 @@ def get_startup_elapsed_sec() -> float:
 
 
 def get_current_machine_state() -> str:
-    return get_controller().machine_state  # 關機/啟動中/運轉中
+    return get_controller().machine_state
 
 
 def maybe_generate_data() -> None:
@@ -93,12 +97,10 @@ def maybe_generate_data() -> None:
     if now - st.session_state.last_generated_ts < DATA_GENERATE_INTERVAL_MS / 1000.0:
         return
 
-    # 同步 startup_begin 到 control.py（Streamlit rerun 後單例可能重置）
     _sb = st.session_state.get("startup_begin", None)
     if _sb is not None:
         ctrl._startup_begin = _sb
 
-    # 設定工況並產生資料
     ctrl.set_fault_type(st.session_state.selected_fault)
     ctrl.tick()
     st.session_state.applied_fault = st.session_state.selected_fault
@@ -126,137 +128,136 @@ def fmt_level(v: str) -> str:
 # Top control bar
 # ---------------------------------------------------------------------------
 def render_top_controls() -> None:
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
-    [data-testid="stAppViewContainer"] { background: #0a0e14; }
-    [data-testid="stHeader"]           { background: transparent; }
+
+    [data-testid="stAppViewContainer"] {
+        background:
+            radial-gradient(circle at top right, rgba(56,189,248,.05), transparent 28%),
+            radial-gradient(circle at top left, rgba(34,211,165,.03), transparent 24%),
+            #0a0e14;
+    }
+    [data-testid="stHeader"] { background: transparent; }
+
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 0 !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
     }
+
     #MainMenu, footer { visibility: hidden; }
     [data-testid="collapsedControl"] { display: none; }
-    section[data-testid="stSidebar"]  { display: none; }
+    section[data-testid="stSidebar"] { display: none; }
+
+    div[data-testid="stHorizontalBlock"] {
+        align-items: end;
+        gap: 10px;
+    }
+
     button[data-testid="baseButton-primary"] {
-        background: rgba(34,211,165,0.08) !important;
-        border: 1px solid rgba(34,211,165,0.45) !important;
+        background: linear-gradient(180deg, rgba(34,211,165,.12), rgba(34,211,165,.06)) !important;
+        border: 1px solid rgba(34,211,165,0.42) !important;
         color: #22d3a5 !important;
         font-family: 'IBM Plex Mono', monospace !important;
         font-size: 12px !important;
-        letter-spacing: 0.06em;
-        box-shadow: 0 0 8px rgba(34,211,165,0.2), inset 0 0 8px rgba(34,211,165,0.05) !important;
-        text-shadow: 0 0 6px rgba(34,211,165,0.6) !important;
-        transition: all 0.2s ease !important;
+        letter-spacing: .05em !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 0 1px rgba(34,211,165,.05) inset, 0 4px 14px rgba(0,0,0,.14) !important;
+        transition: all .2s ease !important;
+        min-height: 42px !important;
     }
     button[data-testid="baseButton-primary"]:hover {
-        background: rgba(34,211,165,0.18) !important;
-        border-color: rgba(34,211,165,0.8) !important;
+        background: linear-gradient(180deg, rgba(34,211,165,.20), rgba(34,211,165,.10)) !important;
+        border-color: rgba(34,211,165,.72) !important;
         color: #ffffff !important;
-        box-shadow: 0 0 18px rgba(34,211,165,0.5), inset 0 0 12px rgba(34,211,165,0.1) !important;
-        text-shadow: 0 0 10px rgba(34,211,165,1.0) !important;
+        box-shadow: 0 0 18px rgba(34,211,165,.18), 0 4px 18px rgba(0,0,0,.18) !important;
     }
+
     button[data-testid="baseButton-secondary"] {
-        background: rgba(248,113,113,0.08) !important;
-        border: 1px solid rgba(248,113,113,0.4) !important;
+        background: linear-gradient(180deg, rgba(248,113,113,.10), rgba(248,113,113,.05)) !important;
+        border: 1px solid rgba(248,113,113,0.34) !important;
         color: #f87171 !important;
         font-family: 'IBM Plex Mono', monospace !important;
         font-size: 12px !important;
-        letter-spacing: 0.06em;
-        box-shadow: 0 0 8px rgba(248,113,113,0.15), inset 0 0 8px rgba(248,113,113,0.05) !important;
-        text-shadow: 0 0 6px rgba(248,113,113,0.6) !important;
-        transition: all 0.2s ease !important;
+        letter-spacing: .05em !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 0 1px rgba(248,113,113,.04) inset, 0 4px 14px rgba(0,0,0,.14) !important;
+        transition: all .2s ease !important;
+        min-height: 42px !important;
     }
     button[data-testid="baseButton-secondary"]:hover {
-        background: rgba(248,113,113,0.18) !important;
-        border-color: rgba(248,113,113,0.8) !important;
+        background: linear-gradient(180deg, rgba(248,113,113,.18), rgba(248,113,113,.08)) !important;
+        border-color: rgba(248,113,113,.68) !important;
         color: #ffffff !important;
-        box-shadow: 0 0 18px rgba(248,113,113,0.5), inset 0 0 12px rgba(248,113,113,0.1) !important;
-        text-shadow: 0 0 10px rgba(248,113,113,1.0) !important;
+        box-shadow: 0 0 18px rgba(248,113,113,.16), 0 4px 18px rgba(0,0,0,.18) !important;
     }
+
+    button[data-testid="baseButton-secondary"]:disabled {
+        opacity: .38 !important;
+        filter: grayscale(.15);
+    }
+
     div[data-testid="stSelectbox"] > div > div {
-        background: #111827 !important;
-        border: 1px solid rgba(56,189,248,0.22) !important;
+        background: linear-gradient(180deg, #111827, #0f1520) !important;
+        border: 1px solid rgba(56,189,248,0.20) !important;
         color: #e2e8f0 !important;
         font-family: 'IBM Plex Mono', monospace !important;
         font-size: 12px !important;
+        border-radius: 10px !important;
+        min-height: 42px !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,.14);
     }
+
     div[data-testid="stSelectbox"] label {
-        color: #4b6174 !important;
+        color: #64748b !important;
         font-family: 'IBM Plex Mono', monospace !important;
         font-size: 10px !important;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: .08em;
     }
+
     iframe { border: none !important; }
-
-
     </style>
-    """, unsafe_allow_html=True)
-
-    ms      = get_current_machine_state()
-    elapsed = get_startup_elapsed_sec()
-    applied = st.session_state.applied_fault
-
-    def badge(label, value, bg, bd, tc):
-        return (
-            f"<div style=\"font-size:9px;color:#4b6174;font-family:'IBM Plex Mono',monospace;"
-            f"text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;\">{label}</div>"
-            f"<span style=\"display:inline-block;padding:5px 14px;border-radius:4px;"
-            f"font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;"
-            f"letter-spacing:.05em;background:{bg};border:1px solid {bd};color:{tc};\">{value}</span>"
-        )
-
-    ms_cfg = {
-        "OFF":     ("rgba(75,97,116,.2)",    "rgba(75,97,116,.4)",    "#4b6174"),
-        "STARTUP": ("rgba(251,191,36,.15)",  "rgba(251,191,36,.4)",   "#fbbf24"),
-        "RUNNING": ("rgba(34,211,165,.12)",  "rgba(34,211,165,.35)",  "#22d3a5"),
-    }
-    mbg, mbd, mtc = ms_cfg.get(ms, ms_cfg["OFF"])
-
-    fault_cfg = {
-        "NORMAL":       ("#22d3a5", "rgba(34,211,165,.12)",  "rgba(34,211,165,.35)"),
-        "OVERLOAD":     ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
-        "STALL":        ("#f87171", "rgba(248,113,113,.18)", "rgba(248,113,113,.5)"),
-        "LOAD_LOSS":    ("#fb923c", "rgba(251,146,60,.15)",  "rgba(251,146,60,.4)"),
-        "BEARING_WEAR": ("#fbbf24", "rgba(251,191,36,.15)",  "rgba(251,191,36,.4)"),
-    }
-    amc, ambg, ambd = fault_cfg.get(applied, fault_cfg["NORMAL"])
-
-    dot_color  = "#22d3a5" if st.session_state.is_running else "#4b6174"
-    live_label = "LIVE" if st.session_state.is_running else "IDLE"
-    live_html = (
-        f"<div style='display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:2px;'>"
-        f"<div style='width:9px;height:9px;border-radius:50%;background:{dot_color};"
-        f"box-shadow:0 0 7px {dot_color};'></div>"
-        f"<span style=\"font-family:'IBM Plex Mono',monospace;font-size:9px;color:#4b6174;"
-        f"text-transform:uppercase;letter-spacing:.08em;\">{live_label}</span>"
-        f"</div>"
+    """,
+        unsafe_allow_html=True,
     )
 
-    c_on, c_off, c_mode, c_clear, c_tech, c_guide = st.columns([1, 1, 2, 1, 1, 1])
+    c_on, c_off, c_mode, c_clear, c_tech, c_guide = st.columns([1, 1, 2.3, 1, 1, 1])
 
     with c_on:
         if st.button("⏻  開機", use_container_width=True, type="primary", key="btn_on"):
             ctrl = get_controller()
             ctrl.power_on(note="Dashboard 開機")
-            st.session_state.is_running        = True
-            st.session_state.startup_begin     = time.time()
+            st.session_state.is_running = True
+            st.session_state.startup_begin = time.time()
             st.session_state.last_generated_ts = 0.0
-            st.session_state.selected_fault    = "NORMAL"
-            st.session_state.applied_fault     = "NORMAL"
+            st.session_state.selected_fault = "NORMAL"
+            st.session_state.applied_fault = "NORMAL"
             st.rerun()
 
     with c_off:
         if st.button("⏼  關機", use_container_width=True, type="secondary", key="btn_off"):
             ctrl = get_controller()
             ctrl.power_off(note="Dashboard 關機")
-            st.session_state.is_running        = False
-            st.session_state.startup_begin     = None
+            st.session_state.is_running = False
+            st.session_state.startup_begin = None
             st.session_state.last_generated_ts = 0.0
-            st.session_state.applied_fault     = "NORMAL"
+            st.session_state.applied_fault = "NORMAL"
+            st.rerun()
+
+    with c_mode:
+        new_fault = st.selectbox(
+            "模擬異常模式",
+            options=FAULT_TYPES,
+            index=FAULT_TYPES.index(st.session_state.selected_fault),
+            format_func=lambda x: f"{x}　{FAULT_LABEL_MAP.get(x, '')}",
+            key="fault_select",
+        )
+        if new_fault != st.session_state.selected_fault:
+            st.session_state.selected_fault = new_fault
             st.rerun()
 
     with c_clear:
@@ -287,21 +288,8 @@ def render_top_controls() -> None:
             st.session_state.page = "guide"
             st.rerun()
 
-    with c_mode:
-        new_fault = st.selectbox(
-            "模擬異常模式",
-            options=FAULT_TYPES,
-            index=FAULT_TYPES.index(st.session_state.selected_fault),
-            format_func=lambda x: f"{x}　{FAULT_LABEL_MAP.get(x, '')}",
-            key="fault_select",
-        )
-        if new_fault != st.session_state.selected_fault:
-            st.session_state.selected_fault = new_fault
-            st.rerun()
-
-
     st.markdown(
-        '<hr style="border:none;border-top:1px solid rgba(56,189,248,0.12);margin:8px 0 0 0;"/>',
+        '<hr style="border:none;border-top:1px solid rgba(56,189,248,0.12);margin:10px 0 0 0;"/>',
         unsafe_allow_html=True,
     )
 
@@ -313,28 +301,30 @@ def build_full_table_html(df: pd.DataFrame) -> str:
     display = df.sort_values("timestamp", ascending=False).head(100).copy()
 
     cols = [
-        ("timestamp",       "時間"),
-        ("machine_state",   "設備階段"),
-        ("frequency_hz",    "頻率 Hz"),
-        ("current_a",       "電流 A"),
-        ("sync_rpm",        "轉速 RPM"),
-        ("slip_ratio",      "轉差率"),
-        ("torque_nm",       "轉矩 N·m"),
+        ("timestamp", "時間"),
+        ("machine_state", "設備階段"),
+        ("frequency_hz", "頻率 Hz"),
+        ("current_a", "電流 A"),
+        ("sync_rpm", "轉速 RPM"),
+        ("slip_ratio", "轉差率"),
+        ("torque_nm", "轉矩 N·m"),
         ("rule_fault_type", "Rule 判斷"),
-        ("rule_level",      "Rule 等級"),
+        ("rule_level", "Rule 等級"),
         ("rule_confidence" if "rule_confidence" in df.columns else "rule_score", "Rule 信心"),
-        ("ml_fault_type",   "ML 判斷"),
-        ("ml_level",        "ML 等級"),
-        ("ml_confidence",   "ML 信心"),
-        ("final_level",     "綜合等級"),
+        ("ml_fault_type", "ML 判斷"),
+        ("ml_level", "ML 等級"),
+        ("ml_confidence", "ML 信心"),
+        ("final_level", "綜合等級"),
     ]
     existing = [(c, l) for c, l in cols if c in display.columns]
 
     th = "".join(f"<th>{l}</th>" for _, l in existing)
 
     level_cls = {
-        "NORMAL": "val-normal", "WARNING": "val-warn",
-        "DANGER": "val-danger", "CRITICAL": "val-danger",
+        "NORMAL": "val-normal",
+        "WARNING": "val-warn",
+        "DANGER": "val-danger",
+        "CRITICAL": "val-danger",
     }
 
     tbody = ""
@@ -342,9 +332,9 @@ def build_full_table_html(df: pd.DataFrame) -> str:
         fl = str(row.get("final_level", "NORMAL"))
         row_style = ""
         if fl == "CRITICAL":
-            row_style = 'style="background:rgba(248,113,113,0.07);"'
+            row_style = 'style="background:rgba(248,113,113,0.06);"'
         elif fl in ("DANGER", "WARNING"):
-            row_style = 'style="background:rgba(251,191,36,0.05);"'
+            row_style = 'style="background:rgba(251,191,36,0.04);"'
 
         cells = ""
         for col, _ in existing:
@@ -360,7 +350,7 @@ def build_full_table_html(df: pd.DataFrame) -> str:
                 cells += f"<td>{float(val):.3f}</td>"
             elif col == "ml_confidence":
                 cells += f"<td>{float(val):.0%}</td>"
-            elif col == "rule_confidence":
+            elif col in ("rule_confidence", "rule_score"):
                 cells += f"<td>{int(val)}</td>"
             elif col in ("rule_fault_type", "ml_fault_type", "fault_type"):
                 cells += f"<td>{fmt_fault(str(val))}</td>"
@@ -396,89 +386,91 @@ def build_dashboard_html(
     is_auto: bool = False,
     flow_items: list = None,
 ) -> str:
-
-    # ── 工況流程 ──
     flow_items = flow_items or []
+
     level_color = {
-        "NORMAL":   "var(--green)",
-        "WARNING":  "var(--amber)",
-        "DANGER":   "#fb923c",
+        "NORMAL": "var(--green)",
+        "WARNING": "var(--amber)",
+        "DANGER": "#fb923c",
         "CRITICAL": "var(--red)",
-        "啟動中":    "var(--text3)",
+        "啟動中": "var(--text3)",
     }
     level_accent = {
-        "NORMAL":   "var(--green)",
-        "WARNING":  "var(--amber)",
-        "DANGER":   "#fb923c",
+        "NORMAL": "var(--green)",
+        "WARNING": "var(--amber)",
+        "DANGER": "#fb923c",
         "CRITICAL": "var(--red)",
-        "啟動中":    "var(--text3)",
+        "啟動中": "var(--text3)",
     }
 
     if flow_items:
         boxes = []
         for i, (fault, level) in enumerate(flow_items):
-            color  = level_color.get(level, "var(--text3)")
+            color = level_color.get(level, "var(--text3)")
             accent = level_accent.get(level, "var(--cyan)")
-            label  = fmt_level(level)
-            value  = fmt_fault(fault)
+            label = fmt_level(level)
+            value = fmt_fault(fault)
             is_latest = (i == len(flow_items) - 1)
-            border = f"border:1px solid {accent};opacity:{1.0 if is_latest else 0.6};"
+            border = f"border:1px solid {accent};opacity:{1.0 if is_latest else 0.62};"
             boxes.append(
                 f'<div class="flow-box" style="--accent:{accent};{border}">'
                 f'<div class="flow-box-label">{label}</div>'
                 f'<div class="flow-box-value" style="color:{color}">{value}</div>'
-                f'</div>'
+                f"</div>"
             )
         flow_html = '<div class="flow-track">'
         for i, box in enumerate(boxes):
             flow_html += box
             if i < len(boxes) - 1:
                 flow_html += '<div class="flow-arrow">→</div>'
-        flow_html += '</div>'
+        flow_html += "</div>"
     else:
         flow_html = ""
 
-    # ── KPI ──
-    total       = stats.get("total", 0)
-    level_dist  = stats.get("level_dist", {})
-    fault_dist  = stats.get("fault_dist", {})
-    warn_count  = level_dist.get("WARNING", 0)
+    total = stats.get("total", 0)
+    level_dist = stats.get("level_dist", {})
+    warn_count = level_dist.get("WARNING", 0)
     danger_count = level_dist.get("DANGER", 0)
     critical_count = level_dist.get("CRITICAL", 0)
     alert_total = warn_count + danger_count + critical_count
 
-    # ── Latest ──
     if not df.empty:
-        latest     = df.iloc[-1]
-        l_freq     = round(float(latest["frequency_hz"]), 1)
-        l_curr     = round(float(latest["current_a"]), 1)
-        l_rpm      = int(float(latest["sync_rpm"]))
-        l_torq     = round(float(latest["torque_nm"]), 1)
-        l_mstate   = str(latest["machine_state"])
-        l_rfault   = fmt_fault(str(latest["rule_fault_type"]))
+        latest = df.iloc[-1]
+        l_freq = round(float(latest["frequency_hz"]), 1)
+        l_curr = round(float(latest["current_a"]), 1)
+        l_rpm = int(float(latest["sync_rpm"]))
+        l_torq = round(float(latest["torque_nm"]), 1)
+        l_mstate = str(latest["machine_state"])
+        l_rfault = fmt_fault(str(latest["rule_fault_type"]))
         l_rlevel_raw = str(latest["rule_level"])
-        l_rlevel   = fmt_level(l_rlevel_raw)
-        # 相容舊版資料庫（rule_score）和新版（rule_confidence）
+        l_rlevel = fmt_level(l_rlevel_raw)
         _score_col = "rule_confidence" if "rule_confidence" in latest.index else "rule_score"
-        l_rscore   = int(latest[_score_col])
-        l_mlfault  = fmt_fault(str(latest["ml_fault_type"]))
-        l_mllevel  = fmt_level(str(latest["ml_level"]))
-        l_mlconf   = round(float(latest["ml_confidence"]) * 100, 1)
-        l_final    = fmt_level(str(latest["final_level"]))
+        l_rscore = int(latest[_score_col])
+        l_mlfault = fmt_fault(str(latest["ml_fault_type"]))
+        l_mllevel = fmt_level(str(latest["ml_level"]))
+        l_mlconf = round(float(latest["ml_confidence"]) * 100, 1)
+        l_final = fmt_level(str(latest["final_level"]))
         l_final_raw = str(latest["final_level"])
 
         freq_pct = min(100, l_freq / 60 * 100)
         curr_pct = min(100, l_curr / 30 * 100)
-        rpm_pct  = min(100, l_rpm / 1800 * 100)
+        rpm_pct = min(100, l_rpm / 1800 * 100)
         torq_pct = min(100, l_torq / 120 * 100)
 
         final_cls = {
-            "NORMAL": "val-normal", "WARNING": "val-warn",
-            "DANGER": "val-danger", "CRITICAL": "val-danger",
+            "NORMAL": "val-normal",
+            "WARNING": "val-warn",
+            "DANGER": "val-danger",
+            "CRITICAL": "val-danger",
         }.get(l_final_raw, "val-muted")
 
-        rule_cls = {"NORMAL": "val-normal", "WARNING": "val-warn", "DANGER": "val-danger", "CRITICAL": "val-danger"}.get(l_rlevel_raw, "val-normal")
-        ml_cls   = "val-danger" if l_final_raw in ("DANGER", "CRITICAL") else "val-warn" if l_final_raw == "WARNING" else "val-normal"
+        rule_cls = {
+            "NORMAL": "val-normal",
+            "WARNING": "val-warn",
+            "DANGER": "val-danger",
+            "CRITICAL": "val-danger",
+        }.get(l_rlevel_raw, "val-normal")
+        ml_cls = "val-danger" if l_final_raw in ("DANGER", "CRITICAL") else "val-warn" if l_final_raw == "WARNING" else "val-normal"
     else:
         l_freq = l_curr = l_rpm = l_torq = 0
         l_rlevel_raw = "NORMAL"
@@ -489,27 +481,24 @@ def build_dashboard_html(
         final_cls = rule_cls = ml_cls = "val-muted"
         l_final_raw = "NORMAL"
 
-    # ── Chart series ──
     if not df.empty:
-        cdf        = df.tail(MAX_CHART_POINTS)
-        ts_labels  = [t.strftime("%H:%M:%S") for t in cdf["timestamp"]]
-        freq_ser   = [round(float(v), 2) for v in cdf["frequency_hz"]]
-        curr_ser   = [round(float(v), 2) for v in cdf["current_a"]]
-        rpm_ser    = [int(float(v)) for v in cdf["sync_rpm"]]
-        torq_ser   = [round(float(v), 2) for v in cdf["torque_nm"]]
+        cdf = df.tail(MAX_CHART_POINTS)
+        ts_labels = [t.strftime("%H:%M:%S") for t in cdf["timestamp"]]
+        freq_ser = [round(float(v), 2) for v in cdf["frequency_hz"]]
+        curr_ser = [round(float(v), 2) for v in cdf["current_a"]]
+        rpm_ser = [int(float(v)) for v in cdf["sync_rpm"]]
+        torq_ser = [round(float(v), 2) for v in cdf["torque_nm"]]
         _score_col2 = "rule_confidence" if "rule_confidence" in cdf.columns else "rule_score"
         rscore_ser = [int(v) for v in cdf[_score_col2]]
         mlconf_ser = [round(float(v) * 100, 1) for v in cdf["ml_confidence"]]
     else:
         ts_labels = freq_ser = curr_ser = rpm_ser = torq_ser = rscore_ser = mlconf_ser = []
 
-    # ── Alert rows ──
     if not df.empty:
-        adf = df[df["final_level"].isin(["WARNING", "DANGER", "CRITICAL"])] \
-                .sort_values("timestamp", ascending=False).head(10)
+        adf = df[df["final_level"].isin(["WARNING", "DANGER", "CRITICAL"])].sort_values("timestamp", ascending=False).head(10)
         alert_rows = ""
         for _, r in adf.iterrows():
-            fl  = str(r["final_level"])
+            fl = str(r["final_level"])
             sev_cls = {"WARNING": "sev-warn", "DANGER": "sev-danger", "CRITICAL": "sev-crit"}.get(fl, "sev-info")
             pill_cls = {"WARNING": "pill-warn", "DANGER": "pill-danger", "CRITICAL": "pill-crit"}.get(fl, "pill-ok")
             alert_rows += (
@@ -531,7 +520,6 @@ def build_dashboard_html(
 
     full_table = build_full_table_html(df) if not df.empty else ""
 
-    # AUTO 模式對比區塊
     auto_section = ""
     if is_auto and not df.empty:
         adf = df[df["machine_state"] == "運轉中"].tail(10).copy()
@@ -540,10 +528,9 @@ def build_dashboard_html(
             correct_count = 0
             total_count = 0
             for _, r in adf.iterrows():
-                # 實際工況：從 rule_fault_type 讀（VFD_simulator 決定的）
-                actual   = str(r.get("rule_fault_type", "NORMAL"))
-                ml_judge = str(r.get("ml_fault_type",   "NORMAL"))
-                ml_conf  = round(float(r.get("ml_confidence", 0)) * 100, 0)
+                actual = str(r.get("rule_fault_type", "NORMAL"))
+                ml_judge = str(r.get("ml_fault_type", "NORMAL"))
+                ml_conf = round(float(r.get("ml_confidence", 0)) * 100, 0)
 
                 is_correct = (actual == ml_judge)
                 mark = "<span class='correct'>✅</span>" if is_correct else "<span class='wrong'>❌</span>"
@@ -584,177 +571,258 @@ def build_dashboard_html(
 </div>
 """
 
-    # ── Header colors ──
-    live_dot  = "#22d3a5" if is_running else "#4b6174"
-    live_lbl  = "ON" if is_running else "OFF"
-    ms_color  = {"關機": "#4b6174", "啟動中": "#fbbf24", "運轉中": "#22d3a5"}.get(machine_state, "#4b6174")
-    ms_bg     = {"關機": "rgba(75,97,116,.15)", "啟動中": "rgba(251,191,36,.15)", "運轉中": "rgba(34,211,165,.12)"}.get(machine_state, "rgba(75,97,116,.15)")
-    ms_bd     = {"關機": "rgba(75,97,116,.35)", "啟動中": "rgba(251,191,36,.4)",  "運轉中": "rgba(34,211,165,.35)"}.get(machine_state, "rgba(75,97,116,.35)")
+    live_dot = "#22d3a5" if is_running else "#4b6174"
+    live_lbl = "ON" if is_running else "OFF"
+    ms_color = {"關機": "#64748b", "啟動中": "#fbbf24", "運轉中": "#22d3a5"}.get(machine_state, "#64748b")
+    ms_bg = {"關機": "rgba(100,116,139,.12)", "啟動中": "rgba(251,191,36,.12)", "運轉中": "rgba(34,211,165,.10)"}.get(machine_state, "rgba(100,116,139,.12)")
+    ms_bd = {"關機": "rgba(100,116,139,.28)", "啟動中": "rgba(251,191,36,.34)", "運轉中": "rgba(34,211,165,.28)"}.get(machine_state, "rgba(100,116,139,.28)")
     fault_color = {
-        "NORMAL": "#22d3a5", "OVERLOAD": "#fbbf24",
-        "STALL": "#f87171", "LOAD_LOSS": "#fb923c", "BEARING_WEAR": "#fbbf24",
+        "NORMAL": "#22d3a5",
+        "OVERLOAD": "#fbbf24",
+        "STALL": "#f87171",
+        "LOAD_LOSS": "#fb923c",
+        "BEARING_WEAR": "#fbbf24",
         "AUTO": "#a78bfa",
     }.get(applied_fault, "#22d3a5")
-    fault_bg  = {
-        "NORMAL": "rgba(34,211,165,.12)", "OVERLOAD": "rgba(251,191,36,.15)",
-        "STALL": "rgba(248,113,113,.18)", "LOAD_LOSS": "rgba(251,146,60,.15)",
-        "BEARING_WEAR": "rgba(251,191,36,.15)", "AUTO": "rgba(167,139,250,.12)",
-    }.get(applied_fault, "rgba(34,211,165,.12)")
-    fault_bd  = {
-        "NORMAL": "rgba(34,211,165,.35)", "OVERLOAD": "rgba(251,191,36,.4)",
-        "STALL": "rgba(248,113,113,.5)",  "LOAD_LOSS": "rgba(251,146,60,.4)",
-        "BEARING_WEAR": "rgba(251,191,36,.4)", "AUTO": "rgba(167,139,250,.35)",
-    }.get(applied_fault, "rgba(34,211,165,.35)")
+    fault_bg = {
+        "NORMAL": "rgba(34,211,165,.10)",
+        "OVERLOAD": "rgba(251,191,36,.12)",
+        "STALL": "rgba(248,113,113,.14)",
+        "LOAD_LOSS": "rgba(251,146,60,.12)",
+        "BEARING_WEAR": "rgba(251,191,36,.12)",
+        "AUTO": "rgba(167,139,250,.12)",
+    }.get(applied_fault, "rgba(34,211,165,.10)")
+    fault_bd = {
+        "NORMAL": "rgba(34,211,165,.28)",
+        "OVERLOAD": "rgba(251,191,36,.34)",
+        "STALL": "rgba(248,113,113,.40)",
+        "LOAD_LOSS": "rgba(251,146,60,.34)",
+        "BEARING_WEAR": "rgba(251,191,36,.34)",
+        "AUTO": "rgba(167,139,250,.30)",
+    }.get(applied_fault, "rgba(34,211,165,.28)")
 
-    ts_j   = json.dumps(ts_labels)
+    ts_j = json.dumps(ts_labels)
     freq_j = json.dumps(freq_ser)
     curr_j = json.dumps(curr_ser)
-    rpm_j  = json.dumps(rpm_ser)
+    rpm_j = json.dumps(rpm_ser)
     torq_j = json.dumps(torq_ser)
-    rs_j   = json.dumps(rscore_ser)
-    ml_j   = json.dumps(mlconf_ser)
+    rs_j = json.dumps(rscore_ser)
+    ml_j = json.dumps(mlconf_ser)
 
     return f"""<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <style>
 :root{{
-  --bg:#0a0e14;--bg3:#151d2e;--panel:#111827;
-  --border:rgba(56,189,248,0.12);--border2:rgba(56,189,248,0.22);
-  --cyan:#38bdf8;--cyan2:#0ea5e9;--green:#22d3a5;--amber:#fbbf24;
-  --red:#f87171;--purple:#a78bfa;
-  --text:#e2e8f0;--text2:#94a3b8;--text3:#4b6174;
-  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans Condensed',sans-serif;
+  --bg:#0a0e14;
+  --bg2:#0f1520;
+  --bg3:#151d2e;
+  --panel:#111827;
+  --border:rgba(56,189,248,0.12);
+  --border2:rgba(56,189,248,0.22);
+  --cyan:#38bdf8;
+  --cyan2:#0ea5e9;
+  --green:#22d3a5;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --purple:#a78bfa;
+  --orange:#fb923c;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --text4:#334155;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans Condensed',sans-serif;
 }}
 *{{box-sizing:border-box;margin:0;padding:0;}}
-html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
-.dash{{padding:14px 20px 40px;}}
-.sec-div{{display:flex;align-items:center;gap:10px;margin:18px 0 12px;
+html,body{{
+  background:
+    radial-gradient(circle at top right, rgba(56,189,248,.05), transparent 28%),
+    radial-gradient(circle at top left, rgba(34,211,165,.03), transparent 24%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+}}
+.dash{{padding:16px 20px 44px;}}
+
+.sec-div{{
+  display:flex;align-items:center;gap:12px;margin:20px 0 12px;
   font-size:9px;font-family:var(--mono);color:var(--text3);
-  text-transform:uppercase;letter-spacing:.1em;}}
-.sec-div::before,.sec-div::after{{content:'';flex:1;height:1px;background:var(--border);}}
-.header{{display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);}}
-.header-left{{display:flex;align-items:center;gap:14px;}}
-.logo-box{{width:42px;height:42px;background:linear-gradient(135deg,var(--cyan2),#0369a1);
-  border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}}
-.header-title{{font-size:18px;font-weight:600;letter-spacing:.02em;}}
+  text-transform:uppercase;letter-spacing:.12em;
+}}
+.sec-div::before,.sec-div::after{{
+  content:'';flex:1;height:1px;background:linear-gradient(90deg, transparent, var(--border), transparent);
+}}
+
+.header{{
+  position:relative;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;
+  padding:18px 20px 16px;
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(15,21,32,.96));
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+}}
+.header::before{{
+  content:'';
+  position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--green),var(--purple));
+  opacity:.84;
+}}
+.header::after{{
+  content:'';
+  position:absolute;right:-60px;top:-60px;width:180px;height:180px;
+  background:radial-gradient(circle, rgba(56,189,248,.14), transparent 65%);
+  pointer-events:none;
+}}
+.header-left{{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}}
+.logo-box{{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--cyan2),#0369a1);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 0 18px rgba(56,189,248,.16);
+}}
+.header-title{{font-size:18px;font-weight:700;letter-spacing:.02em;}}
 .header-sub{{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:3px;letter-spacing:.05em;}}
-.header-right{{display:flex;align-items:center;gap:20px;}}
-.live-pill{{display:flex;align-items:center;gap:7px;font-size:11px;font-family:var(--mono);color:var(--text2);}}
-.header-doc-links{{display:flex;gap:8px;margin-left:4px;}}
-.doc-btn{{font-size:10px;font-family:var(--mono);padding:5px 12px;border-radius:4px;
-  text-decoration:none;letter-spacing:.04em;transition:opacity .2s;}}
-.doc-btn:hover{{opacity:.8;}}
-.doc-btn-cyan{{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--cyan);}}
-.doc-btn-green{{background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.25);color:var(--green);}}
-.live-dot{{width:8px;height:8px;border-radius:50%;background:{live_dot};
-  box-shadow:0 0 7px {live_dot};animation:pulse 2s infinite;}}
-@keyframes pulse{{0%,100%{{opacity:1;}}50%{{opacity:.35;}}}}
+.header-right{{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}}
 .header-badge-group{{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}}
 .hbadge-label{{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}}
-.hbadge{{display:inline-block;padding:5px 14px;border-radius:4px;
-  font-family:var(--mono);font-size:12px;font-weight:500;
-  letter-spacing:.05em;border:1px solid;}}
+.hbadge{{
+  display:inline-block;padding:6px 14px;border-radius:999px;
+  font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.05em;border:1px solid;
+  backdrop-filter: blur(2px);
+}}
+.live-pill{{display:flex;align-items:center;gap:8px;font-size:11px;font-family:var(--mono);color:var(--text2);padding-left:4px;}}
+.live-dot{{width:8px;height:8px;border-radius:50%;background:{live_dot};box-shadow:0 0 8px {live_dot};animation:pulse 2s infinite;}}
+@keyframes pulse{{0%,100%{{opacity:1;}}50%{{opacity:.35;}}}}
+
 .flow-track{{display:flex;align-items:center;gap:0;margin-bottom:18px;}}
-.flow-box{{flex:1;background:var(--panel);border:1px solid var(--border);
-  border-radius:8px;padding:14px 16px;text-align:center;position:relative;overflow:hidden;}}
-.flow-box::before{{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--accent,var(--cyan));opacity:.7;}}
-.flow-box-label{{font-size:9px;font-family:var(--mono);color:var(--text3);
-  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}}
+.flow-box{{
+  flex:1;background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border-radius:12px;padding:14px 16px;text-align:center;position:relative;overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
+.flow-box::before{{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent,var(--cyan));opacity:.72;
+}}
+.flow-box-label{{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}}
 .flow-box-value{{font-size:14px;font-family:var(--mono);font-weight:500;}}
 .flow-arrow{{font-size:18px;color:var(--text3);padding:0 8px;flex-shrink:0;}}
+
 .kpi-row{{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;}}
-.kpi-card{{background:var(--panel);border:1px solid var(--border);border-radius:8px;
-  padding:14px 16px;position:relative;overflow:hidden;}}
-.kpi-card::after{{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--accent,var(--cyan));opacity:.7;}}
-.kpi-label{{font-size:10px;font-family:var(--mono);color:var(--text3);
-  text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}}
-.kpi-value{{font-size:26px;font-family:var(--mono);font-weight:500;line-height:1;}}
-.kpi-unit{{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}}
-.main-grid{{display:grid;grid-template-columns:1fr 360px;gap:14px;}}
+.kpi-card{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;padding:16px 16px;position:relative;overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
+.kpi-card::after{{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--cyan));opacity:.74;}}
+.kpi-label{{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}}
+.kpi-value{{font-size:28px;font-family:var(--mono);font-weight:500;line-height:1;}}
+.kpi-unit{{font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono);}}
+
+.main-grid{{display:grid;grid-template-columns:1fr 370px;gap:14px;}}
 .sensor-grid{{display:grid;grid-template-columns:1fr 1fr;gap:12px;}}
-.sensor-card{{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}}
-.sensor-name{{font-size:10px;font-family:var(--mono);color:var(--text3);
-  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;
-  display:flex;align-items:center;gap:6px;}}
-.sensor-big{{font-size:32px;font-family:var(--mono);font-weight:500;line-height:1;}}
+.sensor-card{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;padding:15px 16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
+.sensor-name{{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}}
+.sensor-big{{font-size:34px;font-family:var(--mono);font-weight:500;line-height:1;}}
 .sensor-unit{{font-size:12px;color:var(--text2);margin-left:4px;}}
-.sensor-bar-wrap{{margin-top:10px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}}
-.sensor-bar{{height:100%;border-radius:2px;transition:width .5s ease;}}
-.status-panel{{background:var(--panel);border:1px solid var(--border);border-radius:8px;
-  padding:16px;display:flex;flex-direction:column;gap:14px;}}
-.panel-title{{font-size:10px;font-family:var(--mono);color:var(--text3);
-  text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}}
-.status-row{{display:flex;flex-direction:column;gap:7px;}}
-.status-item-row{{display:flex;align-items:center;justify-content:space-between;
-  padding:7px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);}}
+.sensor-bar-wrap{{margin-top:12px;height:4px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden;}}
+.sensor-bar{{height:100%;border-radius:999px;transition:width .5s ease;}}
+
+.status-panel{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;padding:16px;
+  display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
+.panel-title{{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}}
+.status-row{{display:flex;flex-direction:column;gap:8px;}}
+.status-item-row{{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);}}
 .status-key{{font-size:11px;color:var(--text2);font-family:var(--mono);}}
 .status-val{{font-size:11px;font-family:var(--mono);font-weight:500;}}
-.val-normal{{color:var(--green);}} .val-warn{{color:var(--amber);}}
-.val-danger{{color:var(--red);}}   .val-muted{{color:var(--text3);}}
+.val-normal{{color:var(--green);}}
+.val-warn{{color:var(--amber);}}
+.val-danger{{color:var(--red);}}
+.val-muted{{color:var(--text3);}}
+
 .score-row{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}}
-.score-block{{background:var(--bg3);border:1px solid var(--border);
-  border-radius:6px;padding:10px;text-align:center;}}
+.score-block{{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;}}
 .score-num{{font-size:22px;font-family:var(--mono);font-weight:500;}}
-.score-label{{font-size:9px;color:var(--text3);font-family:var(--mono);
-  text-transform:uppercase;letter-spacing:.06em;margin-top:3px;}}
+.score-label{{font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;line-height:1.45;}}
+
 .charts-row{{display:grid;grid-template-columns:1fr 1fr;gap:12px;}}
-.chart-card{{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}}
+.chart-card{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
 .chart-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}}
-.chart-title{{font-size:11px;font-family:var(--mono);color:var(--text2);
-  text-transform:uppercase;letter-spacing:.07em;}}
-.badge-live{{font-size:9px;font-family:var(--mono);padding:2px 7px;border-radius:3px;
-  background:rgba(34,211,165,.15);color:var(--green);border:1px solid rgba(34,211,165,.3);}}
-.alert-section{{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;}}
-.auto-panel{{background:var(--panel);border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:16px;}}
-.auto-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}}
-.auto-badge{{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:4px;
-  background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--purple);}}
-.auto-table{{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);}}
-.auto-table th{{text-align:left;padding:6px 10px;color:var(--text3);
-  border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em;}}
-.auto-table td{{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);white-space:nowrap;}}
-.auto-table tr:hover td{{background:var(--bg3);}}
+.chart-title{{font-size:11px;font-family:var(--mono);color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}}
+.badge-live{{font-size:9px;font-family:var(--mono);padding:3px 8px;border-radius:999px;background:rgba(34,211,165,.12);color:var(--green);border:1px solid rgba(34,211,165,.28);}}
+
+.alert-section, .auto-panel{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
+.auto-panel{{border-color:rgba(167,139,250,0.28);}}
+.auto-header,.alert-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}}
+.auto-badge{{font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:999px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:var(--purple);}}
+.alert-count{{font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:999px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.28);color:var(--red);}}
+
+.auto-table,.alert-table{{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);}}
+.auto-table th,.alert-table th{{
+  text-align:left;padding:7px 10px;color:var(--text3);border-bottom:1px solid var(--border);
+  font-size:10px;text-transform:uppercase;letter-spacing:.06em;background:rgba(255,255,255,.01);
+}}
+.auto-table td,.alert-table td{{
+  padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);white-space:nowrap;
+}}
+.auto-table tr:hover td,.alert-table tr:hover td{{background:var(--bg3);}}
 .correct{{color:var(--green);font-weight:500;}}
 .wrong{{color:var(--red);font-weight:500;}}
-.alert-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}}
-.alert-count{{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:4px;
-  background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:var(--red);}}
-.alert-table{{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);}}
-.alert-table th{{text-align:left;padding:6px 10px;color:var(--text3);
-  border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em;}}
-.alert-table td{{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);
-  color:var(--text2);white-space:nowrap;}}
-.alert-table tr:hover td{{background:var(--bg3);}}
-.sev-warn{{color:var(--amber);}} .sev-danger{{color:var(--orange);}} .sev-crit{{color:var(--red);}} .sev-info{{color:var(--cyan);}}
-.pill{{padding:2px 7px;border-radius:3px;font-size:10px;}}
-.pill-warn{{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);}}
-.pill-danger{{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);color:var(--orange);}}
-.pill-crit{{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);}}
-.pill-ok{{background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.3);color:var(--green);}}
-.full-table-wrap{{background:var(--panel);border:1px solid var(--border);border-radius:8px;
-  overflow-x:auto;overflow-y:auto;max-height:460px;}}
+.sev-warn{{color:var(--amber);}}
+.sev-danger{{color:var(--orange);}}
+.sev-crit{{color:var(--red);}}
+.sev-info{{color:var(--cyan);}}
+.pill{{padding:2px 8px;border-radius:999px;font-size:10px;}}
+.pill-warn{{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.28);color:var(--amber);}}
+.pill-danger{{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.28);color:var(--orange);}}
+.pill-crit{{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.28);color:var(--red);}}
+.pill-ok{{background:rgba(34,211,165,.10);border:1px solid rgba(34,211,165,.24);color:var(--green);}}
+
+.full-table-wrap{{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);border-radius:12px;overflow-x:auto;overflow-y:auto;max-height:460px;
+  box-shadow:0 6px 18px rgba(0,0,0,.14);
+}}
 .full-table{{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono);min-width:1100px;}}
 .full-table thead{{position:sticky;top:0;z-index:2;}}
-.full-table th{{text-align:left;padding:8px 12px;color:var(--text3);
-  background:#0f1520;border-bottom:1px solid var(--border2);
-  font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}}
-.full-table td{{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.04);
-  color:var(--text2);white-space:nowrap;}}
+.full-table th{{
+  text-align:left;padding:9px 12px;color:var(--text3);background:#0f1520;border-bottom:1px solid var(--border2);
+  font-size:10px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;
+}}
+.full-table td{{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);white-space:nowrap;}}
 .full-table tr:hover td{{background:rgba(56,189,248,0.04);}}
+
+@media (max-width: 900px){{
+  .header{{flex-direction:column;align-items:flex-start;gap:14px;}}
+  .header-right{{flex-wrap:wrap;}}
+  .kpi-row,.charts-row,.sensor-grid,.main-grid{{grid-template-columns:1fr;}}
+}}
 </style>
 </head>
 <body>
 <div class="dash">
 
-<!-- ══ Header ══ -->
 <div class="header">
   <div class="header-left">
     <div class="logo-box">
@@ -769,11 +837,10 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     </div>
     <div>
       <div class="header-title">VFD MOTOR MONITORING SYSTEM</div>
-      <div class="header-sub">變頻器馬達異常監測與風險分析 · v3.0 · Rule Confidence + Random Forest</div>
+      <div class="header-sub">變頻器馬達異常監測與風險分析 · v4.0 · Rule Confidence + Random Forest</div>
     </div>
   </div>
   <div class="header-right">
-
     <div class="header-badge-group">
       <div class="hbadge-label">設備階段</div>
       <div class="hbadge" style="background:{ms_bg};border-color:{ms_bd};color:{ms_color};">{machine_state}</div>
@@ -784,7 +851,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     </div>
     <div class="header-badge-group">
       <div class="hbadge-label">已運行</div>
-      <div class="hbadge" style="background:rgba(75,97,116,.15);border-color:rgba(75,97,116,.35);color:#94a3b8;">{round(startup_elapsed,1)}s</div>
+      <div class="hbadge" style="background:rgba(100,116,139,.12);border-color:rgba(100,116,139,.28);color:#94a3b8;">{round(startup_elapsed,1)}s</div>
     </div>
     <div class="live-pill">
       <div class="live-dot"></div>{live_lbl}
@@ -793,7 +860,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
 </div>
 
 {flow_html}
-<!-- ══ KPI ══ -->
+
 <div class="sec-div">系統總覽</div>
 <div class="kpi-row">
   <div class="kpi-card" style="--accent:var(--cyan)">
@@ -806,12 +873,12 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     <div class="kpi-value" style="color:var(--amber);">{warn_count}</div>
     <div class="kpi-unit">WARNING</div>
   </div>
-  <div class="kpi-card" style="--accent:var(--red)">
+  <div class="kpi-card" style="--accent:#fb923c">
     <div class="kpi-label">危險</div>
-    <div class="kpi-value" style="color:var(--red);">{danger_count}</div>
+    <div class="kpi-value" style="color:#fb923c;">{danger_count}</div>
     <div class="kpi-unit">DANGER</div>
   </div>
-  <div class="kpi-card" style="--accent:var(--purple)">
+  <div class="kpi-card" style="--accent:var(--red)">
     <div class="kpi-label">緊急</div>
     <div class="kpi-value" style="color:var(--red);">{critical_count}</div>
     <div class="kpi-unit">CRITICAL</div>
@@ -823,7 +890,6 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
   </div>
 </div>
 
-<!-- ══ Sensors + Status ══ -->
 <div class="sec-div">最新設備狀態</div>
 <div class="main-grid">
   <div class="sensor-grid">
@@ -845,7 +911,7 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     <div class="sensor-card">
       <div class="sensor-name"><i class="ti ti-adjustments"></i>轉矩</div>
       <div><span class="sensor-big" style="color:var(--text)">{l_torq}</span><span class="sensor-unit">N·m</span></div>
-      <div class="sensor-bar-wrap"><div class="sensor-bar" style="width:{torq_pct:.1f}%;background:var(--text2)"></div></div>
+      <div class="sensor-bar-wrap"><div class="sensor-bar" style="width:{torq_pct:.1f}%;background:#cbd5e1"></div></div>
     </div>
   </div>
 
@@ -853,32 +919,15 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     <div>
       <div class="panel-title">診斷結果</div>
       <div class="status-row" style="margin-top:8px;">
-        <div class="status-item-row">
-          <span class="status-key">設備階段</span>
-          <span class="status-val val-muted">{l_mstate}</span>
-        </div>
-        <div class="status-item-row">
-          <span class="status-key">Rule 判斷</span>
-          <span class="status-val {rule_cls}">{l_rfault}</span>
-        </div>
-        <div class="status-item-row">
-          <span class="status-key">Rule 等級</span>
-          <span class="status-val {rule_cls}">{l_rlevel}</span>
-        </div>
-        <div class="status-item-row">
-          <span class="status-key">ML 判斷</span>
-          <span class="status-val {ml_cls}">{l_mlfault}</span>
-        </div>
-        <div class="status-item-row">
-          <span class="status-key">ML 等級</span>
-          <span class="status-val {ml_cls}">{l_mllevel}</span>
-        </div>
-        <div class="status-item-row">
-          <span class="status-key">綜合等級</span>
-          <span class="status-val {final_cls}">{l_final}</span>
-        </div>
+        <div class="status-item-row"><span class="status-key">設備階段</span><span class="status-val val-muted">{l_mstate}</span></div>
+        <div class="status-item-row"><span class="status-key">Rule 判斷</span><span class="status-val {rule_cls}">{l_rfault}</span></div>
+        <div class="status-item-row"><span class="status-key">Rule 等級</span><span class="status-val {rule_cls}">{l_rlevel}</span></div>
+        <div class="status-item-row"><span class="status-key">ML 判斷</span><span class="status-val {ml_cls}">{l_mlfault}</span></div>
+        <div class="status-item-row"><span class="status-key">ML 等級</span><span class="status-val {ml_cls}">{l_mllevel}</span></div>
+        <div class="status-item-row"><span class="status-key">綜合等級</span><span class="status-val {final_cls}">{l_final}</span></div>
       </div>
     </div>
+
     <div>
       <div class="panel-title">異常分數</div>
       <div class="score-row" style="margin-top:8px;">
@@ -899,7 +948,6 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
   </div>
 </div>
 
-<!-- ══ Charts ══ -->
 <div class="sec-div">感測器趨勢（最近 {MAX_CHART_POINTS} 筆）</div>
 <div class="charts-row">
   <div class="chart-card">
@@ -915,14 +963,13 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
     <div style="position:relative;height:180px;"><canvas id="c3"></canvas></div>
   </div>
   <div class="chart-card">
-    <div class="chart-header"><span class="chart-title">Rule 信心（0~100%）/ ML 信心（%）</span><span class="badge-live">LIVE</span></div>
+    <div class="chart-header"><span class="chart-title">Rule 信心（0~100）/ ML 信心（%）</span><span class="badge-live">LIVE</span></div>
     <div style="position:relative;height:180px;"><canvas id="c4"></canvas></div>
   </div>
 </div>
 
 {auto_section}
 
-<!-- ══ Alert table ══ -->
 <div class="sec-div">最近異常事件</div>
 <div class="alert-section">
   <div class="alert-header">
@@ -947,31 +994,55 @@ html,body{{background:var(--bg);color:var(--text);font-family:var(--sans);}}
 <script>
 const L={ts_j},F={freq_j},C={curr_j},R={rpm_j},T={torq_j},RS={rs_j},ML={ml_j};
 const base={{
-  responsive:true,maintainAspectRatio:false,animation:false,
+  responsive:true,
+  maintainAspectRatio:false,
+  animation:false,
   plugins:{{legend:{{display:false}}}},
   scales:{{
     x:{{display:false}},
-    y:{{border:{{color:'rgba(255,255,255,0.06)'}},grid:{{color:'rgba(255,255,255,0.05)'}},
-       ticks:{{font:{{family:'IBM Plex Mono',size:9}},color:'#4b6174',maxTicksLimit:5}}}}
+    y:{{
+      border:{{color:'rgba(255,255,255,0.06)'}},
+      grid:{{color:'rgba(255,255,255,0.05)'}},
+      ticks:{{font:{{family:'IBM Plex Mono',size:9}},color:'#64748b',maxTicksLimit:5}}
+    }}
   }}
 }};
 function mkLine(id,datasets){{
   new Chart(document.getElementById(id),{{
     type:'line',
-    data:{{labels:L,datasets:datasets.map(d=>{{return{{
-      label:d.l,data:d.d,borderColor:d.c,borderWidth:1.5,
-      borderDash:d.dash||[],pointRadius:0,tension:0.3,fill:false
-    }}}})  }},
-    options:{{...base,plugins:{{legend:{{
-      display:datasets.length>1,
-      labels:{{font:{{family:'IBM Plex Mono',size:10}},color:'#94a3b8',boxWidth:12,padding:10}}
-    }}}}}}
+    data:{{
+      labels:L,
+      datasets:datasets.map(d=>({{
+        label:d.l,
+        data:d.d,
+        borderColor:d.c,
+        borderWidth:1.6,
+        borderDash:d.dash||[],
+        pointRadius:0,
+        tension:0.32,
+        fill:false
+      }}))
+    }},
+    options:{{
+      ...base,
+      plugins:{{
+        legend:{{
+          display:datasets.length>1,
+          labels:{{
+            font:{{family:'IBM Plex Mono',size:10}},
+            color:'#94a3b8',
+            boxWidth:12,
+            padding:10
+          }}
+        }}
+      }}
+    }}
   }});
 }}
 mkLine('c1',[{{l:'Hz',d:F,c:'#38bdf8'}},{{l:'RPM',d:R,c:'#22d3a5',dash:[3,3]}}]);
 mkLine('c2',[{{l:'A',d:C,c:'#fbbf24'}}]);
 mkLine('c3',[{{l:'N·m',d:T,c:'#cbd5e1'}}]);
-mkLine('c4',[{{l:'Rule Score',d:RS,c:'#f87171'}},{{l:'ML Conf%',d:ML,c:'#a78bfa',dash:[4,2]}}]);
+mkLine('c4',[{{l:'Rule',d:RS,c:'#f87171'}},{{l:'ML',d:ML,c:'#a78bfa',dash:[4,2]}}]);
 </script>
 </body>
 </html>"""
@@ -988,17 +1059,15 @@ def main() -> None:
         initial_sidebar_state="collapsed",
     )
 
-    init_ml_model()      # 確保 ML 只初始化一次，Streamlit rerun 不重新訓練
+    init_ml_model()
     init_session_state()
 
-    # autorefresh 要在最前面，確保持續觸發
     if st.session_state.is_running:
         st_autorefresh(interval=DASHBOARD_REFRESH_INTERVAL_MS, key="motor_refresh")
 
     maybe_generate_data()
     render_top_controls()
 
-    # ── 頁面切換 ──
     page = st.session_state.get("page", "dashboard")
 
     if page == "tech":
@@ -1017,16 +1086,15 @@ def main() -> None:
             components.html(f.read(), height=4000, scrolling=True)
         return
 
-
-    ctrl          = get_controller()
-    df            = load_data()
+    ctrl = get_controller()
+    df = load_data()
     machine_state = ctrl.machine_state
-    # 從 session_state 計算 elapsed_sec，避免 Streamlit rerun 時單例消失
+
     _sb = st.session_state.get("startup_begin", None)
     startup_elapsed = max(0.0, time.time() - _sb) if (_sb is not None and st.session_state.is_running) else 0.0
-    # 同步回 control.py（讓 main.tick 拿到正確的 elapsed_sec）
     if st.session_state.is_running and _sb is not None:
         ctrl._startup_begin = _sb
+
     flow_items = []
     if not df.empty:
         run_df = df[df["machine_state"] == "運轉中"].copy()
@@ -1041,7 +1109,6 @@ def main() -> None:
                 if len(flow_items) >= 3:
                     break
 
-    # 從 VFD_simulator 直接讀取目前實際工況（AUTO 模式會回傳實際切換到的工況）
     from VFD_simulator import get_current_fault
     applied_fault = get_current_fault(st.session_state.applied_fault)
 
@@ -1049,9 +1116,16 @@ def main() -> None:
 
     if df.empty and ctrl.power_state == "OFF":
         st.markdown(
-            '<div style="text-align:center;padding:80px 0;'
-            "font-family:'IBM Plex Mono',monospace;font-size:13px;color:#4b6174;\">"
-            "按下「開機」開始模擬資料流</div>",
+            """
+            <div style="
+                text-align:center;
+                padding:90px 0;
+                font-family:'IBM Plex Mono',monospace;
+                font-size:13px;
+                color:#64748b;">
+                按下「開機」開始模擬資料流
+            </div>
+            """,
             unsafe_allow_html=True,
         )
         return
@@ -1067,7 +1141,7 @@ def main() -> None:
         flow_items=flow_items,
     )
 
-    components.html(html, height=3200, scrolling=False)
+    components.html(html, height=3250, scrolling=False)
 
 
 if __name__ == "__main__":
