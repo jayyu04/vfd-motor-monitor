@@ -233,26 +233,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="mode-use">任何操作頻率下電流超過額定值，模擬機械端過載。觸發即為 WARNING 等級。</div>
       </div>
     </div>
-    <div class="mode-item">
-      <div class="mode-left" style="--accent:var(--red)">
-        <div class="mode-name" style="color:var(--red)">STALL</div>
-        <div class="mode-badge" style="background:rgba(248,113,113,.15);color:var(--red);">機械卡死</div>
-      </div>
-      <div class="mode-right">
-        <div class="mode-signals">頻率：20~35 Hz（拉不上去）　電流：24~30 A（160%+ FLA）</div>
-        <div class="mode-use">電流飆高且頻率拉不上去，模擬機械端堵轉。觸發即為 CRITICAL，是最嚴重的異常。現實中繼續運轉幾分鐘就會燒毀馬達線圈，應立即停機。</div>
-      </div>
-    </div>
-    <div class="mode-item">
-      <div class="mode-left" style="--accent:var(--red)">
-        <div class="mode-name" style="color:var(--red)">LOAD_LOSS</div>
-        <div class="mode-badge" style="background:rgba(248,113,113,.15);color:var(--red);">負載流失</div>
-      </div>
-      <div class="mode-right">
-        <div class="mode-signals">頻率：30~60 Hz（任何操作頻率）　電流：2~4 A（極低）</div>
-        <div class="mode-use">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。應觸發 DANGER 等級。馬達在空轉，沒有做任何有用的功，長期空轉也會造成散熱問題。</div>
-      </div>
-    </div>
+
     <div class="mode-item">
       <div class="mode-left" style="--accent:var(--amber)">
         <div class="mode-name" style="color:var(--amber)">BEARING_WEAR</div>
@@ -263,6 +244,29 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="mode-use">任何操作頻率下電流中心值正常但電流振幅大，模擬軸承磨損產生的電流漣波。需要累積 20 筆資料（約 6 秒）計算標準差，Rule 才觸發。<span class="highlight">切換後約 6 秒才出現 Rule 告警，但 ML 會提早補位顯示 WARNING</span>。應觸發 WARNING 等級。</div>
       </div>
     </div>
+
+    <div class="mode-item">
+      <div class="mode-left" style="--accent:var(--orange)">
+        <div class="mode-name" style="color:var(--orange)">LOAD_LOSS</div>
+        <div class="mode-badge" style="background:rgba(251,146,60,.15);color:var(--orange);">負載流失</div>
+      </div>
+      <div class="mode-right">
+        <div class="mode-signals">頻率：30~60 Hz（任何操作頻率）　電流：2~4 A（極低）</div>
+        <div class="mode-use">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。應觸發 DANGER 等級。馬達在空轉，沒有做任何有用的功，長期空轉也會造成散熱問題。</div>
+      </div>
+    </div>
+
+    <div class="mode-item">
+      <div class="mode-left" style="--accent:var(--red)">
+        <div class="mode-name" style="color:var(--red)">STALL</div>
+        <div class="mode-badge" style="background:rgba(248,113,113,.15);color:var(--red);">機械卡死</div>
+      </div>
+      <div class="mode-right">
+        <div class="mode-signals">頻率：20~35 Hz（拉不上去）　電流：24~30 A（160%+ FLA）</div>
+        <div class="mode-use">電流飆高且頻率拉不上去，模擬機械端堵轉。觸發即為 CRITICAL，是最嚴重的異常。現實中繼續運轉幾分鐘就會燒毀馬達線圈，應立即停機。</div>
+      </div>
+    </div>
+
     <div class="mode-item">
       <div class="mode-left" style="--accent:var(--purple)">
         <div class="mode-name" style="color:var(--purple)">AUTO</div>
