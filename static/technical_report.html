@@ -5,123 +5,608 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>技術報告 — VFD Motor Monitoring System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg:#0a0e14; --bg2:#0f1520; --bg3:#151d2e; --panel:#111827;
-  --border:rgba(56,189,248,0.12); --border2:rgba(56,189,248,0.22);
-  --cyan:#38bdf8; --cyan2:#0ea5e9; --green:#22d3a5; --amber:#fbbf24;
-  --red:#f87171; --purple:#a78bfa; --orange:#fb923c;
-  --text:#e2e8f0; --text2:#94a3b8; --text3:#4b6174;
-  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans Condensed',sans-serif;
+:root{
+  --bg:#0a0e14;
+  --bg2:#0f1520;
+  --bg3:#151d2e;
+  --panel:#111827;
+  --panel2:#0f1724;
+  --border:rgba(56,189,248,0.12);
+  --border2:rgba(56,189,248,0.22);
+  --cyan:#38bdf8;
+  --cyan-soft:rgba(56,189,248,.12);
+  --green:#22d3a5;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --purple:#a78bfa;
+  --orange:#fb923c;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --text4:#334155;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans Condensed',sans-serif;
+  --shadow:0 10px 30px rgba(0,0,0,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
-.page{max-width:960px;margin:0 auto;padding:40px 32px 80px;}
-.header{display:flex;align-items:center;gap:16px;padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid var(--border);}
-.logo-box{width:48px;height:48px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan2),#0369a1);border-radius:10px;display:flex;align-items:center;justify-content:center;}
-.header-title{font-size:20px;font-weight:600;letter-spacing:.02em;}
-.header-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:4px;letter-spacing:.05em;}
-.header-tag{margin-left:auto;font-size:10px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:var(--cyan);}
-.toc{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:32px;}
-.toc-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
-.toc-list{display:flex;flex-direction:column;gap:6px;}
-.toc-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);}
-.toc-num{font-family:var(--mono);font-size:10px;color:var(--text3);width:20px;}
-.section{margin-bottom:48px;}
-.sec-title{display:flex;align-items:center;gap:10px;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
-.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;position:relative;overflow:hidden;}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--cyan));opacity:.7;}
-.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;}
-.card p{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7;}
+html,body{
+  background:
+    radial-gradient(circle at top right, rgba(56,189,248,.06), transparent 28%),
+    radial-gradient(circle at top left, rgba(34,211,165,.04), transparent 24%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.7;
+}
+.page{
+  max-width:980px;
+  margin:0 auto;
+  padding:42px 32px 88px;
+}
+
+/* Hero */
+.hero{
+  position:relative;
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(15,21,32,.96));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:26px 28px 22px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto 0;
+  height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--green),var(--purple));
+  opacity:.85;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  right:-70px;
+  top:-70px;
+  width:220px;
+  height:220px;
+  background:radial-gradient(circle, rgba(56,189,248,.14), transparent 65%);
+  pointer-events:none;
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  gap:18px;
+}
+.logo-box{
+  width:54px;
+  height:54px;
+  flex-shrink:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--cyan),#0369a1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 20px rgba(56,189,248,.18);
+}
+.hero-main{flex:1;}
+.eyebrow{
+  font-size:10px;
+  color:var(--text3);
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  margin-bottom:8px;
+}
+.hero-title{
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:.01em;
+  line-height:1.15;
+  margin-bottom:8px;
+}
+.hero-sub{
+  font-size:12px;
+  color:var(--text2);
+  font-family:var(--mono);
+  letter-spacing:.04em;
+}
+.hero-tag{
+  margin-left:auto;
+  font-size:10px;
+  font-family:var(--mono);
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(56,189,248,.10);
+  border:1px solid rgba(56,189,248,.24);
+  color:var(--cyan);
+  white-space:nowrap;
+}
+.hero-desc{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:12px;
+}
+.hero-stat{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.04);
+  border-radius:12px;
+  padding:12px 14px;
+}
+.hero-stat-label{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:5px;
+}
+.hero-stat-value{
+  font-size:13px;
+  color:var(--text);
+}
+.hero-stat-value strong{color:var(--cyan);}
+
+/* TOC */
+.toc{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 22px;
+  margin-bottom:36px;
+}
+.toc-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  margin-bottom:14px;
+}
+.toc-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.toc-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  color:var(--text2);
+  padding:4px 0;
+}
+.toc-num{
+  width:22px;
+  flex-shrink:0;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--text4);
+}
+
+/* Sections */
+.section{margin-bottom:52px;}
+.sec-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin-bottom:18px;
+}
+.sec-title::before,.sec-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Card */
+.card{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px 24px;
+  margin-bottom:14px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.16);
+}
+.card::before{
+  content:'';
+  position:absolute;
+  left:0; right:0; top:0;
+  height:2px;
+  background:var(--accent,var(--cyan));
+  opacity:.75;
+}
+.card-title{
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:10px;
+  letter-spacing:.01em;
+}
+.card p{
+  font-size:13px;
+  color:var(--text2);
+  margin-bottom:8px;
+  line-height:1.75;
+}
 .card p:last-child{margin-bottom:0;}
-.spec-table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);}
-.spec-table th{text-align:left;padding:8px 14px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border2);font-size:10px;text-transform:uppercase;letter-spacing:.07em;}
-.spec-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2);}
+.lead-card{
+  padding:24px 26px;
+  border-radius:16px;
+}
+.lead-card .card-title{
+  font-size:16px;
+}
+
+/* Tables */
+.spec-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+  font-family:var(--mono);
+}
+.spec-table th{
+  text-align:left;
+  padding:10px 14px;
+  color:var(--text3);
+  background:var(--bg2);
+  border-bottom:1px solid var(--border2);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+}
+.spec-table td{
+  padding:10px 14px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  color:var(--text2);
+}
 .spec-table tr:last-child td{border-bottom:none;}
-.spec-table td:first-child{color:var(--text3);width:35%;}
-.spec-table td:last-child{color:var(--cyan);font-weight:500;}
-.flow-steps{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.flow-step{display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);}
+.spec-table td:first-child{
+  color:var(--text3);
+  width:35%;
+}
+.spec-table td:last-child{
+  color:var(--cyan);
+  font-weight:500;
+}
+
+/* Flow */
+.flow-steps{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:12px;
+  background:var(--panel);
+  box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+.flow-step{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  border-bottom:1px solid var(--border);
+}
 .flow-step:last-child{border-bottom:none;}
-.flow-left{padding:14px 16px;background:var(--bg2);border-right:1px solid var(--border);}
-.flow-module{font-size:11px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
-.flow-io{font-size:10px;font-family:var(--mono);color:var(--text3);}
-.flow-right{padding:14px 18px;}
-.flow-data{font-size:11px;font-family:var(--mono);color:var(--cyan);margin-bottom:6px;line-height:1.8;}
-.flow-note{font-size:12px;color:var(--text2);}
-.formula-block{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin:10px 0;font-family:var(--mono);font-size:12px;color:var(--cyan);line-height:2;}
+.flow-left{
+  padding:14px 16px;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+}
+.flow-module{
+  font-size:11px;
+  font-family:var(--mono);
+  font-weight:500;
+  margin-bottom:4px;
+}
+.flow-io{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+}
+.flow-right{
+  padding:14px 18px;
+}
+.flow-data{
+  font-size:11px;
+  font-family:var(--mono);
+  color:var(--cyan);
+  margin-bottom:6px;
+  line-height:1.8;
+}
+.flow-note{
+  font-size:12px;
+  color:var(--text2);
+}
+
+/* Formula */
+.formula-block{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 18px;
+  margin:10px 0;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--cyan);
+  line-height:2;
+}
 .formula-comment{color:var(--text3);}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.feature-item{display:flex;align-items:flex-start;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 14px;}
-.feature-rank{font-size:10px;font-family:var(--mono);color:var(--text3);width:20px;flex-shrink:0;padding-top:1px;}
-.feature-name{font-size:12px;font-family:var(--mono);font-weight:500;color:var(--cyan);margin-bottom:3px;}
-.feature-desc{font-size:11px;color:var(--text2);}
-.score-bar{margin:16px 0;}
-.score-labels{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:6px;}
-.score-label{font-size:10px;font-family:var(--mono);text-align:center;padding:4px;border-radius:4px;}
-.score-track{height:22px;border-radius:6px;overflow:hidden;display:grid;grid-template-columns:15fr 25fr 25fr 35fr;gap:2px;}
-.score-seg{height:100%;border-radius:3px;}
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.mode-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 18px;border-left:3px solid var(--accent,var(--cyan));}
-.mode-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:6px;}
-.mode-range{font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:6px;line-height:1.8;}
-.mode-logic{font-size:12px;color:var(--text2);}
-.analogy-box{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:6px;padding:14px 18px;margin:10px 0;}
-.analogy-title{font-size:11px;font-family:var(--mono);color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
-.analogy-text{font-size:12px;color:var(--text2);line-height:1.7;}
-.limit-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;}
-.limit-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
-.limit-text{font-size:12px;color:var(--text2);line-height:1.6;}
-.limit-title{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;}
-.level-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
-.level-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;border-top:3px solid var(--accent);}
-.level-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);margin:0 auto 10px;box-shadow:0 0 8px var(--accent);}
-.level-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
-.level-score{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:8px;}
-.level-action{font-size:11px;color:var(--text2);line-height:1.5;}
-.arch-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.arch-item{display:flex;align-items:flex-start;gap:16px;padding:12px 18px;border-bottom:1px solid var(--border);}
+
+/* Layout helpers */
+.two-col{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+.feature-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:12px;
+}
+.feature-item{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 14px;
+}
+.feature-rank{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  width:20px;
+  flex-shrink:0;
+  padding-top:1px;
+}
+.feature-name{
+  font-size:12px;
+  font-family:var(--mono);
+  font-weight:500;
+  color:var(--cyan);
+  margin-bottom:3px;
+}
+.feature-desc{
+  font-size:11px;
+  color:var(--text2);
+}
+.mode-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.mode-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 18px;
+  border-left:3px solid var(--accent,var(--cyan));
+  box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+.mode-name{
+  font-size:12px;
+  font-family:var(--mono);
+  font-weight:500;
+  margin-bottom:6px;
+}
+.mode-range{
+  font-size:11px;
+  font-family:var(--mono);
+  color:var(--text3);
+  margin-bottom:6px;
+  line-height:1.8;
+}
+.mode-logic{
+  font-size:12px;
+  color:var(--text2);
+}
+.arch-list{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.arch-item{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
 .arch-item:last-child{border-bottom:none;}
-.arch-name{font-size:12px;font-family:var(--mono);font-weight:500;min-width:160px;flex-shrink:0;}
-.arch-desc{font-size:12px;color:var(--text2);}
+.arch-name{
+  font-size:12px;
+  font-family:var(--mono);
+  font-weight:500;
+  min-width:160px;
+  flex-shrink:0;
+}
+.arch-desc{
+  font-size:12px;
+  color:var(--text2);
+}
+
+/* Callouts */
+.analogy-box{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-left:3px solid var(--purple);
+  border-radius:12px;
+  padding:14px 18px;
+  margin:10px 0;
+}
+.analogy-title{
+  font-size:11px;
+  font-family:var(--mono);
+  color:var(--purple);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.analogy-text{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.7;
+}
+
+.limit-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px 14px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:8px;
+}
+.limit-icon{
+  font-size:14px;
+  flex-shrink:0;
+  margin-top:1px;
+}
+.limit-text{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.6;
+}
+.limit-title{
+  font-size:12px;
+  font-weight:600;
+  color:var(--amber);
+  margin-bottom:4px;
+}
+
+/* Levels */
+.level-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:12px;
+}
+.level-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  text-align:center;
+  border-top:3px solid var(--accent);
+  box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+.level-dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:var(--accent);
+  margin:0 auto 10px;
+  box-shadow:0 0 8px var(--accent);
+}
+.level-name{
+  font-size:12px;
+  font-family:var(--mono);
+  font-weight:500;
+  margin-bottom:4px;
+}
+.level-score{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  margin-bottom:8px;
+}
+.level-action{
+  font-size:11px;
+  color:var(--text2);
+  line-height:1.5;
+}
+
 .highlight{color:var(--text);font-weight:600;}
+
+/* Responsive */
+@media (max-width: 860px){
+  .hero-top{flex-wrap:wrap;}
+  .hero-tag{margin-left:0;}
+  .hero-desc{grid-template-columns:1fr;}
+  .two-col,.feature-grid,.mode-grid,.level-grid{grid-template-columns:1fr;}
+  .flow-step,.mode-item,.panel-item{grid-template-columns:1fr;}
+  .flow-left,.panel-left,.mode-left{border-right:none;border-bottom:1px solid var(--border);}
+  .arch-item{flex-direction:column;gap:8px;}
+  .arch-name{min-width:auto;}
+}
 </style>
 </head>
 <body>
 <div class="page">
 
-<!-- Header -->
-<div class="header">
-  <div class="logo-box">
-    <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
-      <circle cx="11" cy="11" r="7" stroke="white" stroke-width="1.5" stroke-dasharray="3 2"/>
-      <circle cx="11" cy="11" r="3" fill="white" opacity=".9"/>
-      <line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="11" y1="17" x2="11" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="1" y1="11" x2="5" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="17" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
+<div class="hero">
+  <div class="hero-top">
+    <div class="logo-box">
+      <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="white" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <circle cx="11" cy="11" r="3" fill="white" opacity=".9"/>
+        <line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="11" y1="17" x2="11" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="11" x2="5" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17" y1="11" x2="21" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="hero-main">
+      <div class="eyebrow">VFD Motor Monitoring System · v3.0</div>
+      <div class="hero-title">技術報告</div>
+      <div class="hero-sub">Technical Report · Rule-based Anomaly Score + Random Forest · 系統架構、資料流、物理計算與雙層判斷設計</div>
+    </div>
+
+    <div class="hero-tag">TECHNICAL REPORT</div>
   </div>
-  <div>
-    <div class="header-title">技術報告</div>
-    <div class="header-sub">VFD Motor Monitoring System · v3.0 · Rule-based Anomaly Score + Random Forest</div>
+
+  <div class="hero-desc">
+    <div class="hero-stat">
+      <div class="hero-stat-label">報告定位</div>
+      <div class="hero-stat-value">完整說明系統架構、資料流、Rules、ML 與限制，作為專題技術文件與口試參考</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">適用版本</div>
+      <div class="hero-stat-value"><strong>v3.0</strong> 分層重構版</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">核心主題</div>
+      <div class="hero-stat-value">Architecture / Data Flow / Physics / Rules / ML</div>
+    </div>
   </div>
-  <div class="header-tag">TECHNICAL REPORT</div>
 </div>
 
-<!-- 目錄 -->
 <div class="toc">
-  <div class="toc-title">目錄</div>
+  <div class="toc-title">
+    <span>目錄</span>
+    <span>10 Sections</span>
+  </div>
   <div class="toc-list">
     <div class="toc-item"><span class="toc-num">01</span>馬達基本規格</div>
     <div class="toc-item"><span class="toc-num">02</span>系統架構</div>
     <div class="toc-item"><span class="toc-num">03</span>資料流</div>
     <div class="toc-item"><span class="toc-num">04</span>VFD_simulator — 模擬資料產生</div>
     <div class="toc-item"><span class="toc-num">05</span>物理計算層 — 三個原始值推算物理量</div>
-    <div class="toc-item"><span class="toc-num">06</span>Rules 判斷 — 規則式異常評分</div>
+    <div class="toc-item"><span class="toc-num">06</span>Rules 判斷 — Rule Confidence</div>
     <div class="toc-item"><span class="toc-num">07</span>ML 判斷 — 隨機森林機器學習</div>
     <div class="toc-item"><span class="toc-num">08</span>雙層互補的價值</div>
     <div class="toc-item"><span class="toc-num">09</span>風險等級</div>
@@ -132,7 +617,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 01 規格 -->
 <div class="section" id="spec">
   <div class="sec-title">01 馬達基本規格</div>
-  <div class="card" style="--accent:var(--cyan)">
+  <div class="card lead-card" style="--accent:var(--cyan)">
+    <div class="card-title">目標設備規格</div>
     <table class="spec-table">
       <thead><tr><th>參數</th><th>數值</th></tr></thead>
       <tbody>
@@ -156,13 +642,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 02 架構 -->
 <div class="section" id="arch">
   <div class="sec-title">02 系統架構</div>
-  <div class="card" style="--accent:var(--cyan)">
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">十二個模組，每個只做一件事</div>
     <p>系統採用嚴格分層設計，每個模組職責單一，不依賴其他模組的內部狀態。<span class="highlight">未來換真實硬體只需修改 comms.py 一個模組</span>，換不同規格的馬達只需修改 config.py，其他模組完全不動。</p>
   </div>
 
-  <!-- 架構圖 -->
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:12px;overflow-x:auto;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:12px;overflow-x:auto;box-shadow:0 4px 14px rgba(0,0,0,.14);">
     <svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto;">
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -176,112 +661,82 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         </marker>
       </defs>
 
-      <!-- config.py 橫跨頂部 -->
       <rect x="180" y="10" width="540" height="36" rx="6" fill="#111827" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
       <text x="450" y="25" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">config.py</text>
       <text x="450" y="39" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">馬達規格 / 系統參數 / Rules 閾值（所有模組共用）</text>
 
-      <!-- dashboard -->
       <rect x="330" y="65" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.4)" stroke-width="1.5"/>
       <text x="450" y="81" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">dashboard.py</text>
       <text x="450" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">展示層 / 使用者介面</text>
 
-      <!-- control -->
       <rect x="330" y="130" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.4)" stroke-width="1.5"/>
       <text x="450" y="146" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">control.py</text>
       <text x="450" y="160" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">控制層 / 狀態管理</text>
 
-      <!-- VFD_simulator -->
       <rect x="60" y="210" width="190" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="155" y="226" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#38bdf8" font-weight="500">VFD_simulator.py</text>
       <text x="155" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">模擬 Hz / A / V</text>
 
-      <!-- comms -->
       <rect x="330" y="210" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="450" y="226" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">comms.py</text>
       <text x="450" y="240" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">通訊層 / 換硬體只改這裡</text>
 
-      <!-- data_collector -->
       <rect x="330" y="278" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="450" y="294" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">data_collector.py</text>
       <text x="450" y="308" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">加 timestamp / motor_id</text>
 
-      <!-- physics -->
       <rect x="330" y="346" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="450" y="362" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">physics.py</text>
       <text x="450" y="376" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">推算 RPM / 轉差 / 轉矩</text>
 
-      <!-- main -->
       <rect x="330" y="414" width="240" height="38" rx="6" fill="#111827" stroke="rgba(34,211,165,0.3)" stroke-width="1.5"/>
       <text x="450" y="430" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#22d3a5" font-weight="500">main.py</text>
       <text x="450" y="444" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">串接 / 啟動遮蔽 / 合併結果</text>
 
-      <!-- rules -->
       <rect x="100" y="494" width="170" height="38" rx="6" fill="#111827" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
       <text x="185" y="510" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#fbbf24" font-weight="500">rules.py</text>
-      <text x="185" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Anomaly Score 0~100</text>
+      <text x="185" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Anomaly Score / Rule Confidence</text>
 
-      <!-- ml_model -->
       <rect x="630" y="494" width="170" height="38" rx="6" fill="#111827" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
       <text x="715" y="510" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#a78bfa" font-weight="500">ml_model.py</text>
       <text x="715" y="524" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">隨機森林 100棵樹</text>
 
-      <!-- records -->
       <rect x="60" y="414" width="160" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.2)" stroke-width="1.5" stroke-dasharray="4,3"/>
       <text x="140" y="430" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#38bdf8" font-weight="500">records.py</text>
       <text x="140" y="444" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">FullRecord 資料結構</text>
 
-      <!-- database -->
       <rect x="330" y="556" width="240" height="38" rx="6" fill="#111827" stroke="rgba(56,189,248,0.3)" stroke-width="1.5"/>
       <text x="450" y="572" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#38bdf8" font-weight="500">database.py</text>
       <text x="450" y="586" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">SQLite 儲存</text>
 
-      <!-- ── 控制流（綠色虛線）── -->
-      <!-- dashboard → control -->
       <line x1="450" y1="103" x2="450" y2="128" stroke="rgba(34,211,165,0.6)" stroke-width="1.5" marker-end="url(#arr-g)"/>
-      <!-- control → VFD_simulator -->
       <path d="M330,149 L155,149 L155,208" stroke="rgba(34,211,165,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
-      <!-- control → main（通知開始/停止）-->
       <path d="M570,149 L820,149 L820,433 L572,433" stroke="rgba(34,211,165,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
 
-      <!-- ── 資料流（青藍色實線）── -->
-      <!-- VFD_simulator → comms -->
       <line x1="250" y1="229" x2="328" y2="229" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- comms → data_collector -->
       <line x1="450" y1="248" x2="450" y2="276" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- data_collector → physics -->
       <line x1="450" y1="316" x2="450" y2="344" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- physics → main -->
       <line x1="450" y1="384" x2="450" y2="412" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- main → rules -->
+
       <path d="M380,452 L185,452 L185,492" stroke="rgba(251,191,36,0.5)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-      <!-- rules → main（回傳結果） -->
       <path d="M185,532 L185,546 L310,546 L310,433 L328,433" stroke="rgba(251,191,36,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
-      <!-- main → ml_model -->
+
       <path d="M520,452 L715,452 L715,492" stroke="rgba(167,139,250,0.5)" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-      <!-- ml_model → main（回傳結果） -->
       <path d="M715,532 L715,546 L590,546 L590,433 L572,433" stroke="rgba(167,139,250,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
-      <!-- main → database -->
+
       <line x1="450" y1="452" x2="450" y2="554" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- records → main（虛線，共用資料結構）-->
       <line x1="220" y1="433" x2="328" y2="433" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-d)"/>
-      <!-- records → database（虛線，共用資料結構）-->
       <path d="M220,452 L220,575 L328,575" stroke="rgba(56,189,248,0.2)" stroke-width="1" stroke-dasharray="3,2" fill="none" marker-end="url(#arr-d)"/>
-      <!-- database → dashboard（讀取，虛線，從右側繞） -->
+
       <path d="M570,575 L860,575 L860,84 L572,84" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
-      <!-- VFD_simulator → dashboard（目前工況顯示，橙色虛線，左側繞） -->
       <path d="M60,229 L20,229 L20,84 L328,84" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
       <text x="26" y="160" font-family="IBM Plex Mono" font-size="8" fill="#fb923c" transform="rotate(-90,26,160)">get_current_fault()</text>
 
-
-
-      <!-- 資料標籤 -->
       <text x="276" y="222" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">Hz/A/V</text>
       <text x="456" y="265" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">RawSignal</text>
       <text x="456" y="333" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">CollectedRecord</text>
       <text x="456" y="401" font-family="IBM Plex Mono" font-size="9" fill="#4b6174">PhysicsRecord</text>
 
-      <!-- 圖例 -->
       <rect x="660" y="65" width="175" height="100" rx="4" fill="rgba(15,21,32,0.9)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
       <text x="670" y="83" font-family="IBM Plex Mono" font-size="9" fill="#4b6174" text-decoration="underline">圖例</text>
       <line x1="670" y1="97" x2="710" y2="97" stroke="rgba(56,189,248,0.6)" stroke-width="1.5" marker-end="url(#arr)"/>
@@ -290,13 +745,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <text x="716" y="117" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">控制流</text>
       <line x1="670" y1="131" x2="710" y2="131" stroke="rgba(56,189,248,0.25)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-d)"/>
       <text x="716" y="134" font-family="IBM Plex Mono" font-size="9" fill="#94a3b8">讀取顯示</text>
-
       <line x1="670" y1="148" x2="710" y2="148" stroke="rgba(251,146,60,0.5)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
       <text x="716" y="151" font-family="IBM Plex Mono" font-size="9" fill="#fb923c">實際工況回報</text>
     </svg>
   </div>
 
-  <!-- 模組列表 -->
   <div class="arch-list">
     <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">config.py</span><span class="arch-desc">馬達銘牌規格、系統參數、Rules 閾值的集中管理，所有模組都來這裡讀取設定</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">records.py</span><span class="arch-desc">定義 FullRecord 資料結構，存放合併後的完整紀錄，避免 main.py 和 database.py 循環引用</span></div>
@@ -304,7 +757,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">comms.py</span><span class="arch-desc">通訊層，VFD 與電腦的橋樑。目前從 simulator 讀取，未來換 Modbus 只改這裡</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">data_collector.py</span><span class="arch-desc">接收原始訊號，加上 timestamp 和 motor_id，完成資料擷取</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--cyan)">physics.py</span><span class="arch-desc">用物理公式從三個原始值推算：同步轉速、轉差率、轉矩</span></div>
-    <div class="arch-item"><span class="arch-name" style="color:var(--amber)">rules.py</span><span class="arch-desc">規則式分析層，計算 Anomaly Score（0~100），第一層判斷，結果回傳給 main.py</span></div>
+    <div class="arch-item"><span class="arch-name" style="color:var(--amber)">rules.py</span><span class="arch-desc">規則式分析層，計算 Anomaly Score / Rule Confidence，第一層判斷，結果回傳給 main.py</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--purple)">ml_model.py</span><span class="arch-desc">隨機森林機器學習，100棵決策樹投票，第二層判斷，結果回傳給 main.py</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--green)">main.py</span><span class="arch-desc">流水線串接，判斷啟動遮蔽，合併 Rules + ML 結果，寫入資料庫</span></div>
     <div class="arch-item"><span class="arch-name" style="color:var(--green)">control.py</span><span class="arch-desc">系統狀態唯一管理者，接收 dashboard 指令，通知 main 開始/停止</span></div>
@@ -316,10 +769,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 03 資料流 -->
 <div class="section" id="dataflow">
   <div class="sec-title">03 資料流</div>
-  <div class="card" style="--accent:var(--cyan)">
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">每一筆資料的完整旅程</div>
     <p>從操作員按下開機，到資料出現在 Dashboard，每筆資料會依序通過以下每個模組，整個過程約 300ms 完成一次循環。</p>
   </div>
+
   <div class="flow-steps">
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--green)">control.py</div><div class="flow-io">控制入口</div></div>
@@ -328,6 +782,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="flow-note">操作員的所有操作都透過 control.py，它是唯一的控制入口，把指令傳給 simulator，把 elapsed_sec 傳給 main</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">comms.py</div><div class="flow-io">通訊層</div></div>
       <div class="flow-right">
@@ -335,27 +790,31 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="flow-note">向 VFD_simulator 讀取原始訊號，未來接真實硬體只改這裡</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">VFD_simulator</div><div class="flow-io">模擬訊號</div></div>
       <div class="flow-right">
-        <div class="flow-data">frequency_hz = 21.8<br/>current_a   = 27.9<br/>voltage_v   = 165.9<span style="color:var(--text3);font-size:10px;">（V/f 控制：380 × 21.8 / 50）</span></div>
+        <div class="flow-data">frequency_hz = 21.8<br/>current_a = 27.9<br/>voltage_v = 165.9 <span style="color:var(--text3);font-size:10px;">（V/f 控制：380 × 21.8 / 50）</span></div>
         <div class="flow-note">根據工況和啟動狀態產生對應的三個原始值。電壓跟頻率成比例（V/f 控制），低頻時電壓跟著降。</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">data_collector</div><div class="flow-io">加管理資訊</div></div>
       <div class="flow-right">
-        <div class="flow-data">timestamp = "2026-05-11T14:30:01"<br/>motor_id  = "MOTOR-001"<br/>+ Hz / A / V</div>
+        <div class="flow-data">timestamp = "2026-05-11T14:30:01"<br/>motor_id = "MOTOR-001"<br/>+ Hz / A / V</div>
         <div class="flow-note">加上時間戳記和設備識別碼，完成最小的資料擷取</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">physics.py</div><div class="flow-io">物理推算</div></div>
       <div class="flow-right">
-        <div class="flow-data">sync_rpm   = 654.9 RPM<span style="color:var(--text3);font-size:10px;">（120 × 21.8 / 4）</span><br/>slip_ratio = 0.199<span style="color:var(--text3);font-size:10px;">（電流 27.9A / 15A = 1.86 → 估算）</span><br/>torque_nm  = 87.4 N·m<span style="color:var(--text3);font-size:10px;">（P_out / ω）</span></div>
+        <div class="flow-data">sync_rpm = 654.9 RPM <span style="color:var(--text3);font-size:10px;">（120 × 21.8 / 4）</span><br/>slip_ratio = 0.199 <span style="color:var(--text3);font-size:10px;">（電流 27.9A / 15A = 1.86 → 估算）</span><br/>torque_nm = 87.4 N·m <span style="color:var(--text3);font-size:10px;">（P_out / ω）</span></div>
         <div class="flow-note">用物理公式從三個原始值推算出有意義的物理量，供 Rules 和 ML 使用。sync_rpm 是純公式計算，slip_ratio 和 torque_nm 是估算值。</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--green)">main.py</div><div class="flow-io">啟動遮蔽判斷</div></div>
       <div class="flow-right">
@@ -363,20 +822,23 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="flow-note">啟動期間電流是額定的 1.5~2 倍，是正常限流啟動現象。5 秒內不判斷，避免誤報。BEARING_WEAR 另外需要 20 筆窗口資料（約 6 秒）才能計算標準差。</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--amber)">rules.py</div><div class="flow-io">第一層判斷</div></div>
       <div class="flow-right">
-        <div class="flow-data">fault_type = "STALL"<br/>level      = "CRITICAL"<br/>score      = 78<span style="color:var(--text3);font-size:10px;">（電流 27.9A 超過 20A → (27.9-20) × 10 = 79分）</span></div>
+        <div class="flow-data">fault_type = "STALL"<br/>level = "CRITICAL"<br/>score = 78 <span style="color:var(--text3);font-size:10px;">（電流 27.9A 超過 20A → (27.9-20) × 10 = 79分）</span></div>
         <div class="flow-note">電流超過 133% FLA（20A）判定為 STALL，分數 75 以上為 CRITICAL。</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--purple)">ml_model.py</div><div class="flow-io">第二層判斷</div></div>
       <div class="flow-right">
-        <div class="flow-data">fault_type = "STALL"<br/>level      = "CRITICAL"<br/>confidence = 100%<span style="color:var(--text3);font-size:10px;">（100棵樹全部投 STALL）</span></div>
+        <div class="flow-data">fault_type = "STALL"<br/>level = "CRITICAL"<br/>confidence = 100% <span style="color:var(--text3);font-size:10px;">（100棵樹全部投 STALL）</span></div>
         <div class="flow-note">100 棵決策樹從 6 個特徵組合投票，低頻 + 高電流 + 高轉矩的組合明確指向 STALL。</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--green)">main.py</div><div class="flow-io">合併結果</div></div>
       <div class="flow-right">
@@ -384,6 +846,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="flow-note">取 Rules 和 ML 兩者中較嚴重的等級，寫入資料庫</div>
       </div>
     </div>
+
     <div class="flow-step">
       <div class="flow-left"><div class="flow-module" style="color:var(--cyan)">database.py</div><div class="flow-io">儲存</div></div>
       <div class="flow-right">
@@ -397,10 +860,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 04 simulator -->
 <div class="section" id="simulator">
   <div class="sec-title">04 VFD_simulator — 模擬資料產生</div>
-  <div class="card" style="--accent:var(--cyan)">
+
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">為什麼需要模擬器</div>
     <p>真實工業監控需要接實體感測器，但開發和展示階段沒有真實硬體。VFD_simulator.py 的任務是產生「看起來像真實變頻器輸出」的資料，<span class="highlight">只輸出三個原始值：Hz / A / V</span>，模擬真實硬體透過 Modbus 能直接讀到的最小資料集。</p>
   </div>
+
   <div class="card" style="--accent:var(--cyan)">
     <div class="card-title">連續性設計：資料不會一下高一下低</div>
     <p>真實感測器的數值不會每秒大幅跳動，而是在某個中心值附近小幅浮動。simulator 用「滑動狀態」實現這個特性：</p>
@@ -411,6 +876,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       47.3 → 47.5 → 47.2 → 47.4 Hz（平滑連續，不跳動）
     </div>
   </div>
+
   <div class="card" style="--accent:var(--amber)">
     <div class="card-title">三種運作狀態</div>
     <div class="formula-block" style="font-size:11px;">
@@ -424,10 +890,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       依選擇的工況產生對應的穩態資料
     </div>
   </div>
+
   <div class="card" style="--accent:var(--purple)">
     <div class="card-title">六種工況設計</div>
     <p>五種手動模式 + 一種自動模式，各模式的頻率和電流範圍刻意設計了重疊區間，讓 ML 能學到模糊邊界。</p>
   </div>
+
   <div class="mode-grid">
     <div class="mode-card" style="--accent:var(--green)">
       <div class="mode-name" style="color:var(--green)">NORMAL　正常運轉</div>
@@ -435,30 +903,35 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <div class="mode-logic">頻率由操作員決定，電流反映負載大小，兩者獨立，符合 V/f 控制</div>
       <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">操作範圍 30~60Hz 由從業人員確認，電流 10.5~14A 對應 70%~93% 額定負載</div>
     </div>
+
     <div class="mode-card" style="--accent:var(--amber)">
       <div class="mode-name" style="color:var(--amber)">OVERLOAD　過電流</div>
       <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：18.5~22 A（110%+ FLA）</div>
       <div class="mode-logic">任何操作頻率下電流超過額定值，模擬機械過載。頻率不侷限於特定範圍，因為過載可以在任何轉速下發生</div>
       <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">參考依據：IEC 60947 過電流保護，觸發門檻 110% FLA（16.5A）</div>
     </div>
+
     <div class="mode-card" style="--accent:var(--amber)">
       <div class="mode-name" style="color:var(--amber)">BEARING_WEAR　軸承磨損</div>
       <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：10~13 A（正常，但波動 ±2.5A）</div>
       <div class="mode-logic">任何操作頻率下電流中心值正常但波動幅度大，模擬軸承磨損產生的電流漣波</div>
-      <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">參考依據：ISO 10816 振動監測標準（真實需振動感測器）。本系統以電流標準差作為簡化替代指標</div>
+      <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">參考依據：ISO 10816 振動監測標準（真實需振動感測器）。本系統以電流標準差作為簡化版替代指標</div>
     </div>
+
     <div class="mode-card" style="--accent:var(--orange)">
       <div class="mode-name" style="color:var(--orange)">LOAD_LOSS　負載流失</div>
       <div class="mode-range">頻率：30~60 Hz（任何操作頻率）<br/>電流：2~4 A（空載以下）</div>
       <div class="mode-logic">任何操作頻率下電流極低，模擬皮帶斷裂或幫浦空轉。負載流失可以在任何轉速下發生</div>
       <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">參考依據：幫浦空轉保護（Dry Run Protection）業界慣例，電流低於正常負載電流判定為負載流失</div>
     </div>
+
     <div class="mode-card" style="--accent:var(--red)">
       <div class="mode-name" style="color:var(--red)">STALL　機械卡死</div>
       <div class="mode-range">頻率：20~35 Hz（拉不上去）<br/>電流：24~30 A（160%+ FLA）</div>
       <div class="mode-logic">電流飆高且頻率拉不上去，模擬機械端堵轉</div>
       <div class="mode-logic" style="margin-top:6px;font-size:10px;color:var(--text3);">參考依據：IEC 60947 堵轉保護，觸發門檻 133% FLA</div>
     </div>
+
     <div class="mode-card" style="--accent:var(--purple)">
       <div class="mode-name" style="color:var(--purple)">AUTO　自動隨機切換</div>
       <div class="mode-range">每 10~20 秒自動切換工況（不重複上一個）</div>
@@ -470,10 +943,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 05 物理計算 -->
 <div class="section" id="physics">
   <div class="sec-title">05 物理計算層 — 從三個原始值推算物理量</div>
-  <div class="card" style="--accent:var(--cyan)">
+
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">為什麼要推算</div>
     <p>真實變頻器透過 Modbus 只給出頻率、電流、電壓三個值，但監控和診斷需要更多有意義的物理量。physics.py 是系統裡<span class="highlight">唯一包含物理公式的地方</span>，所有推算都在這裡完成。</p>
   </div>
+
   <div class="card" style="--accent:var(--purple)">
     <div class="card-title">三個核心公式</div>
     <div class="formula-block">
@@ -481,6 +956,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       sync_rpm = 120 × frequency_hz / 極數<br/>
       <span class="formula-comment">　　　　　= 120 × 50 / 4 = 1500 RPM（額定頻率下）</span><br/>
       <span class="formula-comment">　→ 120 是電氣常數，極數決定轉速，極數越多轉速越慢</span><br/><br/>
+
       <span class="formula-comment"># 2. 轉差率（從電流負載比估算）</span><br/>
       load_ratio = current_a / RATED_CURRENT_A<br/>
       <span class="formula-comment">　→ 實際電流佔額定電流的比例，代表目前負載程度</span><br/>
@@ -488,17 +964,19 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <span class="formula-comment">　→ 負載越重，轉差率越大，轉速越慢</span><br/>
       <span class="formula-comment">　→ 0.02 是空載時的基本轉差，× 0.05 是負載影響係數</span><br/>
       <span class="formula-comment">　※ 沒有轉速感測器，用電流近似估算，是估計值</span><br/><br/>
+
       <span class="formula-comment"># 3. 轉矩（理論值）</span><br/>
-      P_in  = √3 × V × I × cosφ<br/>
+      P_in = √3 × V × I × cosφ<br/>
       <span class="formula-comment">　→ 三相電功率公式，√3 是三相電的幾何係數，cosφ 是功率因數</span><br/>
       P_out = P_in × η<br/>
       <span class="formula-comment">　→ 輸入功率乘以效率，得到實際輸出的機械功率</span><br/>
-      ω     = 2π × sync_rpm / 60<br/>
+      ω = 2π × sync_rpm / 60<br/>
       <span class="formula-comment">　→ 將每分鐘轉速（RPM）換算成每秒弧度（角速度）</span><br/>
-      T     = P_out / ω<br/>
+      T = P_out / ω<br/>
       <span class="formula-comment">　→ 功率 ÷ 角速度 = 轉矩，單位 N·m（牛頓米）</span>
     </div>
   </div>
+
   <div class="two-col">
     <div class="card" style="--accent:var(--amber)">
       <div class="card-title">直接量測值（可信）</div>
@@ -513,11 +991,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
   </div>
 </div>
 
-<!-- 06 Rules 判斷 — Rule Confidence -->
+<!-- 06 Rules -->
 <div class="section" id="rules">
   <div class="sec-title">06 Rules 判斷 — Rule Confidence</div>
 
-  <div class="card" style="--accent:var(--amber)">
+  <div class="card lead-card" style="--accent:var(--amber)">
     <div class="card-title">核心概念：判斷模式，等級跟模式綁定</div>
     <p>傳統做法是用分數對應等級，分數高低決定嚴重程度。我們現在改成：<span class="highlight">Rules 的任務只有一件事——判斷是哪種模式</span>，等級直接跟模式綁定，不再由分數決定。</p>
     <p>每個模式計算 0~100 的信心分數，取信心分數最高的那個模式，等級就自動出來。</p>
@@ -594,7 +1072,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <div class="section" id="ml">
   <div class="sec-title">07 ML 判斷 — 隨機森林機器學習</div>
 
-  <div class="card" style="--accent:var(--purple)">
+  <div class="card lead-card" style="--accent:var(--purple)">
     <div class="card-title">什麼是監督式學習</div>
     <p>機器學習有很多種，我們用的是「監督式學習」。<span class="highlight">核心概念</span>：給機器看大量「有正確答案的例題」，讓它自己找出規律，之後遇到新題目就能判斷。</p>
   </div>
@@ -661,13 +1139,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <div class="card-title">六個輸入特徵</div>
     <p>模型不直接看原始感測值，而是使用 6 個有物理意義的特徵，每個特徵都有其針對的異常：</p>
   </div>
+
   <div class="feature-grid">
     <div class="feature-item"><div class="feature-rank">01</div><div><div class="feature-name">current_a</div><div class="feature-desc">電流絕對值，最直接的負載指標。STALL 極高、LOAD_LOSS 極低、OVERLOAD 偏高</div></div></div>
     <div class="feature-item"><div class="feature-rank">02</div><div><div class="feature-name">torque_nm</div><div class="feature-desc">轉矩，從功率和轉速推算。STALL 時轉矩極高，LOAD_LOSS 時極低，區分度大</div></div></div>
     <div class="feature-item"><div class="feature-rank">03</div><div><div class="feature-name">slip_ratio</div><div class="feature-desc">轉差率，從電流負載比估算。STALL 時轉差率高，搭配頻率能區分 STALL vs OVERLOAD</div></div></div>
     <div class="feature-item"><div class="feature-rank">04</div><div><div class="feature-name">current_ratio</div><div class="feature-desc">電流 / 額定電流，正規化的相對負載比，讓不同規格馬達的特徵更具可比性</div></div></div>
     <div class="feature-item"><div class="feature-rank">05</div><div><div class="feature-name">frequency_hz</div><div class="feature-desc">頻率，STALL 時拉不上去，是區分 STALL 和 OVERLOAD 的關鍵背景資訊</div></div></div>
-    <div class="feature-item"><div class="feature-rank">06</div><div><div class="feature-name">current_std</div><div class="feature-desc">最近 20 筆電流的標準差，捕捉電流振幅。BEARING_WEAR 的唯一關鍵特徵，NORMAL 的標準差約 0.2A，BEARING_WEAR 約 1.4A</div></div></div>
+    <div class="feature-item"><div class="feature-rank">06</div><div><div class="feature-name">current_std</div><div class="feature-desc">最近 20 筆電流的標準差，捕捉電流振幅。BEARING_WEAR 的唯一關鍵特徵，NORMAL 約 0.2A，BEARING_WEAR 約 1.4A</div></div></div>
   </div>
 
   <div class="card" style="--accent:var(--green)">
@@ -698,6 +1177,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         立即給出結果，不需要等待
       </div>
     </div>
+
     <div class="card" style="--accent:var(--purple)">
       <div class="card-title">ML 的強項</div>
       <p>Rules 信心分數低或窗口未滿時，ML 靠多特徵組合補位：</p>
@@ -729,7 +1209,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 
     <p style="margin-bottom:8px;"><strong style="color:var(--red);">場景三：兩層都確認（最可信）</strong></p>
     <div class="formula-block" style="font-size:11px;">
-      STALL 電流 28A Hz=25：<br/>
+      STALL 電流 28A：<br/>
       Rules 信心 80% → STALL CRITICAL<br/>
       ML 信心 100% → STALL CRITICAL<br/>
       → final = CRITICAL（兩層一致，高度可信）
@@ -755,25 +1235,25 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <div class="level-card" style="--accent:var(--green)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--green);">正常</div>
-      <div class="level-score" style="font-size:10px;color:var(--text3);">NORMAL</div>
+      <div class="level-score">NORMAL</div>
       <div class="level-action">設備運作正常，持續監控，無需採取行動</div>
     </div>
     <div class="level-card" style="--accent:var(--amber)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--amber);">警告</div>
-      <div class="level-score" style="font-size:10px;color:var(--text3);">OVERLOAD / BEARING_WEAR</div>
+      <div class="level-score">OVERLOAD / BEARING_WEAR</div>
       <div class="level-action">出現異常趨勢，安排檢查，持續觀察是否惡化</div>
     </div>
     <div class="level-card" style="--accent:var(--orange)">
       <div class="level-dot" style="background:var(--orange);box-shadow:0 0 8px var(--orange);"></div>
       <div class="level-name" style="color:var(--orange);">危險</div>
-      <div class="level-score" style="font-size:10px;color:var(--text3);">LOAD_LOSS</div>
+      <div class="level-score">LOAD_LOSS</div>
       <div class="level-action">立即檢查設備，考慮降載或計劃停機檢修</div>
     </div>
     <div class="level-card" style="--accent:var(--red)">
       <div class="level-dot"></div>
       <div class="level-name" style="color:var(--red);">緊急</div>
-      <div class="level-score" style="font-size:10px;color:var(--text3);">STALL</div>
+      <div class="level-score">STALL</div>
       <div class="level-action">立即停機，繼續運轉可能造成設備損壞或人員安全事故</div>
     </div>
   </div>
@@ -794,29 +1274,43 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 10 限制與展望 -->
 <div class="section" id="limits">
   <div class="sec-title">10 系統誠實限制與未來展望</div>
-  <div class="card" style="--accent:var(--amber)">
+
+  <div class="card lead-card" style="--accent:var(--amber)">
     <div class="card-title">現有的限制（誠實說明）</div>
   </div>
+
   <div class="limit-item">
     <div class="limit-icon">⚠️</div>
-    <div><div class="limit-title">訓練資料來自模擬器（最重要的限制）</div>
-    <div class="limit-text">訓練和測試資料都由同一個 simulator 產生，測試集準確率 100% 是在模擬資料分布上的結果。換成真實硬體資料後，準確率可能下降，需要用真實資料重新訓練或微調。這是 Simulation-to-Real 開發流程的標準限制。</div></div>
+    <div>
+      <div class="limit-title">訓練資料來自模擬器（最重要的限制）</div>
+      <div class="limit-text">訓練和測試資料都由同一個 simulator 產生，測試集準確率 100% 是在模擬資料分布上的結果。換成真實硬體資料後，準確率可能下降，需要用真實資料重新訓練或微調。這是 Simulation-to-Real 開發流程的標準限制。</div>
+    </div>
   </div>
+
   <div class="limit-item">
     <div class="limit-icon">⚠️</div>
-    <div><div class="limit-title">轉差率和轉矩是估算值</div>
-    <div class="limit-text">沒有轉速感測器，slip_ratio 是從電流負載比推算的近似值，torque_nm 是用同步轉速計算的理論值。加裝編碼器後才能得到真實的轉速和精確的轉矩。</div></div>
+    <div>
+      <div class="limit-title">轉差率和轉矩是估算值</div>
+      <div class="limit-text">沒有轉速感測器，slip_ratio 是從電流負載比推算的近似值，torque_nm 是用同步轉速計算的理論值。加裝編碼器後才能得到真實的轉速和精確的轉矩。</div>
+    </div>
   </div>
+
   <div class="limit-item">
     <div class="limit-icon">⚠️</div>
-    <div><div class="limit-title">BEARING_WEAR 是簡化版</div>
-    <div class="limit-text">真實的軸承磨損偵測需要高頻取樣（1000Hz 以上）和 FFT 頻譜分析（ISO 10816）。我們用電流標準差做簡化版的特徵提取，適合 demo 展示，真實環境需要升級。</div></div>
+    <div>
+      <div class="limit-title">BEARING_WEAR 是簡化版</div>
+      <div class="limit-text">真實的軸承磨損偵測需要高頻取樣（1000Hz 以上）和 FFT 頻譜分析（ISO 10816）。我們用電流標準差做簡化版的特徵提取，適合 demo 展示，真實環境需要升級。</div>
+    </div>
   </div>
+
   <div class="limit-item">
     <div class="limit-icon">⚠️</div>
-    <div><div class="limit-title">STALL 的 Rules 判斷在低電流區段靠 ML 補位</div>
-    <div class="limit-text">電流 20~24A 時 OVERLOAD 分數高於 STALL，Rules 判 OVERLOAD，由 ML 從頻率和轉矩特徵升等為 STALL。這是設計上刻意的分工，不是錯誤。</div></div>
+    <div>
+      <div class="limit-title">STALL 的 Rules 判斷在低電流區段靠 ML 補位</div>
+      <div class="limit-text">電流 20~24A 時 OVERLOAD 分數高於 STALL，Rules 判 OVERLOAD，由 ML 從頻率和轉矩特徵升等為 STALL。這是設計上刻意的分工，不是錯誤。</div>
+    </div>
   </div>
+
   <div class="card" style="--accent:var(--green);margin-top:12px;">
     <div class="card-title">未來接軌真實硬體</div>
     <p>系統架構已經為接真實硬體做好準備：</p>
@@ -828,6 +1322,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
     <p>核心的雙層判斷架構、物理計算層、資料流設計都不需要改動。</p>
   </div>
+</div>
+
 </div>
 </body>
 </html>
