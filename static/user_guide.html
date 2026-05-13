@@ -5,105 +5,600 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>使用說明 — VFD Motor Monitoring System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg:#0a0e14; --bg2:#0f1520; --bg3:#151d2e; --panel:#111827;
-  --border:rgba(56,189,248,0.12); --border2:rgba(56,189,248,0.22);
-  --cyan:#38bdf8; --green:#22d3a5; --amber:#fbbf24;
-  --red:#f87171; --purple:#a78bfa; --orange:#fb923c;
-  --text:#e2e8f0; --text2:#94a3b8; --text3:#4b6174;
-  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans Condensed',sans-serif;
+:root{
+  --bg:#0a0e14;
+  --bg2:#0f1520;
+  --bg3:#151d2e;
+  --panel:#111827;
+  --panel2:#0f1724;
+  --border:rgba(56,189,248,0.12);
+  --border2:rgba(56,189,248,0.22);
+  --cyan:#38bdf8;
+  --cyan-soft:rgba(56,189,248,.12);
+  --green:#22d3a5;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --purple:#a78bfa;
+  --orange:#fb923c;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --text4:#334155;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'IBM Plex Sans Condensed',sans-serif;
+  --shadow:0 10px 30px rgba(0,0,0,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
-.page{max-width:900px;margin:0 auto;padding:40px 32px 80px;}
-.header{display:flex;align-items:center;gap:16px;padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid var(--border);}
-.logo-box{width:48px;height:48px;flex-shrink:0;background:linear-gradient(135deg,var(--green),#0d9488);border-radius:10px;display:flex;align-items:center;justify-content:center;}
-.header-title{font-size:20px;font-weight:600;}
-.header-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:4px;}
-.header-tag{margin-left:auto;font-size:10px;font-family:var(--mono);padding:4px 12px;border-radius:4px;background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.25);color:var(--green);}
-.toc{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:32px;}
-.toc-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
-.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;}
-.toc-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:3px 0;}
-.toc-num{font-family:var(--mono);font-size:10px;color:var(--text3);width:18px;flex-shrink:0;}
-.section{margin-bottom:48px;}
-.sec-title{display:flex;align-items:center;gap:10px;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
-.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:12px;position:relative;overflow:hidden;}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--cyan));opacity:.7;}
-.card-title{font-size:13px;font-weight:600;margin-bottom:10px;}
-.card p{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7;}
+html,body{
+  background:
+    radial-gradient(circle at top right, rgba(56,189,248,.06), transparent 28%),
+    radial-gradient(circle at top left, rgba(34,211,165,.04), transparent 24%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.7;
+}
+.page{
+  max-width:980px;
+  margin:0 auto;
+  padding:42px 32px 88px;
+}
+
+/* Header */
+.hero{
+  position:relative;
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(15,21,32,.96));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:26px 28px 22px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:22px;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:0 0 auto 0;
+  height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--green),var(--purple));
+  opacity:.85;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  right:-70px;
+  top:-70px;
+  width:220px;
+  height:220px;
+  background:radial-gradient(circle, rgba(56,189,248,.14), transparent 65%);
+  pointer-events:none;
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  gap:18px;
+}
+.logo-box{
+  width:54px;
+  height:54px;
+  flex-shrink:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--green),#0d9488);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 20px rgba(34,211,165,.18);
+}
+.hero-main{flex:1;}
+.eyebrow{
+  font-size:10px;
+  color:var(--text3);
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  margin-bottom:8px;
+}
+.hero-title{
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:.01em;
+  line-height:1.15;
+  margin-bottom:8px;
+}
+.hero-sub{
+  font-size:12px;
+  color:var(--text2);
+  font-family:var(--mono);
+  letter-spacing:.04em;
+}
+.hero-tag{
+  margin-left:auto;
+  font-size:10px;
+  font-family:var(--mono);
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(34,211,165,.1);
+  border:1px solid rgba(34,211,165,.24);
+  color:var(--green);
+  white-space:nowrap;
+}
+.hero-desc{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:12px;
+}
+.hero-stat{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.04);
+  border-radius:12px;
+  padding:12px 14px;
+}
+.hero-stat-label{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:5px;
+}
+.hero-stat-value{
+  font-size:13px;
+  color:var(--text);
+}
+.hero-stat-value strong{color:var(--cyan);}
+
+/* TOC */
+.toc{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 22px;
+  margin-bottom:36px;
+}
+.toc-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  margin-bottom:14px;
+}
+.toc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px 26px;
+}
+.toc-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  color:var(--text2);
+  padding:4px 0;
+}
+.toc-num{
+  width:22px;
+  flex-shrink:0;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--text4);
+}
+
+/* Sections */
+.section{margin-bottom:52px;}
+.sec-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin-bottom:18px;
+}
+.sec-title::before,.sec-title::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Generic card */
+.card{
+  background:linear-gradient(180deg, rgba(17,24,39,.96), rgba(17,24,39,.92));
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px 24px;
+  margin-bottom:14px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,.16);
+}
+.card::before{
+  content:'';
+  position:absolute;
+  left:0; right:0; top:0;
+  height:2px;
+  background:var(--accent,var(--cyan));
+  opacity:.75;
+}
+.card-title{
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:10px;
+  letter-spacing:.01em;
+}
+.card p{
+  font-size:13px;
+  color:var(--text2);
+  margin-bottom:8px;
+  line-height:1.75;
+}
 .card p:last-child{margin-bottom:0;}
-.step-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.step{display:flex;align-items:flex-start;gap:14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 16px;}
-.step-num{width:24px;height:24px;border-radius:50%;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:var(--cyan);font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:500;}
+
+/* Stronger section intro */
+.lead-card{
+  padding:24px 26px;
+  border-radius:16px;
+}
+.lead-card .card-title{
+  font-size:16px;
+}
+
+/* Steps */
+.step-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:14px;
+}
+.step{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.step-num{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:rgba(56,189,248,.14);
+  border:1px solid rgba(56,189,248,.28);
+  color:var(--cyan);
+  font-family:var(--mono);
+  font-size:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-weight:500;
+}
 .step-content{flex:1;}
-.step-title{font-size:13px;font-weight:600;margin-bottom:4px;}
-.step-desc{font-size:12px;color:var(--text2);line-height:1.6;}
-.step-note{font-size:11px;font-family:var(--mono);color:var(--text3);margin-top:6px;padding:6px 10px;background:var(--bg2);border-radius:4px;}
-.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.btn-item{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px 14px;}
-.btn-badge{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:4px;flex-shrink:0;font-weight:500;white-space:nowrap;}
-.btn-desc{font-size:12px;color:var(--text2);line-height:1.5;}
-.mode-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.mode-item{display:grid;grid-template-columns:160px 1fr;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.mode-left{padding:14px 16px;background:var(--bg2);border-right:1px solid var(--border);border-left:3px solid var(--accent,var(--cyan));}
-.mode-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
-.mode-badge{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:3px;display:inline-block;}
-.mode-right{padding:14px 18px;}
-.mode-signals{font-size:11px;font-family:var(--mono);color:var(--cyan);margin-bottom:6px;line-height:1.8;}
-.mode-use{font-size:12px;color:var(--text2);}
-.panel-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.panel-item{display:grid;grid-template-columns:180px 1fr;border-bottom:1px solid var(--border);}
+.step-title{
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+.step-desc{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.65;
+}
+.step-note{
+  font-size:11px;
+  font-family:var(--mono);
+  color:var(--text3);
+  margin-top:7px;
+  padding:6px 10px;
+  background:var(--bg2);
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.03);
+}
+
+/* Buttons description */
+.btn-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+.btn-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 15px;
+}
+.btn-badge{
+  font-size:11px;
+  font-family:var(--mono);
+  padding:4px 10px;
+  border-radius:999px;
+  flex-shrink:0;
+  font-weight:500;
+  white-space:nowrap;
+}
+.btn-desc{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.6;
+}
+
+/* Mode cards */
+.mode-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:12px;
+}
+.mode-item{
+  display:grid;
+  grid-template-columns:175px 1fr;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+.mode-left{
+  padding:16px 16px;
+  background:linear-gradient(180deg, rgba(15,21,32,.92), rgba(21,29,46,.92));
+  border-right:1px solid var(--border);
+  border-left:3px solid var(--accent,var(--cyan));
+}
+.mode-name{
+  font-size:13px;
+  font-family:var(--mono);
+  font-weight:500;
+  margin-bottom:6px;
+}
+.mode-badge{
+  font-size:10px;
+  font-family:var(--mono);
+  padding:2px 8px;
+  border-radius:999px;
+  display:inline-block;
+}
+.mode-right{
+  padding:16px 18px;
+}
+.mode-signals{
+  font-size:11px;
+  font-family:var(--mono);
+  color:var(--cyan);
+  margin-bottom:7px;
+  line-height:1.8;
+}
+.mode-use{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.7;
+}
+
+/* Panel list */
+.panel-list{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.panel-item{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  border-bottom:1px solid var(--border);
+}
 .panel-item:last-child{border-bottom:none;}
-.panel-left{padding:12px 16px;background:var(--bg2);border-right:1px solid var(--border);}
-.panel-name{font-size:12px;font-family:var(--mono);font-weight:500;color:var(--cyan);}
-.panel-sub{font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:2px;}
-.panel-right{padding:12px 18px;font-size:12px;color:var(--text2);line-height:1.6;}
-.warn-box{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25);border-left:3px solid var(--amber);border-radius:6px;padding:14px 18px;margin:10px 0;}
-.warn-title{font-size:11px;font-family:var(--mono);color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
-.warn-text{font-size:12px;color:var(--text2);line-height:1.6;}
-.info-box{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-left:3px solid var(--cyan);border-radius:6px;padding:14px 18px;margin:10px 0;}
-.info-title{font-size:11px;font-family:var(--mono);color:var(--cyan);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
-.info-text{font-size:12px;color:var(--text2);line-height:1.6;}
-.level-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
-.level-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:8px;padding:14px;text-align:center;}
-.level-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);margin:0 auto 8px;box-shadow:0 0 6px var(--accent);}
-.level-name{font-size:12px;font-family:var(--mono);font-weight:500;margin-bottom:4px;}
-.level-score{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:6px;}
-.level-action{font-size:11px;color:var(--text2);line-height:1.5;}
-.faq-list{display:flex;flex-direction:column;gap:8px;}
-.faq-item{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.faq-q{padding:12px 16px;font-size:13px;font-weight:600;color:var(--cyan);border-bottom:1px solid var(--border);}
-.faq-a{padding:12px 16px;font-size:12px;color:var(--text2);line-height:1.6;}
-.code{font-family:var(--mono);font-size:11px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--cyan);}
+.panel-left{
+  padding:14px 16px;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+}
+.panel-name{
+  font-size:12px;
+  font-family:var(--mono);
+  font-weight:500;
+  color:var(--cyan);
+}
+.panel-sub{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  margin-top:3px;
+}
+.panel-right{
+  padding:14px 18px;
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.72;
+}
+
+/* Info / warn */
+.warn-box,.info-box{
+  border-radius:12px;
+  padding:16px 18px;
+  margin:12px 0;
+}
+.warn-box{
+  background:rgba(251,191,36,.06);
+  border:1px solid rgba(251,191,36,.24);
+  border-left:3px solid var(--amber);
+}
+.info-box{
+  background:rgba(56,189,248,.06);
+  border:1px solid rgba(56,189,248,.2);
+  border-left:3px solid var(--cyan);
+}
+.warn-title,.info-title{
+  font-size:11px;
+  font-family:var(--mono);
+  margin-bottom:7px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.warn-title{color:var(--amber);}
+.info-title{color:var(--cyan);}
+.warn-text,.info-text{
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.7;
+}
+
+/* Levels */
+.level-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.level-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-top:3px solid var(--accent);
+  border-radius:14px;
+  padding:16px 14px;
+  text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.14);
+}
+.level-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--accent);
+  margin:0 auto 10px;
+  box-shadow:0 0 8px var(--accent);
+}
+.level-name{
+  font-size:13px;
+  font-family:var(--mono);
+  font-weight:500;
+  margin-bottom:5px;
+}
+.level-score{
+  font-size:10px;
+  font-family:var(--mono);
+  color:var(--text3);
+  margin-bottom:7px;
+}
+.level-action{
+  font-size:11px;
+  color:var(--text2);
+  line-height:1.55;
+}
+
+/* FAQ */
+.faq-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.faq-item{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+.faq-q{
+  padding:14px 16px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--cyan);
+  border-bottom:1px solid var(--border);
+  background:rgba(56,189,248,.03);
+}
+.faq-a{
+  padding:14px 16px;
+  font-size:12px;
+  color:var(--text2);
+  line-height:1.7;
+}
+
+.code{
+  font-family:var(--mono);
+  font-size:11px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:2px 8px;
+  color:var(--cyan);
+}
 .highlight{color:var(--text);font-weight:600;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.two-col{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+/* Responsive */
+@media (max-width: 860px){
+  .hero-top{flex-wrap:wrap;}
+  .hero-tag{margin-left:0;}
+  .hero-desc{grid-template-columns:1fr;}
+  .toc-grid,.btn-grid,.two-col,.level-row{grid-template-columns:1fr;}
+  .mode-item,.panel-item{grid-template-columns:1fr;}
+  .mode-left,.panel-left{border-right:none;border-bottom:1px solid var(--border);}
+}
 </style>
 </head>
 <body>
 <div class="page">
 
-<div class="header">
-  <div class="logo-box">
-    <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
-      <rect x="3" y="3" width="16" height="16" rx="3" stroke="white" stroke-width="1.5"/>
-      <line x1="7" y1="11" x2="15" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="7" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="7" y1="15" x2="11" y2="15" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
+<div class="hero">
+  <div class="hero-top">
+    <div class="logo-box">
+      <svg width="24" height="24" viewBox="0 0 22 22" fill="none">
+        <rect x="3" y="3" width="16" height="16" rx="3" stroke="white" stroke-width="1.5"/>
+        <line x1="7" y1="11" x2="15" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="7" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="7" y1="15" x2="11" y2="15" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="hero-main">
+      <div class="eyebrow">VFD Motor Monitoring System · v3.0</div>
+      <div class="hero-title">使用說明</div>
+      <div class="hero-sub">User Guide · 即時監控、模擬工況、雙層異常判斷與操作流程說明</div>
+    </div>
+
+    <div class="hero-tag">USER GUIDE</div>
   </div>
-  <div>
-    <div class="header-title">使用說明</div>
-    <div class="header-sub">VFD Motor Monitoring System · v3.0 · User Guide</div>
+
+  <div class="hero-desc">
+    <div class="hero-stat">
+      <div class="hero-stat-label">文件定位</div>
+      <div class="hero-stat-value">提供系統啟動、控制、模式切換、判讀與常見問題說明</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">適用版本</div>
+      <div class="hero-stat-value"><strong>v3.0</strong> 分層架構版</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">核心內容</div>
+      <div class="hero-stat-value">控制列 / 模擬模式 / 診斷邏輯 / Dashboard</div>
+    </div>
   </div>
-  <div class="header-tag">USER GUIDE</div>
 </div>
 
 <div class="toc">
-  <div class="toc-title">目錄</div>
+  <div class="toc-title">
+    <span>目錄</span>
+    <span>8 Sections</span>
+  </div>
   <div class="toc-grid">
     <div class="toc-item"><span class="toc-num">01</span>系統需求與啟動</div>
     <div class="toc-item"><span class="toc-num">02</span>控制列完整說明</div>
@@ -119,11 +614,13 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 01 啟動 -->
 <div class="section">
   <div class="sec-title">01 系統需求與啟動</div>
-  <div class="card" style="--accent:var(--green)">
+
+  <div class="card lead-card" style="--accent:var(--green)">
     <div class="card-title">系統需求</div>
     <p>Python 3.9 以上，安裝以下套件：</p>
     <p><span class="code">streamlit　streamlit-autorefresh　pandas　scikit-learn　numpy</span></p>
   </div>
+
   <div class="step-list">
     <div class="step">
       <div class="step-num">1</div>
@@ -157,6 +654,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       </div>
     </div>
   </div>
+
   <div class="warn-box">
     <div class="warn-title">⚠️ 第一次啟動很慢是正常的</div>
     <div class="warn-text">系統在背景自動產生 5000 筆模擬訓練資料並訓練 100 棵決策樹，這個過程需要 15~20 秒。完成後 pkl 檔案會儲存下來，之後每次啟動只需要 1~2 秒載入，不需要重新訓練。</div>
@@ -166,10 +664,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 02 控制列 -->
 <div class="section">
   <div class="sec-title">02 控制列完整說明</div>
-  <div class="card" style="--accent:var(--cyan)">
+
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">控制列位於頁面最上方，共有六個功能</div>
     <p>這裡是所有操作的入口，所有指令都從這裡送出去。</p>
   </div>
+
   <div class="btn-grid">
     <div class="btn-item">
       <span class="btn-badge" style="background:rgba(34,211,165,.15);color:var(--green);border:1px solid rgba(34,211,165,.3);">開機</span>
@@ -196,6 +696,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       <div class="btn-desc">開啟本說明文件（你現在正在看的這個）。</div>
     </div>
   </div>
+
   <div class="info-box">
     <div class="info-title">💡 建議操作流程</div>
     <div class="info-text">
@@ -208,10 +709,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 03 模式 -->
 <div class="section">
   <div class="sec-title">03 六種模擬模式</div>
-  <div class="card" style="--accent:var(--cyan)">
+
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">每種模式模擬真實工業場景中的不同狀況</div>
     <p>選擇模式後，VFD_simulator 會產生對應的頻率、電流訊號。Rules 和 ML 不知道你選了什麼，純粹根據訊號特徵做判斷。</p>
   </div>
+
   <div class="mode-list">
     <div class="mode-item">
       <div class="mode-left" style="--accent:var(--green)">
@@ -223,6 +726,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
         <div class="mode-use">正常工況，兩層診斷都應判為正常。用於確認系統在正常狀態下不會誤報。頻率範圍廣是因為操作員可以依需求設定變頻器輸出頻率（30Hz 低速、60Hz 高速）。</div>
       </div>
     </div>
+
     <div class="mode-item">
       <div class="mode-left" style="--accent:var(--amber)">
         <div class="mode-name" style="color:var(--amber)">OVERLOAD</div>
@@ -283,10 +787,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <!-- 04 VFD Header -->
 <div class="section">
   <div class="sec-title">04 VFD Header 狀態列</div>
-  <div class="card" style="--accent:var(--cyan)">
+
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">位於控制列正下方，即時顯示設備狀態</div>
     <p>每 500ms 更新一次，顯示系統目前的即時狀況。</p>
   </div>
+
   <div class="panel-list">
     <div class="panel-item">
       <div class="panel-left"><div class="panel-name">設備階段</div><div class="panel-sub">machine state</div></div>
@@ -319,6 +825,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
       </div>
     </div>
   </div>
+
   <div class="warn-box">
     <div class="warn-title">⚠️ 開機後 5 秒診斷結果都是「啟動中」，分數都是 0，這是正常的</div>
     <div class="warn-text">馬達開機時電流是額定的 1.5~2 倍（約 22~30A），這是變頻器限流啟動的正常現象，不是異常。如果不遮蔽，高啟動電流會被誤判為緊急告警。5 秒後電流降回正常範圍，系統才開始正常診斷。這 5 秒的資料在資料庫裡會標記為「啟動中」。</div>
@@ -352,7 +859,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     <p>每個卡片下方有進度條顯示相對於最大值的比例。</p>
   </div>
 
-  <div class="card" style="--accent:var(--amber)">
+  <div class="card lead-card" style="--accent:var(--amber)">
     <div class="card-title">④ 診斷面板（最核心的資訊）</div>
     <p>這是系統的核心輸出，分左右兩欄加下方：</p>
     <p>
@@ -401,12 +908,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
 <div class="section">
   <div class="sec-title">06 雙層判斷怎麼讀</div>
 
-  <div class="card" style="--accent:var(--amber)">
+  <div class="card lead-card" style="--accent:var(--amber)">
     <div class="card-title">Rules 的 Rule Confidence 怎麼看</div>
     <p>Rule Confidence 越高代表 Rules 對這個模式的判斷越確定。診斷面板的觸發原因說明了為什麼這個模式被觸發，完全透明可解釋。</p>
   </div>
 
-  <div class="card" style="--accent:var(--purple)">
+  <div class="card lead-card" style="--accent:var(--purple)">
     <div class="card-title">ML 的信心分數怎麼看</div>
     <p>
       <strong style="color:var(--green);">90%+</strong>：模型非常確定，高度可信，通常準確<br/>
@@ -471,7 +978,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);line-he
     </div>
   </div>
 
-  <div class="card" style="--accent:var(--cyan)">
+  <div class="card lead-card" style="--accent:var(--cyan)">
     <div class="card-title">各工況設計對應的等級</div>
     <p>
       <strong style="color:var(--red);">STALL（機械卡死）</strong> → 緊急 CRITICAL → 立即停機<br/>
